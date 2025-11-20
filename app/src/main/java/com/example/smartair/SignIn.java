@@ -10,22 +10,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-public class MainActivity extends AppCompatActivity {
-
-    FirebaseDatabase db;
+public class SignIn extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-
-        db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-
-
+        setContentView(R.layout.activity_sign_in);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -33,10 +24,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void launchSignIn(View v) {
-        Intent i = new Intent(this, SignIn.class);
+    public void launchChild(View v) {
+        Intent i = new Intent(this, HomeChild.class);
         startActivity(i);
     }
 
+    public void launchParent(View v) {
+        Intent i = new Intent(this, HomeParent.class);
+        startActivity(i);
+    }
 
+    public void launchProvider(View v) {
+        Intent i = new Intent(this, HomeProvider.class);
+        startActivity(i);
+    }
 }
