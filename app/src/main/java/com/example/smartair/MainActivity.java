@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-//        DatabaseReference myRef = db.getReference("badge");
+//        DatabaseReference myRef = db.getReference(path);
 //
 //        Map<String, Object> m = new HashMap<>();
 //        m.put("child-id", 11);
