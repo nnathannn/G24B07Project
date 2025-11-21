@@ -13,7 +13,7 @@ public class Triage extends Item {
 
     public Triage() {}
 
-    public Triage(String id, LocalDateTime startDate, boolean emergency, LocalDateTime endDate,
+    public Triage(String id, LocalDateTime startDate, boolean emergency, String endDate,
                   List<String> symptompList, List<String> pefList, List<String> rescueList) {
         super(startDate, id);
         try {
