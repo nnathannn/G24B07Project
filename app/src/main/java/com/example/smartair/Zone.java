@@ -28,6 +28,8 @@ public class Zone extends PEF {
 
     public String getStatus() { return status; }
 
+    public void getCurPB() { return curPB; }
+
     public void setStatus(double count, double curPB) throws IllegalArgumentException {
         super.setCount(count);
         this.curPB = curPB;
