@@ -34,6 +34,7 @@ public class Item {
     public void setDate(LocalDateTime date) { this.date = date; }
 
     // String date needs to be in the format "yyyy-MM-ddTHH:mm:ss" with the letter 'T' as delimiter
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void setDate(String date) throws DateTimeParseException {
         try {
             this.date = LocalDateTime.parse(date);
