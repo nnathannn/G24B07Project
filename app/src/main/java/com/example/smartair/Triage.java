@@ -30,7 +30,7 @@ public class Triage extends Item {
 
     public boolean getEmergency() { return emergency;}
     public LocalDateTime getEndDate() { return endDate;}
-    public List<String> getSymptompList() { return symptomList;}
+    public List<String> getSymptomList() { return symptomList;}
     public List<String> getPefList() { return pefList;}
     public List<String> getRescueList() { return rescueList;}
 
