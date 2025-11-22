@@ -16,15 +16,15 @@ import com.example.smartair.databinding.ActivityHomeParentBinding;
 import com.example.smartair.databinding.ActivityMainBinding;
 
 public class HomeParent extends AppCompatActivity {
-
+    String temporary_parent_id = "parent1";
     ActivityHomeParentBinding binding;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         replaceFragment(new HomeParentFragment());
 
         binding.parentBottomNavView.setOnItemSelectedListener(item -> {
