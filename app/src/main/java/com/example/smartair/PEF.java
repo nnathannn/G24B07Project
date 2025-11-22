@@ -12,19 +12,9 @@ public class PEF extends Item {
 
     public PEF() {}
 
-    // PEF needs to be a positive number
-    public PEF(LocalDateTime date, String id, double count) throws IllegalArgumentException {
-        super(date, id);
-        if (count <= 0) {
-            throw new IllegalArgumentException("PEF should be a positive number");
-        }
-        this.count = count;
-    }
-
     // String date needs to be in the format "yyyy-MM-ddTHH:mm:ss" with the letter 'T' as delimiter
     // PEF needs to be a positive number
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public PEF(String date, String id, double count) throws DateTimeParseException, IllegalArgumentException {
+    public PEF(String date, String id, double count) throws IllegalArgumentException {
         super(date, id);
         if (count <= 0) {
             throw new IllegalArgumentException("PEF should be a positive number");
