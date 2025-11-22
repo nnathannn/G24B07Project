@@ -4,8 +4,7 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import java.text.ParseException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public class Inventory extends Item{
@@ -14,16 +13,6 @@ public class Inventory extends Item{
     private String expiryDate;
     private boolean rescue;
     public Inventory() {}
-    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws IllegalArgumentException {
-        super (purchaseDate, childId);
-        if (amountLeft < 0 || amountLeft > 1) {
-            throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
-        }
-        this.amountLeft = amountLeft;
-        this.expiryDate = date.toLocalDate().toString();
-        this.rescue = rescue;
-
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws DateTimeParseException, IllegalArgumentException {
@@ -31,8 +20,7 @@ public class Inventory extends Item{
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
         }
-        LocalDate.parse(purchaseDate);
-        Localdate.parse(expiryDate);
+        LocalDate.parse(expiryDate);
 
         this.amountLeft = amountLeft;
         this.expiryDate = expiryDate;
@@ -46,10 +34,12 @@ public class Inventory extends Item{
 
     public void setAmountLeft(double amountLeft) {
         if (amountLeft < 0 || amountLeft > 1) {
-            throw new IllegalArgumentException(("Amount Left must be between 0.0 and 1.0"))
+            throw new IllegalArgumentException(("Amount Left must be between 0.0 and 1.0"));
         }
         this.amountLeft = amountLeft;
     }
+    
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void setExpiryDate(String expiryDate) {
         LocalDate.parse(expiryDate);
         this.expiryDate = expiryDate;
@@ -60,7 +50,7 @@ public class Inventory extends Item{
 
     public void applyDose(double dose){
         if (dose < 0){
-            throw new IllegalArgumentException("Dose cannot be negative")
+            throw new IllegalArgumentException("Dose cannot be negative");
         }
         double usedMedicine = dose * pumpPercentage;
         double amountNow = amountLeft - usedMedicine;

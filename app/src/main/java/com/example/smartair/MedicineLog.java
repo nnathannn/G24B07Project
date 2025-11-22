@@ -67,7 +67,7 @@ public class MedicineLog extends PEF {
 
     public void setDose(int dose){
         if (dose<= 0) {
-            throw new IllegalArgumentException(("Dose must be a positive number"))
+            throw new IllegalArgumentException(("Dose must be a positive number"));
         }
     }
 
