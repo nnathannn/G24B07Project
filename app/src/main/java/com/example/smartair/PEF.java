@@ -1,0 +1,44 @@
+package com.example.smartair;
+
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
+public class PEF extends Item {
+    private double count;
+
+    public PEF() {}
+
+    // PEF needs to be a positive number
+    public PEF(LocalDateTime date, String id, double count) throws IllegalArgumentException {
+        super(date, id);
+        if (count <= 0) {
+            throw new IllegalArgumentException("PEF should be a positive number");
+        }
+        this.count = count;
+    }
+
+    // String date needs to be in the format "yyyy-MM-ddTHH:mm:ss" with the letter 'T' as delimiter
+    // PEF needs to be a positive number
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public PEF(String date, String id, double count) throws DateTimeParseException, IllegalArgumentException {
+        super(date, id);
+        if (count <= 0) {
+            throw new IllegalArgumentException("PEF should be a positive number");
+        }
+        this.count = count;
+    }
+
+    public double getCount() { return count; }
+
+    // PEF needs to be a positive number
+    public void setCount(double count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("PEF should be a positive number");
+        }
+        this.count = count;
+    }
+}
