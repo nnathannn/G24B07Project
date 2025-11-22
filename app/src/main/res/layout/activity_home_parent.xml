@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeParent">
+    tools:context=".HomeParent"
+    android:background="@color/white">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/parentBottomNavView"
@@ -16,6 +17,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/parent_bottom_nav_menu"
         app:labelVisibilityMode="labeled"
+        android:background="@color/white"
+        app:itemTextColor="@color/almost_dark_blue"
         />
 
     <FrameLayout
