@@ -12,10 +12,11 @@ public class MedicineLog extends PEF {
     private String prePostStatus;
     private double rating;
     private boolean rescue;
+    private int dose;
 
     public MedicineLog() {}
 
-    public MedicineLog(LocalDateTime date, String id, double count, String prePostStatus, double rating, boolean rescue) throws IllegalArgumentException {
+    public MedicineLog(LocalDateTime date, String id, double count, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
         super(date, id, count);
         this.prePostStatus = prePostStatus;
         if (rating < 0 || rating >10) {
@@ -23,10 +24,14 @@ public class MedicineLog extends PEF {
         }
         this.rating = rating;
         this.rescue = rescue;
+        if (dose <= 0) {
+            throw new IllegalArgumentException("Dose must be a positive number");
+        }
+        this.dose = dose;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public MedicineLog(String date, String id, double count, String prePostStatus, double rating, boolean rescue) throws DateTimeParseException, IllegalArgumentException {
+    public MedicineLog(String date, String id, double count, String prePostStatus, double rating, boolean rescue, int dose) throws DateTimeParseException, IllegalArgumentException {
         super(date, id, count);
         this.prePostStatus = prePostStatus;
         if (rating < 0 || rating >10) {
@@ -34,11 +39,16 @@ public class MedicineLog extends PEF {
         }
         this.rating = rating;
         this.rescue = rescue;
+        if (dose <= 0) {
+            throw new IllegalArgumentException("Dose must be a positive number");
+        }
+        this.dose = dose;
     }
 
     public String getPrePostStatus() {return prePostStatus;}
     public double getRating() {return rating;}
     public boolean isRescue() {return rescue;}
+    public int getDose() {return dose;}
 
     public void setPrePostStatus(String prePostStatus) {
         if (!prePostStatus.equals("Better") && !prePostStatus.equals("Same") && !prePostStatus.equals("Worse")) {
@@ -54,5 +64,11 @@ public class MedicineLog extends PEF {
         this.rating = rating;
     }
     public void setRescue(boolean rescue) {this.rescue = rescue;}
+
+    public void setDose(int dose){
+        if (dose<= 0) {
+            throw new IllegalArgumentException(("Dose must be a positive number"))
+        }
+    }
 
 }
