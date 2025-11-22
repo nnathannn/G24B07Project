@@ -36,7 +36,7 @@ public class BadgeAdapter extends RecyclerView.Adapter<BadgeAdapter.BadgeViewHol
     @Override
     public void onBindViewHolder(@NonNull BadgeViewHolder holder, int position) {
         Item item = itemList.get(position);
-        holder.date.setText(item.getDate().toString());
+        holder.date.setText(item.getDate());
     }
 
     @Override
