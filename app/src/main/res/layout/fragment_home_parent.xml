@@ -10,26 +10,50 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/parent_header"
-        android:layout_width="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/child_list_fragment_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="8dp"
-        android:layout_height="200dp">
+        android:layout_height="250dp"
+        android:layout_width="match_parent"
+        android:background="@drawable/home_page_top_nav_background"
+        >
 
         <TextView
             android:id="@+id/welcome_parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/welcome_parent"
-            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:gravity="center"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            app:layout_constraintHorizontal_bias="0.2"
+            app:layout_constraintVertical_bias="0.3"
             />
+
+        <SearchView
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:background="@color/white"
+            android:queryHint="Search Child Name"
+            tools:layout_editor_absoluteX="30dp"
+            tools:layout_editor_absoluteY="130dp"
+            />
+
+        <ImageButton
+            android:id="@+id/imageButton3"
+            android:layout_width="56dp"
+            android:layout_height="48dp"
+            android:background="@color/transparent"
+            android:src="@drawable/outline_account_circle_24"
+            tools:layout_editor_absoluteX="339dp"
+            tools:layout_editor_absoluteY="16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -41,6 +65,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/parent_header" />
+        app:layout_constraintTop_toBottomOf="@id/parent_header" >
+
+        <ImageButton
+            android:id="@+id/imageButton4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/almost_light_blue"
+            android:src="@drawable/outline_edit_square_24"
+            tools:layout_editor_absoluteX="325dp"
+            tools:layout_editor_absoluteY="396dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
