@@ -8,19 +8,16 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
-public abstract class Item {
+public class Item {
     private LocalDateTime date;
-    private String id;
 
     public Item() {}
-    public Item(LocalDateTime date, String id) {
-        this.date = date;
-        this.id = id;
-    }
+
+    public Item(LocalDateTime date) { this.date = date; }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     // String date needs to be in the format "yyyy-MM-ddTHH:mm:ss" with the letter 'T' as delimiter
-    public Item(String date, String id) throws DateTimeParseException {
-        this.id = id;
+    public Item(String date) throws DateTimeParseException {
         try {
             this.date = LocalDateTime.parse(date);
         } catch (DateTimeParseException e) {
@@ -31,12 +28,12 @@ public abstract class Item {
 
     public LocalDateTime getDate() { return date; }
 
-    public String getId() { return id; }
+    // Returns the date as a string in the format "yyyy-MM-ddTHH:mm:ss"
+    public String getDateString() { return date.toString(); }
 
     public void setDate(LocalDateTime date) { this.date = date; }
 
     // String date needs to be in the format "yyyy-MM-ddTHH:mm:ss" with the letter 'T' as delimiter
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void setDate(String date) throws DateTimeParseException {
         try {
             this.date = LocalDateTime.parse(date);
@@ -45,6 +42,4 @@ public abstract class Item {
             this.date = null;
         }
     }
-
-    public void setId(String id) { this.id = id; }
 }
