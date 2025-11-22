@@ -47,7 +47,7 @@ public class MedicineLog extends PEF {
 
     public String getPrePostStatus() {return prePostStatus;}
     public double getRating() {return rating;}
-    public boolean isRescue() {return rescue;}
+    public boolean getRescue() {return rescue;}
     public int getDose() {return dose;}
 
     public void setPrePostStatus(String prePostStatus) {
