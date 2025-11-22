@@ -3,7 +3,7 @@ package com.example.smartair;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public abstract class Item {
+public class Item {
     private String date;
     private String childId;
     private String itemId; // unique key

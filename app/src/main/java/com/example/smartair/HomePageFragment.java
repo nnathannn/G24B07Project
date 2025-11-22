@@ -120,6 +120,7 @@ public class HomePageFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle possible errors
+                System.out.println("Error: " + databaseError.getMessage());
             }
         });
     }
