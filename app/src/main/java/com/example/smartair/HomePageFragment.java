@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,6 +44,55 @@ public class HomePageFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
         fetchData();
+
+        Button buttonTriage = view.findViewById(R.id.buttonTriage);
+        Button buttonMedicine = view.findViewById(R.id.buttonMedicine);
+        Button buttonDaily = view.findViewById(R.id.buttonDaily);
+        Button buttonTechnique = view.findViewById(R.id.buttonTechnique);
+        Button buttonPEF = view.findViewById(R.id.buttonPEF);
+        Button buttonProfile = view.findViewById(R.id.buttonProfile);
+
+        buttonTriage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new TriageFragment());
+            }
+        });
+
+        buttonMedicine.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new MedicineFragment());
+            }
+        });
+
+        buttonDaily.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new SymptomFragment());
+            }
+        });
+
+        buttonTechnique.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new TechniqueFragment());
+            }
+        });
+
+        buttonPEF.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new PEFFragment());
+            }
+        });
+
+        buttonProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new ProfileFragment());
+            }
+        });
 
         return view;
     }
