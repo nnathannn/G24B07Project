@@ -1,8 +1,12 @@
 package com.example.smartair;
 
-import android.os.Build;
+import androidx.annotation.NonNull;
 
-import androidx.annotation.RequiresApi;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -44,6 +48,9 @@ public abstract class Item {
             System.out.println("Error parsing date: " + e.getMessage());
             this.date = null;
         }
+        FirebaseDatabase db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
+        DatabaseReference ref = db.getReference(path);
+        ref.child(itemId).removeValue();
     }
 
     public void setId(String id) { this.id = id; }
