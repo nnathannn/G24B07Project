@@ -13,6 +13,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase db;
@@ -24,7 +27,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-
+//        DatabaseReference myRef = db.getReference(path);
+//
+//        Map<String, Object> m = new HashMap<>();
+//        m.put("child-id", 11);
+//        m.put("date", "2025-11-21");
+//        m.put("name", "test");
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
+//        myRef.push().setValue(m);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
