@@ -13,4 +13,6 @@
     <color name="pale_yellow">#F4C945</color>
     <color name="another_blue">#45A0F4</color>
     <color name="transparent">#00000000</color>
+    <color name="light_orange">#F0DCDC</color>
+
 </resources>
