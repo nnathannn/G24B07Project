@@ -12,9 +12,10 @@ public class Inventory extends Item{
     private double amountLeft;  //percentage 0.0-1.0
     private String expiryDate;
     private boolean rescue;
+    private String medName;
     public Inventory() {}
 
-    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws IllegalArgumentException {
+    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName) throws IllegalArgumentException {
         super(purchaseDate, childId);
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
@@ -24,12 +25,14 @@ public class Inventory extends Item{
         this.amountLeft = amountLeft;
         this.expiryDate = expiryDate;
         this.rescue = rescue;
+        this.medName = medName;
 
     }
 
     public double getAmountLeft() {return amountLeft;}
-    public String getExpirydate() {return expiryDate;}
+    public String getExpiryDate() {return expiryDate;}
     public boolean getRescue() {return rescue;}
+    public String getMedName() {return medName;}
 
     public void setAmountLeft(double amountLeft) {
         if (amountLeft < 0 || amountLeft > 1) {
@@ -43,7 +46,9 @@ public class Inventory extends Item{
     }
     public void setRescue(boolean rescue) { this.rescue = rescue;}
 
-
+    public void setMedName(String medName){
+        this.medName = medName;
+    }
 
     public void applyDose(double dose){
         if (dose < 0){
