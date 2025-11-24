@@ -4,6 +4,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.PropertyName;
 
+import androidx.annotation.RequiresApi;
+
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
 public class Item {
     private String date;
 
@@ -24,7 +30,7 @@ public class Item {
     @PropertyName("child-id")
     public String getChildId() { return childId; }
     @PropertyName("child-id")
-    public void setChildId(String childId) { this.childId = this.childId; }
+    public void setChildId(String childId) { this.childId = childId; }
     @PropertyName("item-id")
     public String getItemId() { return itemId; }
     @PropertyName("item-id")
