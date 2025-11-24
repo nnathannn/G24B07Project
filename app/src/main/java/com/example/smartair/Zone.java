@@ -13,14 +13,6 @@ public class Zone extends PEF {
 
     public Zone() {}
 
-    public Zone (LocalDateTime date, String id, double count, double curPB) throws IllegalArgumentException {
-        super(date, id, count);
-        this.curPB = curPB;
-        this.status = (count >= 0.8 * curPB ? "Green" : (count >= 0.5 * curPB ? "Yellow" : "Red"));
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public Zone (String date, String id, double count, double curPB) throws DateTimeParseException, IllegalArgumentException {
     public Zone (String date, String id, double count, double curPB) throws IllegalArgumentException {
         super(date, id, count);
         this.curPB = curPB;

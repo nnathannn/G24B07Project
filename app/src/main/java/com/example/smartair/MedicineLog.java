@@ -30,21 +30,6 @@ public class MedicineLog extends Item {
         this.dose = dose;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
-        super(date, id);
-        this.prePostStatus = prePostStatus;
-        if (rating < 0 || rating >10) {
-            throw new IllegalArgumentException("Rating must be between 0 and 10");
-        }
-        this.rating = rating;
-        this.rescue = rescue;
-        if (dose <= 0) {
-            throw new IllegalArgumentException("Dose must be a positive number");
-        }
-        this.dose = dose;
-    }
-
     public String getPrePostStatus() {return prePostStatus;}
     public double getRating() {return rating;}
     public boolean getRescue() {return rescue;}
