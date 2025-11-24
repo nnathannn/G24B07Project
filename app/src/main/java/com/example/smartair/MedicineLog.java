@@ -54,6 +54,7 @@ public class MedicineLog extends Item {
         if (dose<= 0) {
             throw new IllegalArgumentException(("Dose must be a positive number"));
         }
+        this.dose = dose;
     }
 
 }
