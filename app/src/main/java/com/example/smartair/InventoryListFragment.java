@@ -32,7 +32,7 @@ public class InventoryListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentUserId = "parent1"; // to be updated
+        parentUserId = "parent1"; // TO BE UPDATED ONCE LOGGED IN
     }
 
     @Override
@@ -43,7 +43,7 @@ public class InventoryListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         itemList = new ArrayList<>();
-        adapter = new InventoryAdapter(itemList);
+        adapter = new InventoryAdapter(itemList); //
         recyclerView.setAdapter(adapter);
 
         // ItemAdapter.fetchData(adapter, "inventory");
@@ -95,44 +95,55 @@ public class InventoryListFragment extends Fragment {
         childrenRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                itemList.clear();
                 for (String childId : childIds) {
                     if (dataSnapshot.hasChild(childId)) {
                         DataSnapshot childNode = dataSnapshot.child(childId);
                         if(childNode.exists()){
                             for(DataSnapshot itemSnapshot : childNode.getChildren()){
                                 String inventoryId = itemSnapshot.getValue(String.class);
-
-                                //TO BE COMPLETED
-                                if(inventoryId != null){
-                                    DatabaseReference childInventoryRef = FirebaseDatabase.getInstance().getReference("inventory").child(inventoryId);
-//                                    itemList.add(new Inventory(childId, childInventoryRef.child("purchase-date").get(String.class))
-                                }
-
-
-
-
+                                addInventory(inventoryId);
                             }
                         }
-
-//                        if (childNode.hasChild("username")) {
-//                            String childName = childNode.child("username").getValue(String.class);
-//                            if (childName != null) {
-//                                DatabaseReference childInventoryRef = FirebaseDatabase.getInstance().getReference("child-inventory").child(childId);
-//
-//                                itemList.add(childName);
-//                            }
-//                        }
                     }
                 }
                 adapter.notifyDataSetChanged();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getContext(), "Failed to fetch child names: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Failed to fetch inventory IDs: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
 
             }
         });
+    }
+
+    private void addInventory(String inventoryId){
+        DatabaseReference inventoryRef = FirebaseDatabase.getInstance().getReference("inventory");
+        inventoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                itemList.clear();
+                if(dataSnapshot.hasChild(inventoryId)){
+                    DataSnapshot inventoryNode = dataSnapshot.child(inventoryId);
+                    if(inventoryNode.exists()) {
+                        //String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue
+                        itemList.add(
+                                new Inventory(inventoryNode.child("child-id").getValue(String.class),
+                                inventoryNode.child("purchase-date").getValue(String.class),
+                                inventoryNode.child("amount-left").getValue(double.class),
+                                inventoryNode.child("expiry-date").getValue(String.class),
+                                inventoryNode.child("rescue").getValue(boolean.class))
+                        );
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "Failed to fetch inventory: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+
+            }
+        });
+
     }
 
     //TO BE COMPLETED: ONCLICK LISTENER
