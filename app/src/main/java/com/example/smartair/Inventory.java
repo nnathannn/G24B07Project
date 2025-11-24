@@ -20,7 +20,7 @@ public class Inventory extends Item{
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
         }
-        LocalDate.parse(expiryDate);
+
 
         this.amountLeft = amountLeft;
         this.expiryDate = expiryDate;
@@ -30,7 +30,7 @@ public class Inventory extends Item{
 
     public double getAmountLeft() {return amountLeft;}
     public String getExpirydate() {return expiryDate;}
-    public boolean isRescue() {return rescue;}
+    public boolean getRescue() {return rescue;}
 
     public void setAmountLeft(double amountLeft) {
         if (amountLeft < 0 || amountLeft > 1) {
@@ -41,7 +41,7 @@ public class Inventory extends Item{
     
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void setExpiryDate(String expiryDate) {
-        LocalDate.parse(expiryDate);
+
         this.expiryDate = expiryDate;
     }
     public void setRescue(boolean rescue) { this.rescue = rescue;}
@@ -53,13 +53,13 @@ public class Inventory extends Item{
             throw new IllegalArgumentException("Dose cannot be negative");
         }
         double usedMedicine = dose * pumpPercentage;
-        double amountNow = amountLeft - usedMedicine;
+        double amountNow = this.amountLeft - usedMedicine;
 
         if(amountNow < 0) amountNow = 0;
-        amountLeft = amountNow;
+        this.amountLeft = amountNow;
     }
 
     public boolean isLowCanister(){
-        return amountLeft <= 0.20;
+        return this.amountLeft <= 0.20;
     }
 }

@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
-public class MedicineLog extends PEF {
+public class MedicineLog extends Item {
     private String prePostStatus;
     private double rating;
     private boolean rescue;
@@ -16,8 +16,8 @@ public class MedicineLog extends PEF {
 
     public MedicineLog() {}
 
-    public MedicineLog(LocalDateTime date, String id, double count, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
-        super(date, id, count);
+    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
+        super(date, id);
         this.prePostStatus = prePostStatus;
         if (rating < 0 || rating >10) {
             throw new IllegalArgumentException("Rating must be between 0 and 10");
@@ -31,8 +31,8 @@ public class MedicineLog extends PEF {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public MedicineLog(String date, String id, double count, String prePostStatus, double rating, boolean rescue, int dose) throws DateTimeParseException, IllegalArgumentException {
-        super(date, id, count);
+    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
+        super(date, id);
         this.prePostStatus = prePostStatus;
         if (rating < 0 || rating >10) {
             throw new IllegalArgumentException("Rating must be between 0 and 10");
