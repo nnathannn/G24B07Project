@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryListFragment extends Fragment {
+public class InventoryListFragment extends Fragment implements InventoryAdapter.OnItemClickListener {
 
     private String parentUserId;
     private RecyclerView recyclerView;
@@ -43,7 +43,7 @@ public class InventoryListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         itemList = new ArrayList<>();
-        adapter = new InventoryAdapter(itemList); //
+        adapter = new InventoryAdapter(itemList, this);
         recyclerView.setAdapter(adapter);
 
         // ItemAdapter.fetchData(adapter, "inventory");
@@ -100,7 +100,7 @@ public class InventoryListFragment extends Fragment {
                         DataSnapshot childNode = dataSnapshot.child(childId);
                         if(childNode.exists()){
                             for(DataSnapshot itemSnapshot : childNode.getChildren()){
-                                String inventoryId = itemSnapshot.getValue(String.class);
+                                String inventoryId = itemSnapshot.getKey();
                                 addInventory(inventoryId);
                             }
                         }
@@ -125,14 +125,7 @@ public class InventoryListFragment extends Fragment {
                 if(dataSnapshot.hasChild(inventoryId)){
                     DataSnapshot inventoryNode = dataSnapshot.child(inventoryId);
                     if(inventoryNode.exists()) {
-                        //String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue
-                        itemList.add(
-                                new Inventory(inventoryNode.child("child-id").getValue(String.class),
-                                inventoryNode.child("purchase-date").getValue(String.class),
-                                inventoryNode.child("amount-left").getValue(double.class),
-                                inventoryNode.child("expiry-date").getValue(String.class),
-                                inventoryNode.child("rescue").getValue(boolean.class))
-                        );
+                        itemList.add(inventoryNode.getValue(Inventory.class));
                         adapter.notifyDataSetChanged();
                     }
                 }
@@ -147,8 +140,8 @@ public class InventoryListFragment extends Fragment {
     }
 
     //TO BE COMPLETED: ONCLICK LISTENER
-//    @Override
-//    public void onItemClick(String clickedString) {
-//        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
-//    }
+    @Override
+    public void onItemClick(String clickedString) {
+        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
+    }
 }

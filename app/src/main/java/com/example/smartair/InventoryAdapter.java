@@ -8,19 +8,24 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 public class InventoryAdapter extends ItemAdapter {
-    public InventoryAdapter(List<Item> itemList) {
-        super(itemList);
-    }
 
+    public interface OnItemClickListener {
+        void onItemClick(String clickedString);
+    }
+     private final OnItemClickListener listener;
+
+    public InventoryAdapter(List<Item> itemList, OnItemClickListener listener) {
+        super(itemList);
+        this.listener = listener;
+    }
     public static class InventoryViewHolder extends ItemViewHolder {
-        TextView medName;
-        TextView medChildName;
-        TextView expiryDate;
-        TextView purchaseDate;
-        TextView amountLeft;
+        TextView medName, medChildName, expiryDate, purchaseDate, amountLeft;
         CardView cardView;
 
         public InventoryViewHolder(@NonNull View view) {
@@ -44,8 +49,18 @@ public class InventoryAdapter extends ItemAdapter {
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = getItemList().get(position);
+        Inventory inventory = (Inventory) item;
         InventoryAdapter.InventoryViewHolder inventoryHolder = (InventoryAdapter.InventoryViewHolder) holder;
-        //TO BE COMPLETED ONCE SUBCLASS INVENTORY FINISHED //
-        //inventoryHolder.medName.setText(item.getName());
+        String childId = inventory.getChildId();
+        DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users").child(childId);
+        childRef.child("username").get().addOnSuccessListener(dataSnapshot -> {
+            String childName = dataSnapshot.getValue(String.class);
+            inventoryHolder.medChildName.setText(childName);
+        });
+        //TO BE EDITED
+        inventoryHolder.medName.setText("tes aja ni");
+        inventoryHolder.purchaseDate.setText(inventory.getDate());
+        inventoryHolder.expiryDate.setText(inventory.getExpirydate());
+        inventoryHolder.amountLeft.setText(Double.toString(inventory.getAmountLeft()));
     }
 }
