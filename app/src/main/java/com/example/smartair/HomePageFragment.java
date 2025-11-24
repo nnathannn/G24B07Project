@@ -27,7 +27,6 @@ public class HomePageFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter badgeAdapter;
     private List<Item> itemList;
-    private FirebaseDatabase db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,7 +42,7 @@ public class HomePageFragment extends Fragment {
         badgeAdapter = new BadgeAdapter(itemList);
         recyclerView.setAdapter(badgeAdapter);
 
-        ItemAdapter.fetchData(badgeAdapter);
+        ItemAdapter.fetchData(badgeAdapter, "badge");
 
         Button buttonTriage = view.findViewById(R.id.buttonTriage);
         Button buttonMedicine = view.findViewById(R.id.buttonMedicine);
