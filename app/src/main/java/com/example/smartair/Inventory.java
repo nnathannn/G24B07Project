@@ -14,8 +14,7 @@ public class Inventory extends Item{
     private boolean rescue;
     public Inventory() {}
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws DateTimeParseException, IllegalArgumentException {
+    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws IllegalArgumentException {
         super(purchaseDate, childId);
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
@@ -39,9 +38,7 @@ public class Inventory extends Item{
         this.amountLeft = amountLeft;
     }
     
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void setExpiryDate(String expiryDate) {
-
         this.expiryDate = expiryDate;
     }
     public void setRescue(boolean rescue) { this.rescue = rescue;}
