@@ -20,9 +20,12 @@ public class MedicineLog extends Item {
     @PropertyName("dose")
     private int dose;
 
+    @PropertyName("med-name")
+    private String medName;
+
     public MedicineLog() {}
 
-    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose) throws IllegalArgumentException {
+    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose, String medName) throws IllegalArgumentException {
         super(date, id);
         this.prePostStatus = prePostStatus;
         if (rating < 0 || rating >10) {
@@ -34,6 +37,7 @@ public class MedicineLog extends Item {
             throw new IllegalArgumentException("Dose must be a positive number");
         }
         this.dose = dose;
+        this.medName = medName;
     }
 
     @PropertyName("prePostStatus")
@@ -44,6 +48,10 @@ public class MedicineLog extends Item {
     public boolean getRescue() {return rescue;}
     @PropertyName("dose")
     public int getDose() {return dose;}
+
+    @PropertyName("med-name")
+    public String getMedName() {return medName;}
+
 
     @PropertyName("prePostStatus")
     public void setPrePostStatus(String prePostStatus) {
@@ -69,6 +77,11 @@ public class MedicineLog extends Item {
             throw new IllegalArgumentException(("Dose must be a positive number"));
         }
         this.dose = dose;
+    }
+
+    @PropertyName("med-name")
+    public void setMedName(String medName){
+        this.medName = medName;
     }
 
 }
