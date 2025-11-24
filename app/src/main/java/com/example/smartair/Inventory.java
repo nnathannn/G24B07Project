@@ -11,10 +11,15 @@ import java.time.format.DateTimeParseException;
 
 public class Inventory extends Item{
     private static final double pumpPercentage = 0.0075;
+    @PropertyName("amount-left")
     private double amountLeft;  //percentage 0.0-1.0
+    @PropertyName("expiry-date")
     private String expiryDate;
+    @PropertyName("purchase-date")
     private String purchaseDate;
+    @PropertyName("rescue")
     private boolean rescue;
+    @PropertyName("med-name")
     private String medName;
     public Inventory() {}
 
