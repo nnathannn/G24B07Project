@@ -13,12 +13,13 @@ public class Inventory extends Item{
     private static final double pumpPercentage = 0.0075;
     private double amountLeft;  //percentage 0.0-1.0
     private String expiryDate;
+    private String purchaseDate;
     private boolean rescue;
     private String medName;
     public Inventory() {}
 
-    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName) throws IllegalArgumentException {
-        super(purchaseDate, childId);
+    public Inventory(String childId, String date, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName) throws IllegalArgumentException {
+        super(date, childId);
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
         }
@@ -33,7 +34,7 @@ public class Inventory extends Item{
 
 
     @PropertyName("purchase-date")
-    public double getPurchaseDate() {return super.getPurchaseDate();}
+    public String getPurchaseDate() {return purchaseDate;}
     @PropertyName("amount-left")
     public double getAmountLeft() {return amountLeft;}
     @PropertyName("expiry-date")
