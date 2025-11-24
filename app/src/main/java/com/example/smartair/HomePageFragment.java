@@ -25,9 +25,8 @@ import java.util.List;
 public class HomePageFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private BadgeAdapter badgeAdapter;
+    private ItemAdapter badgeAdapter;
     private List<Item> itemList;
-    private FirebaseDatabase db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,6 +34,7 @@ public class HomePageFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
 
+        //Copy the code up until fetchData() and change with respective view holders for recycler view
         recyclerView = view.findViewById(R.id.badgeRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true));
 
@@ -42,8 +42,7 @@ public class HomePageFragment extends Fragment {
         badgeAdapter = new BadgeAdapter(itemList);
         recyclerView.setAdapter(badgeAdapter);
 
-        db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-        fetchData();
+        ItemAdapter.fetchData(badgeAdapter, "badge");
 
         Button buttonTriage = view.findViewById(R.id.buttonTriage);
         Button buttonMedicine = view.findViewById(R.id.buttonMedicine);
@@ -104,24 +103,4 @@ public class HomePageFragment extends Fragment {
         transaction.commit();
     }
 
-    private void fetchData() {
-        DatabaseReference itemsRef = db.getReference("badge");
-        itemsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                itemList.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Item item = snapshot.getValue(Item.class);
-                    itemList.add(item);
-                }
-                badgeAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors
-                System.out.println("Error: " + databaseError.getMessage());
-            }
-        });
-    }
 }

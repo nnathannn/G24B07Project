@@ -8,15 +8,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class BadgeAdapter extends RecyclerView.Adapter<BadgeAdapter.BadgeViewHolder> {
-    //Complete in future updates
-    private List<Item> itemList;
+public class BadgeAdapter extends ItemAdapter {
 
     public BadgeAdapter(List<Item> itemList) {
-        this.itemList = itemList;
+        super(itemList);
     }
 
-    public static class BadgeViewHolder extends RecyclerView.ViewHolder {
+    public static class BadgeViewHolder extends ItemViewHolder {
         //Complete in future updates
         TextView date;
 
@@ -28,19 +26,16 @@ public class BadgeAdapter extends RecyclerView.Adapter<BadgeAdapter.BadgeViewHol
 
     @NonNull
     @Override
-    public BadgeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.badge_view_holder, parent, false);
-        return new BadgeViewHolder(view);
+        return (ItemViewHolder) new BadgeViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BadgeViewHolder holder, int position) {
-        Item item = itemList.get(position);
-        holder.date.setText(item.getDate());
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+        Item item = getItemList().get(position);
+        BadgeViewHolder badgeholder = (BadgeViewHolder) holder;
+        badgeholder.date.setText(item.getDate());
     }
 
-    @Override
-    public int getItemCount() {
-        return itemList.size();
-    }
 }

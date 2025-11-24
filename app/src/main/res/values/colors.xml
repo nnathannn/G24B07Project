@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bluebackground">#45A1F5</color>
     <color name="light_blue">#7DC1FF</color>
     <color name="dark_blue">#0085FF</color>
     <color name="middle_blue">#62B4FF</color>
@@ -12,4 +13,5 @@
     <color name="pale_orange">#FB7959</color>
     <color name="pale_yellow">#F4C945</color>
     <color name="another_blue">#45A0F4</color>
+    <color name="transparent">#00000000</color>
 </resources>

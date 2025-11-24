@@ -2,10 +2,20 @@ package com.example.smartair;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.PropertyName;
+
+import androidx.annotation.RequiresApi;
+
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public class Item {
     private String date;
+
+    @PropertyName("child-id")
     private String childId;
+    @PropertyName("item-id")
     private String itemId; // unique key
 
     public Item() {}
@@ -17,9 +27,13 @@ public class Item {
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
+    @PropertyName("child-id")
     public String getChildId() { return childId; }
-    public void setChildId(String childId) { this.childId = this.childId; }
+    @PropertyName("child-id")
+    public void setChildId(String childId) { this.childId = childId; }
+    @PropertyName("item-id")
     public String getItemId() { return itemId; }
+    @PropertyName("item-id")
     public void setItemId(String itemId) { this.itemId = itemId; }
 
 
