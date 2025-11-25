@@ -53,5 +53,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+    public void launchGetStartedPage(View v) {
+        Intent i = new Intent(this, GetStartedActivity.class);
+        startActivity(i);
+    }
+
 
 }
