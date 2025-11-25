@@ -191,12 +191,20 @@ public class MedicineFragment extends Fragment {
             Toast.makeText(getContext(), "Please enter a dose count", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (Integer.parseInt(doseCountStr) <= 0) {
+            Toast.makeText(getContext(), "Dose count must be a positive number", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (prePostStatus == null) {
             Toast.makeText(getContext(), "Please select a pre-post status", Toast.LENGTH_SHORT).show();
             return;
         }
         if (shortBreathCountStr.isEmpty()) {
             Toast.makeText(getContext(), "Please enter a short breath rating", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (Integer.parseInt(shortBreathCountStr) < 0 || Integer.parseInt(shortBreathCountStr) > 10) {
+            Toast.makeText(getContext(), "Short breath rating must be between 0 and 10", Toast.LENGTH_SHORT).show();
             return;
         }
 
