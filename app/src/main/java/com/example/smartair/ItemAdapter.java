@@ -17,6 +17,7 @@ import java.util.List;
 
 public abstract class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
     //Complete in future updates
+    private static final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private List<Item> itemList;
 
     public ItemAdapter(List<Item> itemList) {
@@ -45,9 +46,8 @@ public abstract class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemV
         return itemList.size();
     }
 
-     static void fetchData(ItemAdapter itemAdapter) {
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference itemsRef = db.getReference("badge");
+     static void fetchData(ItemAdapter itemAdapter, String path) {
+        DatabaseReference itemsRef = db.getReference(path);
         itemsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

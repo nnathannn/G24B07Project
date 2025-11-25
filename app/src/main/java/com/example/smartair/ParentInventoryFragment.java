@@ -12,7 +12,9 @@ import android.view.ViewGroup;
 
 public class ParentInventoryFragment extends Fragment {
 
-    String temporaryParentId = "parent1";
+    String temporaryParentId = "parent1"; //to be edited once logged in
+
+
 
     public ParentInventoryFragment() {}
 
@@ -27,20 +29,17 @@ public class ParentInventoryFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_parent_inventory, container, false);
     }
 
-//    @Override
-//    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
-//
-//        if(getChildFragmentManager().findFragmentById(R.id.inventoryListContainer) == null) {
-//            Bundle bundle = new Bundle();
-//            bundle.putString("parent_user_id", temporaryParentId);
-//
-//            getChildFragmentManager().beginTransaction()
-//                    .setReorderingAllowed(true)
-//                    .add(R.id.inventoryListContainer, InventoryListFragment.class, bundle)
-//                    .commit();
-//        }
-//    }
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if(getParentFragmentManager().findFragmentById(R.id.inventoryListContainer) == null) {
+            getChildFragmentManager().beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(R.id.inventoryListContainer, new InventoryListFragment())
+                    .commit();
+        }
+    }
 
 
 
