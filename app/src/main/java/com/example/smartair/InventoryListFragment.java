@@ -95,6 +95,7 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
         childrenRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                itemList.clear();
                 for (String childId : childIds) {
                     if (dataSnapshot.hasChild(childId)) {
                         DataSnapshot childNode = dataSnapshot.child(childId);
@@ -121,7 +122,6 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
         inventoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                itemList.clear();
                 if(dataSnapshot.hasChild(inventoryId)){
                     DataSnapshot inventoryNode = dataSnapshot.child(inventoryId);
                     if(inventoryNode.exists()) {
@@ -139,9 +139,8 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
 
     }
 
-    //TO BE COMPLETED: ONCLICK LISTENER
     @Override
-    public void onItemClick(String clickedString) {
-        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
+    public void onItemClick(Inventory clickedInventory) {
+        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedInventory.getMedName(), Toast.LENGTH_LONG).show();
     }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 public class InventoryAdapter extends ItemAdapter {
 
     public interface OnItemClickListener {
-        void onItemClick(String clickedString);
+        void onItemClick(Inventory clickedInventory);
     }
      private final OnItemClickListener listener;
 
@@ -36,6 +36,14 @@ public class InventoryAdapter extends ItemAdapter {
             this.expiryDate = view.findViewById(R.id.expiryDate);
             this.amountLeft = view.findViewById(R.id.amountLeft);
             this.cardView = (CardView) itemView;
+        }
+        public void bind(Inventory inventory, OnItemClickListener listener) {
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(inventory);
+                }
+            });
         }
     }
 
@@ -57,10 +65,15 @@ public class InventoryAdapter extends ItemAdapter {
             String childName = dataSnapshot.getValue(String.class);
             inventoryHolder.medChildName.setText(childName);
         });
-        //TO BE EDITED
-        inventoryHolder.medName.setText("tes aja ni");
-        inventoryHolder.purchaseDate.setText(inventory.getDate());
-        inventoryHolder.expiryDate.setText(inventory.getExpirydate());
-        inventoryHolder.amountLeft.setText(Double.toString(inventory.getAmountLeft()));
+        if(inventory.getRescue()){
+            inventoryHolder.medName.setText("Rescue | " + inventory.getMedName());
+        }
+        else{
+            inventoryHolder.medName.setText("Controller | " + inventory.getMedName());
+        }
+        inventoryHolder.purchaseDate.setText("Purchase Date: " + inventory.getPurchaseDate());
+        inventoryHolder.expiryDate.setText("Expiry Date: " + inventory.getExpiryDate());
+        inventoryHolder.amountLeft.setText("Amount Left: " + Double.toString(inventory.getAmountLeft()));
+        inventoryHolder.bind(inventory, listener);
     }
 }
