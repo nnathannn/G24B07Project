@@ -12,7 +12,9 @@ import android.view.ViewGroup;
 
 public class ParentInventoryFragment extends Fragment {
 
-    String temporaryParentId = "parent1";
+    String temporaryParentId = "parent1"; //to be edited once logged in
+
+
 
     public ParentInventoryFragment() {}
 
