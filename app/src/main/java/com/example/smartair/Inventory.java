@@ -4,45 +4,70 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import com.google.firebase.database.PropertyName;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public class Inventory extends Item{
     private static final double pumpPercentage = 0.0075;
+    @PropertyName("amount-left")
     private double amountLeft;  //percentage 0.0-1.0
+    @PropertyName("expiry-date")
     private String expiryDate;
+    @PropertyName("purchase-date")
+    private String purchaseDate;
+    @PropertyName("rescue")
     private boolean rescue;
+    @PropertyName("med-name")
+    private String medName;
     public Inventory() {}
 
-    public Inventory(String childId, String purchaseDate, double amountLeft, String expiryDate, boolean rescue) throws IllegalArgumentException {
-        super(purchaseDate, childId);
+    public Inventory(String childId, String date, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName) throws IllegalArgumentException {
+        super(date, childId);
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
         }
 
-
+        this.purchaseDate = purchaseDate;
         this.amountLeft = amountLeft;
         this.expiryDate = expiryDate;
         this.rescue = rescue;
+        this.medName = medName;
 
     }
 
-    public double getAmountLeft() {return amountLeft;}
-    public String getExpirydate() {return expiryDate;}
-    public boolean getRescue() {return rescue;}
 
+    @PropertyName("purchase-date")
+    public String getPurchaseDate() {return purchaseDate;}
+    @PropertyName("amount-left")
+    public double getAmountLeft() {return amountLeft;}
+    @PropertyName("expiry-date")
+    public String getExpiryDate() {return expiryDate;}
+    @PropertyName("rescue")
+    public boolean getRescue() {return rescue;}
+    @PropertyName("med-name")
+    public String getMedName() {return medName;}
+
+    @PropertyName("amount-left")
     public void setAmountLeft(double amountLeft) {
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException(("Amount Left must be between 0.0 and 1.0"));
         }
         this.amountLeft = amountLeft;
     }
-    
+
+    @PropertyName("expiry-date")
     public void setExpiryDate(String expiryDate) {
         this.expiryDate = expiryDate;
     }
+    @PropertyName("rescue")
     public void setRescue(boolean rescue) { this.rescue = rescue;}
 
+    @PropertyName("med-name")
+    public void setMedName(String medName){
+        this.medName = medName;
+    }
 
 
     public void applyDose(double dose){

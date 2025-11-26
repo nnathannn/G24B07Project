@@ -3,7 +3,6 @@ package com.example.smartair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,7 +30,7 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ChildViewHol
 
         public ChildViewHolder(View childView) {
             super(childView);
-            nameTextView = childView.findViewById(R.id.childName);
+            nameTextView = childView.findViewById(R.id.medName);
             cardView = (CardView) itemView;
         }
 
