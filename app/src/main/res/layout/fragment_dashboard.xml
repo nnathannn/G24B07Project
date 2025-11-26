@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="352dp"
+    android:layout_height="420dp"
+    app:cardCornerRadius="18dp"
+    app:strokeColor="@color/another_blue"
+    app:strokeWidth="5dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardZone"
+            android:layout_width="match_parent"
+            android:layout_height="112dp"
+            android:layout_margin="24dp"
+            android:backgroundTint="@color/green"
+            app:layout_constraintStart_toStartOf="@id/constraintLayout"
+            app:layout_constraintEnd_toEndOf="@id/constraintLayout"
+            app:layout_constraintTop_toTopOf="@id/constraintLayout"
+            app:cardCornerRadius="14dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintZone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/zoneTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today's Zone"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:layout_marginTop="9dp"
+                    app:layout_constraintTop_toTopOf="@id/constraintZone"
+                    app:layout_constraintStart_toStartOf="@id/constraintZone"
+                    app:layout_constraintEnd_toEndOf="@id/constraintZone"
+                    />
+
+                <TextView
+                    android:id="@+id/zonePercentage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="80%"
+                    android:textColor="@color/white"
+                    android:textSize="60sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="22dp"
+                    app:layout_constraintTop_toTopOf="@id/zoneTitle"
+                    app:layout_constraintBottom_toBottomOf="@id/constraintZone"
+                    app:layout_constraintStart_toStartOf="@id/constraintZone"/>
+
+                <TextView
+                    android:id="@+id/zoneData"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PB:\nPEF:"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:layout_marginStart="45dp"
+                    app:layout_constraintTop_toTopOf="@id/zonePercentage"
+                    app:layout_constraintBottom_toBottomOf="@id/zonePercentage"
+                    app:layout_constraintStart_toEndOf="@id/zonePercentage"
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintRescue"
+            android:layout_width="0dp"
+            android:layout_height="108dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            app:layout_constraintTop_toBottomOf="@id/cardZone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardLastRescue"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:backgroundTint="@color/another_blue"
+                app:layout_constraintStart_toStartOf="@id/constraintRescue"
+                app:layout_constraintEnd_toStartOf="@id/cardWeeklyRescue"
+                app:cardCornerRadius="20dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLastRescue"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textLastRescue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Rescue\nTime"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        android:layout_marginTop="11dp"
+                        app:layout_constraintStart_toStartOf="@id/constraintLastRescue"
+                        app:layout_constraintEnd_toEndOf="@id/constraintLastRescue"
+                        app:layout_constraintTop_toTopOf="@id/constraintLastRescue"/>
+
+                    <TextView
+                        android:id="@+id/timeLastRescue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="dd-MM-yyyy\nh:m"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        android:layout_marginTop="54dp"
+                        app:layout_constraintStart_toStartOf="@id/constraintLastRescue"
+                        app:layout_constraintEnd_toEndOf="@id/constraintLastRescue"
+                        app:layout_constraintTop_toTopOf="@id/constraintLastRescue"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWeeklyRescue"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/another_blue"
+                app:layout_constraintStart_toEndOf="@id/cardLastRescue"
+                app:layout_constraintEnd_toEndOf="@id/constraintRescue"
+                app:cardCornerRadius="20dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintWeeklyRescue"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textWeeklyRescue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Weekly Rescue\nCount"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        android:layout_marginTop="11dp"
+                        app:layout_constraintStart_toStartOf="@id/constraintWeeklyRescue"
+                        app:layout_constraintEnd_toEndOf="@id/constraintWeeklyRescue"
+                        app:layout_constraintTop_toTopOf="@id/constraintWeeklyRescue"/>
+                    
+                    <TextView
+                        android:id="@+id/countWeeklyRescue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="40sp"
+                        android:layout_marginTop="49dp"
+                        app:layout_constraintStart_toStartOf="@id/constraintWeeklyRescue"
+                        app:layout_constraintEnd_toEndOf="@id/constraintWeeklyRescue"
+                        app:layout_constraintTop_toTopOf="@id/constraintWeeklyRescue"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTrendSnippet"
+            android:layout_width="0dp"
+            android:layout_height="108dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/constraintRescue"
+            app:layout_constraintStart_toStartOf="@id/constraintLayout"
+            app:layout_constraintEnd_toEndOf="@id/constraintLayout"
+            app:cardCornerRadius="20dp"
+            app:strokeColor="@color/another_blue"
+            app:strokeWidth="2dp">
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteX="208dp"
+            tools:layout_editor_absoluteY="379dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</com.google.android.material.card.MaterialCardView>
