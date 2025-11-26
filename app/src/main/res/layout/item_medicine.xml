@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardViewMedicine"
     android:layout_width="match_parent"
-    android:layout_height="68dp"
+    android:layout_height="113dp"
     android:layout_marginBottom="12dp"
     android:backgroundTint="@color/another_blue"
     app:cardCornerRadius="20dp">
