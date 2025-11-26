@@ -21,7 +21,7 @@
             android:name=".HomeParent"
             android:exported="false" />
         <activity
-            android:name=".HomeChild"
+            android:name=".ChildActivity"
             android:exported="false" />
         <activity
             android:name=".SignIn"
