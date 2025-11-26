@@ -1,6 +1,7 @@
 package com.example.smartair;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -28,11 +29,35 @@ public class HomeChild extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home_child);
-
+        EdgeToEdge.enable(this);
+        String childId = "id1"; //TO BE UPDATED
         if (savedInstanceState == null) {
-            loadFragment(new HomePageFragment());
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                    .child("child-users").child(childId)
+                    .child("first-run");
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    boolean isFirstRun = snapshot.getValue(Boolean.class);
+                    if (snapshot.getValue(Boolean.class) == null) {
+                        isFirstRun = true;
+                    }
+                    if (isFirstRun) {
+                        Bundle args = new Bundle();
+                        args.putString("role", "child");
+                        OnboardingFragment fragment = new OnboardingFragment();
+                        fragment.setArguments(args);
+                        loadFragment(fragment);
+                        ref.setValue(false);
+                    } else {
+                        loadFragment(new HomePageFragment());
+                    }
+                }
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(HomeChild.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    loadFragment(new HomePageFragment());
+                }
+            });
         }
     }
 
