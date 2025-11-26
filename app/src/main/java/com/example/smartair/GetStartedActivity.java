@@ -18,10 +18,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GetStartedActivity extends AppCompatActivity {
 
     private FirebaseAuth myAuth = FirebaseAuth.getInstance();
+    private FirebaseDatabase db = FirebaseDatabase.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +49,13 @@ public class GetStartedActivity extends AppCompatActivity {
         }
     }
 
-    public void signUp(String email, String password) {
+    public void signUp(String email, String password, String role, String name) {
         myAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            logUser(role, name);
                             Intent i = new Intent(GetStartedActivity.this, SignIn.class);
                             startActivity(i);
                         } else {
@@ -59,7 +65,8 @@ public class GetStartedActivity extends AppCompatActivity {
                 });
     }
 
-    public void signIn(String email, String password) {
+    public void signIn(String user, String password) {
+        String email = checkAccount(user);
         myAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -72,5 +79,29 @@ public class GetStartedActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void logUser(String role, String name) {
+        String uid = myAuth.getCurrentUser().getUid();
+        if (role.equals("parent")) {
+            Map<String, Object> parent_data = new HashMap<>();
+            parent_data.put("child-ids", "");
+            parent_data.put("first-run", true);
+            parent_data.put("name", name);
+            db.getReference("parent-users").child(uid).setValue(parent_data);
+        } else if (role.equals("provider")) {
+            db.getReference("provider-users").child(uid).child("name").setValue(name);
+        } else {
+            db.getReference("child-users").child(uid).child("username").setValue(name);
+        }
+    }
+
+    private String checkAccount(String user) {
+        if (user.contains("@")) {
+            return user;
+        } else {
+            return user + "@g24b07project.examplefakedomain";
+        }
+
     }
 }

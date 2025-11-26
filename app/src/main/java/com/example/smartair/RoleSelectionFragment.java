@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class RoleSelectionFragment extends Fragment {
 
@@ -45,6 +46,8 @@ public class RoleSelectionFragment extends Fragment {
         Button parentSignUpButton = view.findViewById(R.id.ParentSignUpButton);
         Button childSignUpButton = view.findViewById(R.id.ChildSignInButton);
         Button providerSignUpButton = view.findViewById(R.id.ProviderSignUpButton);
+        TextView sign_in = view.findViewById(R.id.SignInOption);
+
         parentSignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +57,7 @@ public class RoleSelectionFragment extends Fragment {
         childSignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                replaceFragment(new ChildSignInFragment());
+                replaceFragment(new SignInFragment());
             }
         });
         providerSignUpButton.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +65,10 @@ public class RoleSelectionFragment extends Fragment {
             public void onClick(View v) {
                 replaceFragment(new ProviderSignUpFragment());
             }
+        });
+        sign_in.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { replaceFragment(new SignInFragment()); }
         });
     }
     private void replaceFragment(Fragment fragment){
