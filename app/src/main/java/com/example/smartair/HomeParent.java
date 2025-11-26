@@ -32,7 +32,6 @@ public class HomeParent extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         if (savedInstanceState == null) {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                     .child("parent-users").child(temporary_parent_id)
@@ -46,38 +45,40 @@ public class HomeParent extends AppCompatActivity {
                     if (isFirstRun) {
                         Bundle args = new Bundle();
                         args.putString("role", "parent");
+                        View parentBottomNavView = findViewById(R.id.parentBottomNavView);
+                        parentBottomNavView.setVisibility(View.INVISIBLE);
                         OnboardingFragment fragment = new OnboardingFragment();
                         fragment.setArguments(args);
-                        replaceFragment(R.id.parent_frame_layout, fragment);
+                        replaceFragment(fragment);
                         ref.setValue(false);
                     } else {
-                        replaceFragment(R.id.parent_frame_layout, new HomeParentFragment());
+                        replaceFragment(new HomeParentFragment());
                     }
                 }
                 public void onCancelled(@NonNull DatabaseError error) {
                     Toast.makeText(HomeParent.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    replaceFragment(R.id.parent_frame_layout, new HomeParentFragment());
+                    replaceFragment(new HomeParentFragment());
                 }
             });
         }
 
-        replaceFragment(R.id.parent_frame_layout,new HomeParentFragment());
+//        replaceFragment(new HomeParentFragment());
 
         binding.parentBottomNavView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if(itemId == R.id.home){
-                replaceFragment(R.id.parent_frame_layout, new HomeParentFragment());
+                replaceFragment(new HomeParentFragment());
                 return true;
             }else if(itemId == R.id.provider){
-                replaceFragment(R.id.parent_frame_layout, new ManageProviderAccessFragment());
+                replaceFragment(new ManageProviderAccessFragment());
                 return true;
             }
             else if(itemId == R.id.inventory){
-                replaceFragment(R.id.parent_frame_layout, new ParentInventoryFragment());
+                replaceFragment(new ParentInventoryFragment());
                 return true;
             }
             else if(itemId == R.id.history){
-                replaceFragment(R.id.parent_frame_layout, new ParentHistoryFragment());
+                replaceFragment(new ParentHistoryFragment());
                 return true;
             }
             return false;
@@ -92,10 +93,10 @@ public class HomeParent extends AppCompatActivity {
 //        });
     }
 
-    private void replaceFragment(int currentFragment, Fragment fragment){
+    private void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(currentFragment, fragment);
+        fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
         fragmentTransaction.commit();
     }
 
