@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
+            android:name=".GetStartedActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeProvider"
             android:exported="false" />
         <activity
