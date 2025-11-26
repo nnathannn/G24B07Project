@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
 public class MedicineLog extends Item {
-    @PropertyName("prePostStatus")
-    private String prePostStatus;
-    @PropertyName("rating")
-    private double rating;
+    @PropertyName("preStatus")
+    private int preStatus;
+    @PropertyName("postStatus")
+    private int postStatus;
     @PropertyName("rescue")
     private boolean rescue;
     @PropertyName("dose")
@@ -25,13 +25,18 @@ public class MedicineLog extends Item {
 
     public MedicineLog() {}
 
-    public MedicineLog(String date, String id, String prePostStatus, double rating, boolean rescue, int dose, String medName) throws IllegalArgumentException {
+    public MedicineLog(String date, String id, int preStatus, int postStatus, boolean rescue, int dose, String medName) throws IllegalArgumentException {
         super(date, id);
-        this.prePostStatus = prePostStatus;
-        if (rating < 0 || rating >10) {
-            throw new IllegalArgumentException("Rating must be between 0 and 10");
+
+        if (postStatus < 1 || postStatus >5) {
+            throw new IllegalArgumentException("Post-status must be between 1 and 5");
         }
-        this.rating = rating;
+        this.postStatus = postStatus;
+
+        if (preStatus < 1 || preStatus >5) {
+            throw new IllegalArgumentException("Pre-status must be between 1 and 5");
+        }
+        this.preStatus = preStatus;
         this.rescue = rescue;
         if (dose <= 0) {
             throw new IllegalArgumentException("Dose must be a positive number");
@@ -40,10 +45,10 @@ public class MedicineLog extends Item {
         this.medName = medName;
     }
 
-    @PropertyName("prePostStatus")
-    public String getPrePostStatus() {return prePostStatus;}
-    @PropertyName("rating")
-    public double getRating() {return rating;}
+    @PropertyName("preStatus")
+    public int getPreStatus() {return preStatus;}
+    @PropertyName("postStatus")
+    public int getPostStatus() {return postStatus;}
    @PropertyName("rescue")
     public boolean getRescue() {return rescue;}
     @PropertyName("dose")
@@ -53,21 +58,22 @@ public class MedicineLog extends Item {
     public String getMedName() {return medName;}
 
 
-    @PropertyName("prePostStatus")
-    public void setPrePostStatus(String prePostStatus) {
-        if (!prePostStatus.equals("Better") && !prePostStatus.equals("Same") && !prePostStatus.equals("Worse")) {
-            throw new IllegalArgumentException("prePostStatus must be better, same, or worse");
+    @PropertyName("preStatus")
+    public void setPreStatus(int preStatus) {
+        if (preStatus< 1 || preStatus>5) {
+            throw new IllegalArgumentException("Pre-status must be between 1 and 5");
         }
-        this.prePostStatus = prePostStatus;
+        this.preStatus = preStatus;
     }
 
-    @PropertyName("rating")
-    public void setRating(double rating) {
-        if (rating<0 || rating>10) {
-            throw new IllegalArgumentException("Rating must be between 0 and 10");
+    @PropertyName("postStatus")
+    public void setPostStatus(int postStatus) {
+        if (postStatus< 1 || postStatus>5) {
+            throw new IllegalArgumentException("Post-status must be between 1 and 5");
         }
-        this.rating = rating;
+        this.postStatus = postStatus;
     }
+
    @PropertyName("rescue")
     public void setRescue(boolean rescue) {this.rescue = rescue;}
 
