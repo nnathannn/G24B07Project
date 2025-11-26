@@ -15,5 +15,7 @@
     <color name="another_blue">#45A0F4</color>
     <color name="transparent">#00000000</color>
     <color name="light_grey">#F1F1F1</color>
+    <color name="dark_grey">#808080</color>
+    <color name="darker_blue">#004FA2</color>
 
 </resources>
