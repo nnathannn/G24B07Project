@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/providerAccessContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProviderAccessFragment"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/allowAccessHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="35dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/allowAccessTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="Allow Access"
+            android:textAlignment="textStart"
+            android:textColor="@color/black"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/providerAccessName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="3dp"
+            android:text="Provider A"
+            android:textAlignment="textStart"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/childAccessName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="3dp"
+            android:text="Child Name"
+            android:textAlignment="textStart"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingLeft="35dp"
+        android:paddingRight="45dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allowAccessHeader">
+
+        <Switch
+            android:id="@+id/rescueSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Rescue Log"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"/>
+
+        <Switch
+            android:id="@+id/controllerSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Controller Adherence Summary"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"/>
+
+        <Switch
+            android:id="@+id/symptomsSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Symptoms"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"/>
+
+        <Switch
+            android:id="@+id/triggerSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Triggers"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"
+            android:minHeight="48dp"
+            />
+
+        <Switch
+            android:id="@+id/PEFToggleSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Peak-flow (PEF)"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"/>
+
+        <Switch
+            android:id="@+id/triageSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Triage Incidents"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"
+            android:minHeight="48dp"/>
+
+        <Switch
+            android:id="@+id/summarySwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Summary Charts"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:switchMinWidth="55dp"
+            android:minHeight="48dp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
