@@ -4,28 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SignIn extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sign_in);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        FirebaseAuth myAuth = FirebaseAuth.getInstance();
+        System.out.println(myAuth.getCurrentUser());
     }
 
     public void launchChild(View v) {
-        Intent i = new Intent(this, HomeChild.class);
+        Intent i = new Intent(this, ChildActivity.class);
         startActivity(i);
     }
 
@@ -36,6 +30,14 @@ public class SignIn extends AppCompatActivity {
 
     public void launchProvider(View v) {
         Intent i = new Intent(this, HomeProvider.class);
+        startActivity(i);
+    }
+
+    public void signOut(View v) {
+        FirebaseAuth myAuth = FirebaseAuth.getInstance();
+        myAuth.signOut();
+        System.out.println("Signed out");
+        Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
     }
 }
