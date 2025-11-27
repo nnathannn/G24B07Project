@@ -2,6 +2,7 @@ package com.example.smartair;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -59,6 +60,7 @@ public class GetStartedActivity extends AppCompatActivity {
                             Intent i = new Intent(GetStartedActivity.this, SignIn.class);
                             startActivity(i);
                         } else {
+                            Toast.makeText(GetStartedActivity.this, "Authentication failed. Email/Username and Password does not match our records.", Toast.LENGTH_LONG).show();
                             System.out.println("Error sign up");
                         }
                     }

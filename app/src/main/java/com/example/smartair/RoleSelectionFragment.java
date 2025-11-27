@@ -17,21 +17,12 @@ public class RoleSelectionFragment extends Fragment {
 
 
     public RoleSelectionFragment() {}
-
-//    @Override
-//    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
-//
-//        if(getChildFragmentManager().findFragmentById(R.id.child_list_fragment_container) == null) {
-//            Bundle bundle = new Bundle();
-//            bundle.putString("parent_user_id", temporaryParentId);
-//
-//            getChildFragmentManager().beginTransaction()
-//                    .setReorderingAllowed(true)
-//                    .add(R.id.child_list_fragment_container, ChildListFragment.class, bundle)
-//                    .commit();
-//        }
-//    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TextView view = getActivity().findViewById(R.id.GetStartedTitle);
+        view.setText("Get Started");
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

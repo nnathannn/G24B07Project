@@ -22,6 +22,8 @@ public class ProviderSignUpFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TextView view = getActivity().findViewById(R.id.GetStartedTitle);
+        view.setText("Get Started");
     }
 
     @Override
@@ -48,7 +50,10 @@ public class ProviderSignUpFragment extends Fragment {
 
         sign_in.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { replaceFragment(new SignInFragment());}
+            public void onClick(View v) {
+                replaceFragment(new SignInFragment());
+
+            }
         });
 
         return view;

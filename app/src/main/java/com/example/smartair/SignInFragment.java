@@ -50,7 +50,9 @@ public class SignInFragment extends Fragment {
 
         sign_up.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { replaceFragment(new RoleSelectionFragment());}
+            public void onClick(View v) {
+                replaceFragment(new RoleSelectionFragment());
+            }
         });
 
 

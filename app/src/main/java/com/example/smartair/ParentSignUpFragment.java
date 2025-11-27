@@ -23,7 +23,8 @@ public class ParentSignUpFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        TextView view = getActivity().findViewById(R.id.GetStartedTitle);
+        view.setText("Get Started");
     }
 
     @Override
