@@ -1,17 +1,26 @@
 package com.example.smartair;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class ChildActivity extends AppCompatActivity {
-
+    String childId;
     private FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     @Override
@@ -20,7 +29,8 @@ public class ChildActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_home_child);
         EdgeToEdge.enable(this);
-        String childId = "id1"; //TO BE UPDATED
+        childId = getUser().getUid(); //TO BE UPDATED
+
         if (savedInstanceState == null) {
 
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
@@ -44,7 +54,7 @@ public class ChildActivity extends AppCompatActivity {
                     }
                 }
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(HomeChild.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChildActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     loadFragment(new HomeChildFragment());
                 }
             });

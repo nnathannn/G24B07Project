@@ -26,19 +26,22 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class HomeParent extends AppCompatActivity {
-    String temporary_parent_id = "parent1";
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String parentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        parentId = getUser().getUid();
+
         if (savedInstanceState == null) {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
-                    .child("parent-users").child(temporary_parent_id)
+                    .child("parent-users").child(parentId)
                     .child("first-run");
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {

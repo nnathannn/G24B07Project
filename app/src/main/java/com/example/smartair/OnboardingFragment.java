@@ -93,7 +93,7 @@ public class OnboardingFragment extends Fragment {
                     startActivity(intent);
                 }
                 else {
-                    Intent intent = new Intent(getActivity(), HomeChild.class);
+                    Intent intent = new Intent(getActivity(), ChildActivity.class);
                     startActivity(intent);
                 }
             }
