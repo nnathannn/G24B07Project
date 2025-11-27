@@ -85,16 +85,17 @@ public class GetStartedActivity extends AppCompatActivity {
 
     private void logUser(String role, String name) {
         String uid = myAuth.getCurrentUser().getUid();
+        Map<String, Object> data = new HashMap<>();
+        data.put("first-run", true);
+        data.put("name", name);
         if (role.equals("parent")) {
-            Map<String, Object> parent_data = new HashMap<>();
-            parent_data.put("child-ids", "");
-            parent_data.put("first-run", true);
-            parent_data.put("name", name);
-            db.getReference("parent-users").child(uid).setValue(parent_data);
+            data.put("child-ids", "");
+            db.getReference("parent-users").child(uid).setValue(data);
         } else if (role.equals("provider")) {
-            db.getReference("provider-users").child(uid).child("name").setValue(name);
+            data.put("access", "");
+            db.getReference("provider-users").child(uid).setValue(data);
         } else {
-            db.getReference("child-users").child(uid).child("username").setValue(name);
+            db.getReference("child-users").child(uid).setValue(data);
         }
     }
 
