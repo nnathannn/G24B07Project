@@ -15,27 +15,52 @@ public class AdapterHistory extends ItemAdapter {
     }
 
     public static class HistoryViewHolder extends ItemViewHolder {
-        //Complete in future updates
-        TextView date;
+        TextView name, date, field1, field2, field3;
 
         public HistoryViewHolder(@NonNull View view) {
             super(view);
-            this.date = view.findViewById(R.id.textView2);
+            this.name = view.findViewById(R.id.HistoryDataName);
+            this.date = view.findViewById(R.id.HistoryDataDate);
+            this.field1 = view.findViewById(R.id.HistoryDataField1);
+            this.field2 = view.findViewById(R.id.HistoryDataField2);
+            this.field3 = view.findViewById(R.id.HistoryDataField3);
         }
+    }
+
+    public static class HistoryItem extends Item {
+        String field1, field2, field3;
+        String type;
+
+        public HistoryItem(String name, String date, String field1, String field2, String field3, String type) {
+            super(name, date);
+            this.field1 = field1;
+            this.field2 = field2;
+            this.field3 = field3;
+            this.type = type;
+        }
+
     }
 
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.badge_view_holder, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_history, parent, false);
         return (ItemViewHolder) new HistoryViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = getItemList().get(position);
-        HistoryViewHolder badgeholder = (HistoryViewHolder) holder;
-        badgeholder.date.setText(item.getDate());
+        HistoryItem historyItem = (HistoryItem) item;
+        HistoryViewHolder historyHolder = (HistoryViewHolder) holder;
+        historyHolder.name.setText(historyItem.getChildId());
+        historyHolder.date.setText(historyItem.getDate());
+        historyHolder.field1.setText(historyItem.field1);
+        historyHolder.field2.setText(historyItem.field2);
+        historyHolder.field3.setText(historyItem.field3);
     }
 
+//    static void fetchData(ItemAdapter itemAdapter, String path) {
+//
+//    }
 }

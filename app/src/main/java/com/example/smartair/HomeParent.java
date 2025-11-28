@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -16,12 +17,18 @@ import com.example.smartair.databinding.ActivityHomeParentBinding;
 import com.example.smartair.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class HomeParent extends AppCompatActivity {
     String temporary_parent_id = "parent1";
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +58,8 @@ public class HomeParent extends AppCompatActivity {
             return false;
         });
 
+        checkRole();
+
 //        EdgeToEdge.enable(this);
 //        setContentView(R.layout.activity_home_parent);
 //        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -69,4 +78,25 @@ public class HomeParent extends AppCompatActivity {
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
+    private void checkRole() {
+        String uid = getUser().getUid();
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+        myref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child("parent-users").hasChild(uid)) {
+                    user = "parent";
+                } else if (snapshot.child("child-users").hasChild(uid)) {
+                    user = "child";
+                } else {
+                    user = "provider";
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }
