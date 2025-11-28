@@ -12,13 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".DailyCheckinPage"
-            android:exported="false" />
-        <activity
-            android:name=".TechniqueHelper"
-            android:exported="false" />
-        <activity
-            android:name=".ParentProviderAccess"
+            android:name=".GetStartedActivity"
             android:exported="false" />
         <activity
             android:name=".HomeProvider"
@@ -27,7 +21,7 @@
             android:name=".HomeParent"
             android:exported="false" />
         <activity
-            android:name=".HomeChild"
+            android:name=".ChildActivity"
             android:exported="false" />
         <activity
             android:name=".SignIn"

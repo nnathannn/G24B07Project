@@ -2,30 +2,30 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout"
+    android:id="@+id/frameLayout0"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeParentFragment">
+    tools:context=".HomeProviderFragment">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/parent_header"
+        android:id="@+id/providerHeader"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:background="@drawable/home_page_top_nav_background"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/child_list_fragment_container"
+        app:layout_constraintBottom_toTopOf="@+id/providerChildListContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/welcome_parent"
+            android:id="@+id/welcomeProvider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="@string/welcome_parent"
+            android:text="Welcome, Provider!"
             android:textColor="@color/white"
             android:textSize="34sp"
             android:textStyle="bold"
@@ -37,7 +37,7 @@
             app:layout_constraintVertical_bias="0.3" />
 
         <SearchView
-            android:id="@+id/child_search_bar"
+            android:id="@+id/childSearchBar"
             android:layout_width="350dp"
             android:layout_height="50dp"
             android:layout_marginTop="35dp"
@@ -48,12 +48,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.577"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/welcome_parent"
+            app:layout_constraintTop_toBottomOf="@+id/welcomeProvider"
 
             app:layout_constraintVertical_bias="0.0" />
 
         <ImageButton
-            android:id="@+id/imageButton3"
+            android:id="@+id/profileButton"
             android:layout_width="56dp"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
@@ -67,28 +67,28 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/child_list_fragment_container"
+        android:id="@+id/providerChildListContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/parent_header"
+        app:layout_constraintTop_toBottomOf="@id/providerHeader"
         android:layout_marginTop="30dp">
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageButton
-        android:id="@+id/imageButton7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/edit_icon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.951"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.93"
-        android:background="@color/transparent"/>
+        <ImageButton
+            android:id="@+id/addEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/edit_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.951"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.93"
+            android:background="@color/transparent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
