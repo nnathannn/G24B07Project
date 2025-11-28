@@ -46,10 +46,10 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                        if (user.equals("child")) {
-                            transaction.replace(R.id.fragmentContainerView, new ProfileChildFragment());
-                        }
+                        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                        if (user.equals("child")) transaction.replace(R.id.fragmentContainerView, new ProfileChildFragment());
+                        if (user.equals("parent")) transaction.replace(R.id.parent_frame_layout, new ProfileParentFragment());
+                        if (user.equals("provider")) transaction.replace(R.id.providerHomeLayout, new ProfileProviderFragment());
                         transaction.addToBackStack(null);
                         transaction.commit();
                     }
@@ -57,7 +57,7 @@ public class ProfileFragment extends Fragment {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
+                    // error handling
                 }
             });
         }

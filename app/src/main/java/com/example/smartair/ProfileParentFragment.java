@@ -8,9 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProfileChildFragment extends Fragment {
+public class ProfileParentFragment extends Fragment {
 
-    public ProfileChildFragment() {
+    public ProfileParentFragment() {
         // Required empty public constructor
     }
 
@@ -18,6 +18,6 @@ public class ProfileChildFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile_child, container, false);
+        return inflater.inflate(R.layout.fragment_profile_parent, container, false);
     }
 }
