@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,58 +8,112 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TechniqueFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class TechniqueFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final int TOTAL_STEPS = 5;
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private ImageView stepImage;
+    private TextView stepCaption;
+    private Button buttonSkip;
+    private Button buttonCompleted;
 
-    public TechniqueFragment() {
-        // Required empty public constructor
-    }
+    private int currentStep = 0;
+    private int completedStep = 0;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TechniqueFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TechniqueFragment newInstance(String param1, String param2) {
-        TechniqueFragment fragment = new TechniqueFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
+    public TechniqueFragment() { }
+
+    /*private int[] stepImageContents = {
+            R.drawable.step1,
+            R.drawable.step2,
+            R.drawable.step3,
+            R.drawable.step4,
+            R.drawable.step5
+    }; */
+
+    private String[] stepCaptionContents = {
+            "Seal lips",
+            "Take a slow and deep breath",
+            "Hold breath for ~10 seconds",
+            "Wait 30-60 seconds between puffs",
+            "Use spacer/mask if needed"
+    };
+
+
+
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_technique, container, false);
+
+        stepImage = view.findViewById(R.id.stepImage);
+        stepCaption = view.findViewById(R.id.stepCaption);
+        buttonSkip = view.findViewById(R.id.buttonSkip);
+        buttonCompleted = view.findViewById(R.id.buttonCompleted);
+
+
+        //revise here
+        showCurrentStep();
+
+        buttonSkip.setOnClickListener(v -> {
+            goToNextStep(false);
+        });
+
+        buttonCompleted.setOnClickListener(v -> {
+            goToNextStep(true);
+        });
+
+        return view;
+    }
+
+    private void showCurrentStep(){
+        //stepImage.setImageResource(stepImageContents[currentStep]);
+        stepCaption.setText(stepCaptionContents[currentStep]);
+
+    }
+
+    private void goToNextStep(boolean isCompleted){
+        if(isCompleted){
+            completedStep++;
         }
+
+        if(currentStep < TOTAL_STEPS - 1){
+            currentStep++;
+            showCurrentStep();
+        } else {
+            onSessionFinished();
+        }
+
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_technique, container, false);
+
+    private void onSessionFinished(){
+        boolean highQuality = (completedStep == TOTAL_STEPS);
+
+        //send to database
+
+        //reset
+        currentStep = 0;
+        completedStep = 0;
+
     }
+
+
+
+
 }
