@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,11 +30,12 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
     private ItemAdapter adapter;
     private List<Item> itemList;
     private DatabaseReference parentChildrenRef;
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentUserId = "parent1"; // TO BE UPDATED ONCE LOGGED IN
+        parentUserId = getUser().getUid();
     }
 
     @Override
@@ -143,4 +146,5 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
     public void onItemClick(Inventory clickedInventory) {
         Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedInventory.getMedName(), Toast.LENGTH_LONG).show();
     }
+    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 }

@@ -24,7 +24,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<ProviderAdapter.Provid
         void onItemClick(String clickedString);
     }
 
-    //first isi provider id, second is child id
+    //first is provider id, second is child id
     private final List<Pair<String, String>> providerList;
     private final OnItemClickListener listener;
 

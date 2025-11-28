@@ -9,9 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ManageProviderAccessFragment extends Fragment {
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-    String temporaryParentId = "parent1"; //to be edited once logged in
+public class ManageProviderAccessFragment extends Fragment {
 
     public ManageProviderAccessFragment() {}
 
