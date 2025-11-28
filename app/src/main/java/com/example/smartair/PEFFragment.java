@@ -124,6 +124,11 @@ public class PEFFragment extends Fragment {
                         inputPEF.setText("");
                         // The ValueEventListener in fetchData() will automatically update the UI
                     }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+                    // input zone id to child-zones
+                    DatabaseReference childZoneRef = db.getReference("child-zones").child(childID);
+                    childZoneRef.push().setValue("true").addOnFailureListener
+                            (e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                 } else {
                     Toast.makeText(getContext(), "Could not find Personal Best for child.", Toast.LENGTH_SHORT).show();
                 }
