@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,7 +41,12 @@ public class ProviderListFragment extends Fragment implements ProviderAdapter.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentUserId = getUser().getUid();
+        if(getUser()!=null){
+            parentUserId = getUser().getUid();
+        }
+        else{
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -120,8 +127,18 @@ public class ProviderListFragment extends Fragment implements ProviderAdapter.On
     }
 
     @Override
-    public void onItemClick(String clickedString) {
-        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
+    public void onItemClick(Pair<String, String> clickedString) {
+        Bundle bundle = new Bundle();
+        bundle.putString("child_id", clickedString.second);
+        bundle.putString("provider_id", clickedString.first);
+        Fragment fragment = new ProviderAccessFragment();
+        fragment.setArguments(bundle);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.providerListContainer, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+        Toast.makeText(getContext(), "[debugging] Clicked: " + clickedString.first + " " + clickedString.second, Toast.LENGTH_LONG).show();
     }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ProviderAdapter extends RecyclerView.Adapter<ProviderAdapter.ProviderViewHolder>{
     public interface OnItemClickListener {
-        void onItemClick(String clickedString);
+        void onItemClick(Pair<String, String> clickedString);
     }
 
     //first is provider id, second is child id
@@ -74,7 +74,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<ProviderAdapter.Provid
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.onItemClick((providerString.first + " | " + providerString.second));
+                    listener.onItemClick(new Pair<>(providerString.first, providerString.second));
                 }
             });
         }
