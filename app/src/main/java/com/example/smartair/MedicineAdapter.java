@@ -1,13 +1,16 @@
 package com.example.smartair;
 
+import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,16 +25,16 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         this.medicineLogs = medicineLogs;
     }
     public static class MedicineViewHolder extends RecyclerView.ViewHolder {
-        TextView textCardViewMedicineType, textCardViewMedicineDate,
-                textCardViewMedicineCheck, textCardViewMedicineRating;
-        CardView cardViewMedicine;
+        TextView textMedicineType, textMedicineDate, textStatus, textPrePostRating;
+        CardView cardViewMedicine, cardViewStatus;
 
         public MedicineViewHolder(@NonNull View itemView) {
             super(itemView);
-            textCardViewMedicineType = itemView.findViewById(R.id.textCardViewMedicineType);
-            textCardViewMedicineDate = itemView.findViewById(R.id.textCardViewMedicineDate);
-            textCardViewMedicineCheck = itemView.findViewById(R.id.textCardViewMedicineCheck);
-            textCardViewMedicineRating = itemView.findViewById(R.id.textCardViewMedicineRating);
+            textMedicineType = itemView.findViewById(R.id.textMedicineType);
+            textMedicineDate = itemView.findViewById(R.id.textMedicineDate);
+            textStatus = itemView.findViewById(R.id.textStatus);
+            textPrePostRating = itemView.findViewById(R.id.textPrePostRating);
+            cardViewStatus = itemView.findViewById(R.id.cardStatus);
             cardViewMedicine = itemView.findViewById(R.id.cardViewMedicine);
         }
     }
@@ -44,6 +47,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         return new MedicineViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull MedicineAdapter.MedicineViewHolder holder, int position) {
         MedicineLog medicineLog = medicineLogs.get(position);
@@ -57,23 +61,28 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
             holder.cardViewMedicine.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#176EBE")));
         }
 
+        // dose text
         String doseText = medicineType + " Dose: " + Integer.toString(medicineLog.getDose());
-        holder.textCardViewMedicineType.setText(doseText);
-        holder.textCardViewMedicineRating.setText("Short Breath Rating: " + Double.toString(medicineLog.getRating()));
+        holder.textMedicineType.setText(doseText);
+        // pre post text
+        String prePostText = "Pre Check Rating: " + Integer.toString(medicineLog.getPreStatus()) + "\nPost Check Rating: " + Integer.toString(medicineLog.getPostStatus());
+        holder.textPrePostRating.setText(prePostText);
+        // date text
         LocalDateTime dateTime = LocalDateTime.parse(medicineLog.getDate());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
-        holder.textCardViewMedicineDate.setText(dateTime.format(formatter));
-        if (medicineLog.getPrePostStatus().equals("Worse")) {
-            holder.textCardViewMedicineCheck.setText("Worse");
-            holder.textCardViewMedicineCheck.setBackgroundColor(Color.parseColor("#EC3131"));
+        holder.textMedicineDate.setText(dateTime.format(formatter));
+        // status text and card color
+        if (medicineLog.getPreStatus() > medicineLog.getPostStatus()) {
+            holder.textStatus.setText("Worse");
+            holder.cardViewStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EC3131")));
         }
-        else if (medicineLog.getPrePostStatus().equals("Same")) {
-            holder.textCardViewMedicineCheck.setText("Same");
-            holder.textCardViewMedicineCheck.setBackgroundColor(Color.parseColor("#F4C945"));
+        else if (medicineLog.getPreStatus() == medicineLog.getPostStatus()) {
+            holder.textStatus.setText("Same");
+            holder.cardViewStatus.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#F4C945")));
         }
         else {
-            holder.textCardViewMedicineCheck.setText("Better");
-            holder.textCardViewMedicineCheck.setBackgroundColor(Color.parseColor("#31D219"));
+            holder.textStatus.setText("Better");
+            holder.cardViewStatus.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#31D219")));
         }
     }
 

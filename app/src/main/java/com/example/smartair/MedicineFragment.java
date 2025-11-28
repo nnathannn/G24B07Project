@@ -2,8 +2,6 @@ package com.example.smartair;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,8 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
@@ -36,9 +37,9 @@ import java.util.Objects;
 public class MedicineFragment extends Fragment {
 
     private Button buttonSubmit, buttonDate, buttonTime;
-    private MaterialButton buttonRescue, buttonController, buttonWorse, buttonSame, buttonBetter;
-    private EditText editDoseCount, editShortBreathRating;
-    private String medicineType, prePostStatus;
+    private MaterialButton buttonRescue, buttonController;
+    private EditText editDoseCount, editPreCheck, editPostCheck;
+    private String medicineType;
     private LocalDateTime dateTime;
 
     // RecyclerView components
@@ -67,15 +68,13 @@ public class MedicineFragment extends Fragment {
 
     private void initializeViews(View view) {
         buttonSubmit = view.findViewById(R.id.buttonMedicineSubmit);
-        buttonWorse = view.findViewById(R.id.buttonWorse);
-        buttonSame = view.findViewById(R.id.buttonSame);
-        buttonBetter = view.findViewById(R.id.buttonBetter);
         buttonDate = view.findViewById(R.id.buttonDate);
         buttonTime = view.findViewById(R.id.buttonTime);
         buttonRescue = view.findViewById(R.id.buttonRescue);
         buttonController = view.findViewById(R.id.buttonController);
         editDoseCount = view.findViewById(R.id.editDoseCount);
-        editShortBreathRating = view.findViewById(R.id.editShortBreathRating);
+        editPreCheck = view.findViewById(R.id.editPreCheck);
+        editPostCheck = view.findViewById(R.id.editPostCheck);
         recyclerViewMedicines = view.findViewById(R.id.recyclerViewMedicines);
     }
 
@@ -121,33 +120,6 @@ public class MedicineFragment extends Fragment {
             buttonRescue.setStrokeColorResource(android.R.color.white);
         });
 
-        buttonWorse.setOnClickListener(v -> {
-            prePostStatus = "Worse";
-            int paleYellowColor = Color.parseColor("#F4C945");
-            int greenColor = Color.parseColor("#31D219");
-            buttonWorse.setStrokeColorResource(android.R.color.holo_blue_bright);
-            buttonSame.setStrokeColor(ColorStateList.valueOf(paleYellowColor));
-            buttonBetter.setStrokeColor(ColorStateList.valueOf(greenColor));
-        });
-
-        buttonSame.setOnClickListener(v -> {
-            prePostStatus = "Same";
-            int redColor = Color.parseColor("#EC3131");
-            int greenColor = Color.parseColor("#31D219");
-            buttonWorse.setStrokeColor(ColorStateList.valueOf(redColor));
-            buttonSame.setStrokeColorResource(android.R.color.holo_blue_bright);
-            buttonBetter.setStrokeColor(ColorStateList.valueOf(greenColor));
-        });
-
-        buttonBetter.setOnClickListener(v -> {
-            prePostStatus = "Better";
-            int redColor = Color.parseColor("#EC3131");
-            int paleYellowColor = Color.parseColor("#F4C945");
-            buttonWorse.setStrokeColor(ColorStateList.valueOf(redColor));
-            buttonSame.setStrokeColor(ColorStateList.valueOf(paleYellowColor));
-            buttonBetter.setStrokeColorResource(android.R.color.holo_blue_bright);
-        });
-
         buttonDate.setOnClickListener(v -> showDatePicker());
         buttonTime.setOnClickListener(v -> showTimePicker());
         buttonSubmit.setOnClickListener(v -> submitMedicineLog());
@@ -181,7 +153,8 @@ public class MedicineFragment extends Fragment {
 
     private void submitMedicineLog() {
         String doseCountStr = editDoseCount.getText().toString();
-        String shortBreathCountStr = editShortBreathRating.getText().toString();
+        String preCheckStr = editPreCheck.getText().toString();
+        String postCheckStr = editPostCheck.getText().toString();
 
         if (medicineType == null) {
             Toast.makeText(getContext(), "Please select a medicine type", Toast.LENGTH_SHORT).show();
@@ -191,30 +164,31 @@ public class MedicineFragment extends Fragment {
             Toast.makeText(getContext(), "Please enter a dose count", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (preCheckStr.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter a pre-check rating", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (postCheckStr.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter a post-check rating", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (Integer.parseInt(doseCountStr) <= 0) {
             Toast.makeText(getContext(), "Dose count must be a positive number", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (prePostStatus == null) {
-            Toast.makeText(getContext(), "Please select a pre-post status", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (shortBreathCountStr.isEmpty()) {
-            Toast.makeText(getContext(), "Please enter a short breath rating", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (Integer.parseInt(shortBreathCountStr) < 0 || Integer.parseInt(shortBreathCountStr) > 10) {
-            Toast.makeText(getContext(), "Short breath rating must be between 0 and 10", Toast.LENGTH_SHORT).show();
+        if (Integer.parseInt(preCheckStr) < 1 || Integer.parseInt(preCheckStr) > 5 || Integer.parseInt(postCheckStr) < 1 || Integer.parseInt(postCheckStr) > 5) {
+            Toast.makeText(getContext(), "Rating must be between 1 and 5", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int dose = Integer.parseInt(doseCountStr);
-        int rating = Integer.parseInt(shortBreathCountStr);
+        int preCheck = Integer.parseInt(preCheckStr);
+        int postCheck = Integer.parseInt(postCheckStr);
         boolean isRescue = "Rescue".equals(medicineType);
 
         String childId = "placeholder_child_id"; // TODO: Replace with actual child ID
 
-        MedicineLog log = new MedicineLog(dateTime.toString(), childId, prePostStatus, rating, isRescue, dose);
+        MedicineLog log = new MedicineLog(dateTime.toString(), childId, preCheck, postCheck, isRescue, dose, "");
 
         databaseReference.push().setValue(log)
                 .addOnSuccessListener(aVoid -> {
@@ -228,23 +202,16 @@ public class MedicineFragment extends Fragment {
 
     private void resetForm() {
         medicineType = null;
-        prePostStatus = null;
         dateTime = LocalDateTime.now();
 
         editDoseCount.setText("");
-        editShortBreathRating.setText("");
+        editPreCheck.setText("");
+        editPostCheck.setText("");
 
         buttonDate.setText("Date");
         buttonTime.setText("Time");
 
         buttonRescue.setStrokeColorResource(android.R.color.white);
         buttonController.setStrokeColorResource(android.R.color.white);
-
-        int redColor = Color.parseColor("#EC3131");
-        int paleYellowColor = Color.parseColor("#F4C945");
-        int greenColor = Color.parseColor("#31D219");
-        buttonWorse.setStrokeColor(ColorStateList.valueOf(redColor));
-        buttonSame.setStrokeColor(ColorStateList.valueOf(paleYellowColor));
-        buttonBetter.setStrokeColor(ColorStateList.valueOf(greenColor));
     }
 }
