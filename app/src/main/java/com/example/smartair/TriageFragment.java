@@ -66,7 +66,7 @@ public class TriageFragment extends Fragment {
         // set up child data
         fetchChildData(view);
 
-        // check flags, submit symptom and triage, navigate to right page
+        // check flags; input symptom, triage, child-symptoms, child-triages; navigate to right page
         checkFlag(view);
     }
 
@@ -118,52 +118,81 @@ public class TriageFragment extends Fragment {
         flag3 = view.findViewById(R.id.flag3);
         submitFlag = view.findViewById(R.id.submit_triage);
 
-        List<String> symptomList = new ArrayList<>();
-        if (flag1.isChecked()) symptomList.add("Can't speak full sentences");
-        if (flag2.isChecked()) symptomList.add("Chest pulling in");
-        if (flag3.isChecked()) symptomList.add("Blue/gray lips/nails");
-
-        List<String> pefList = new ArrayList<>();
-        List<String> rescueList = new ArrayList<>();
-
-        // input triage
-        DatabaseReference triageRef = db.getReference("triage");
-        Triage triage = new Triage(childID, LocalDateTime.now().toString(), flag3.isChecked(),
-                "", symptomList, pefList, rescueList);
-        triageRef.push().setValue(triage).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        });
-
-        // input symptom
-        DatabaseReference symptomRef = db.getReference("symptom");
-        if (flag1.isChecked()) {
-            Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
-                    "Can't speak full sentences", triageRef.push().getKey(), null);
-            symptomRef.push().setValue(symptom).addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        }
-        if (flag2.isChecked()) {
-            Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
-                    "Chest pulling in", triageRef.push().getKey(), null);
-            symptomRef.push().setValue(symptom).addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        }
-        if (flag3.isChecked()) {
-            Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
-                    "Blue/gray lips/nails", triageRef.push().getKey(), null);
-            symptomRef.push().setValue(symptom).addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        }
-
-        // navigate to another fragment
         submitFlag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!flag1.isChecked() && !flag2.isChecked() && !flag3.isChecked()) {
+                    Toast.makeText(getContext(), "Please select at least one flag.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // input triage and child-triages
+                List<String> symptomList = new ArrayList<>();
+                if (flag1.isChecked()) symptomList.add(flag1.getText().toString());
+                if (flag2.isChecked()) symptomList.add(flag2.getText().toString());
+                if (flag3.isChecked()) symptomList.add(flag3.getText().toString());
+
+                List<String> pefList = new ArrayList<>();
+                List<String> rescueList = new ArrayList<>();
+
+                DatabaseReference triageRef = db.getReference("triage");
+                DatabaseReference childTriagesRef = db.getReference("child-triages").child(childID);
+                Triage triage = new Triage(childID, LocalDateTime.now().toString(), flag3.isChecked(),
+                        "", symptomList, pefList, rescueList);
+                DatabaseReference triageRefPush = triageRef.push();
+                triageRefPush.setValue(triage).addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+                childTriagesRef.child(triageRefPush.getKey()).setValue(true).addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+                // input symptom and child-symptoms
+                DatabaseReference symptomRef = db.getReference("symptom");
+                DatabaseReference childSymptomsRef = db.getReference("child-symptoms").child(childID);
+                if (flag1.isChecked()) {
+                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                            flag1.getText().toString(), triageRefPush.getKey(), null);
+                    DatabaseReference symptomRefPush = symptomRef.push();
+                    symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                    childSymptomsRef.child(symptomRefPush.getKey()).setValue(true).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+                if (flag2.isChecked()) {
+                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                            flag2.getText().toString(), triageRefPush.getKey(), null);
+                    DatabaseReference symptomRefPush = symptomRef.push();
+                    symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                    childSymptomsRef.child(symptomRefPush.getKey()).setValue(true).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+                if (flag3.isChecked()) {
+                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                            flag3.getText().toString(), triageRefPush.getKey(), null);
+                    DatabaseReference symptomRefPush = symptomRef.push();
+                    symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                    childSymptomsRef.child(symptomRefPush.getKey()).setValue(true).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                // navigate to another fragment
                 if (flag3.isChecked()) loadFragment(new TriageEmergencyFragment());
-                else loadFragment(new TriageInputPEFRescueFragment());
+                else {
+                    TriageInputPEFRescueFragment fragment = new TriageInputPEFRescueFragment();
+                    Bundle args = new Bundle();
+                    args.putString("triageId", triageRefPush.getKey());
+                    fragment.setArguments(args);
+                    loadFragment(fragment);
+                }
             }
         });
     }
