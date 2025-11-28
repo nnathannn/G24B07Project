@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/dark_red">
+
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="30dp"
+        android:text="Timer "
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/timer_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10:00:00"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@id/timer"
+        app:layout_constraintTop_toTopOf="@id/timer"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cur_pef_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:padding="15dp"
+        android:background="@drawable/smalled_rounded_edges_background"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="@id/timer"
+        app:layout_constraintTop_toBottomOf="@id/timer_number"
+        app:layout_constraintBottom_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/cur_pef_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current PEF and Zone"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="@id/cur_pef_box"
+            app:layout_constraintStart_toStartOf="@id/cur_pef_box"/>
+
+        <TextView
+            android:id="@+id/cur_percentage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:textAlignment="center"
+            android:textSize="60sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/cur_pef_title"
+            app:layout_constraintStart_toStartOf="@id/cur_pef_box" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    recycler view -->
+
+    <Button
+        android:id="@+id/stop_timer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:backgroundTint="@color/white"
+        android:text="Stop Timer"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

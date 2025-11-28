@@ -1,14 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TriageFragment">
+    android:background="@color/dark_red"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/child_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="30dp"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:text="Child Name"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/child_dob"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:text="Date of Birth: DD-MM-YYYY "
+        app:layout_constraintTop_toBottomOf="@+id/child_name"
+        app:layout_constraintStart_toStartOf="@+id/child_name" />
+
+    <TextView
+        android:id="@+id/child_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:text="(Age years old)"
+        app:layout_constraintTop_toBottomOf="@+id/child_name"
+        app:layout_constraintStart_toEndOf="@+id/child_dob" />
+
+    <TextView
+        android:id="@+id/child_notes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:text="Notes: "
+        app:layout_constraintTop_toBottomOf="@+id/child_dob"
+        app:layout_constraintStart_toStartOf="@+id/child_dob" />
+
+    <CheckBox
+        android:id="@+id/flag1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginHorizontal="30dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:background="@drawable/smalled_rounded_edges_background"
+        android:backgroundTint="@color/white"
+        android:button="@null"
+        android:drawableEnd="@drawable/custom_checkbox"
+        android:text="Can't speak full sentences"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:checked="false"
+        app:layout_constraintTop_toBottomOf="@id/child_notes"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <CheckBox
+        android:id="@+id/flag2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="30dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:background="@drawable/smalled_rounded_edges_background"
+        android:backgroundTint="@color/white"
+        android:button="@null"
+        android:drawableEnd="@drawable/custom_checkbox"
+        android:text="Chest pulling in"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:checked="false"
+        app:layout_constraintTop_toBottomOf="@id/flag1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <CheckBox
+        android:id="@+id/flag3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="30dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:background="@drawable/smalled_rounded_edges_background"
+        android:backgroundTint="@color/white"
+        android:button="@null"
+        android:drawableEnd="@drawable/custom_checkbox"
+        android:text="Blue/gray lips/nails"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:checked="false"
+        app:layout_constraintTop_toBottomOf="@id/flag2"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/submit_triage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:text="Submit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flag3"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
