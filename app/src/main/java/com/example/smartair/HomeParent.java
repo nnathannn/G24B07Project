@@ -29,11 +29,11 @@ public class HomeParent extends AppCompatActivity {
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String user;
     String parentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -91,6 +91,8 @@ public class HomeParent extends AppCompatActivity {
             return false;
         });
 
+        checkRole();
+
 //        EdgeToEdge.enable(this);
 //        setContentView(R.layout.activity_home_parent);
 //        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -109,4 +111,24 @@ public class HomeParent extends AppCompatActivity {
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
+    private void checkRole() {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+        myref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child("parent-users").hasChild(parentId)) {
+                    user = "parent";
+                } else if (snapshot.child("child-users").hasChild(parentId)) {
+                    user = "child";
+                } else {
+                    user = "provider";
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }
