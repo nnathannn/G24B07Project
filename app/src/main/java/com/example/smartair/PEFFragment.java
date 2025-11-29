@@ -38,6 +38,8 @@ public class PEFFragment extends Fragment {
     private EditText inputPEF;
     private Button submitPEF;
     private String childID;
+    private int totalSnapshot;
+    private int loadedSnapshot;
 
     public PEFFragment() {
         // Required empty public constructor
@@ -56,7 +58,7 @@ public class PEFFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-        
+
         childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         inputPEF = view.findViewById(R.id.submit_pef_box);
         submitPEF = view.findViewById(R.id.submit_pef_button);
@@ -68,22 +70,40 @@ public class PEFFragment extends Fragment {
     }
 
     private void fetchData() {
-        DatabaseReference ref = db.getReference("zone");
+        DatabaseReference ref = db.getReference("child-zones").child(childID);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Zone item = dataSnapshot.getValue(Zone.class);
-                    if (item != null) list.add(item);
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String zoneID = ds.getKey();
+
+                        db.getReference("zone").child(zoneID)
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot zoneSnapshot) {
+                                if (zoneSnapshot.exists()) {
+                                    Zone zone = zoneSnapshot.getValue(Zone.class);
+                                    if (zone != null) {
+                                        list.add(0, zone);
+                                    }
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(getContext(), "Failed to get zones: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 }
-                Collections.reverse(list); // Show most recent items first
-                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Failed to fetch data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Failed to get zones: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -52,15 +52,18 @@ public class PEFAdapter extends RecyclerView.Adapter<PEFAdapter.PEFViewHolder> {
         double curPB = zone.getCurPB();
         String status = zone.getStatus();
         int percent = (int) (pef / curPB * 100);
+
         holder.date.setText(newDate);
         holder.PB.setText("PB: " + curPB);
         holder.count.setText("PEF: " + pef);
         holder.percent.setText(percent + "%");
         if (status.equals("Green")) {
-            holder.cardView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#48D718")));;
-        } else if (status.equals("Yellow")) {
+            holder.cardView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#48D718")));
+        }
+        else if (status.equals("Yellow")) {
             holder.cardView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F4C945")));
-        } else {
+        }
+        else {
             holder.cardView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EC3131")));
         }
     }
