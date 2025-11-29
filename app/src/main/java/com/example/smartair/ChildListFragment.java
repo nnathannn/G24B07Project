@@ -95,8 +95,8 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
                 for (String childId : childIds) {
                     if (dataSnapshot.hasChild(childId)) {
                         DataSnapshot childNode = dataSnapshot.child(childId);
-                        if (childNode.hasChild("username")) {
-                            String childName = childNode.child("username").getValue(String.class);
+                        if (childNode.hasChild("name")) {
+                            String childName = childNode.child("name").getValue(String.class);
                             if (childName != null) {
                                 childList.add(childName);
                             }

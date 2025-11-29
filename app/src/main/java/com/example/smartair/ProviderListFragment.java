@@ -138,7 +138,6 @@ public class ProviderListFragment extends Fragment implements ProviderAdapter.On
         fragmentTransaction.replace(R.id.providerListContainer, fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
-        Toast.makeText(getContext(), "[debugging] Clicked: " + clickedString.first + " " + clickedString.second, Toast.LENGTH_LONG).show();
     }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
