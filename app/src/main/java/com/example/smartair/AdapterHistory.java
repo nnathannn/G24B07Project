@@ -15,7 +15,7 @@ public class AdapterHistory extends ItemAdapter {
     }
 
     public static class HistoryViewHolder extends ItemViewHolder {
-        TextView name, date, field1, field2, field3;
+        TextView name, date, field1, field2;
 
         public HistoryViewHolder(@NonNull View view) {
             super(view);
@@ -23,13 +23,11 @@ public class AdapterHistory extends ItemAdapter {
             this.date = view.findViewById(R.id.HistoryDataDate);
             this.field1 = view.findViewById(R.id.HistoryDataField1);
             this.field2 = view.findViewById(R.id.HistoryDataField2);
-            this.field3 = view.findViewById(R.id.HistoryDataField3);
         }
     }
 
     public static class HistoryItem extends Item {
         String field1, field2;
-        String type;
 
         public HistoryItem(String name, String date, String field1, String field2) {
             super(name, date);
