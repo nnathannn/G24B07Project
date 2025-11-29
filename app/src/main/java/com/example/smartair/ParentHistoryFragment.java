@@ -19,11 +19,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
@@ -33,7 +32,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class ParentHistoryFragment extends Fragment {
 
@@ -43,10 +41,11 @@ public class ParentHistoryFragment extends Fragment {
     private List<Item> itemList;
     private ItemAdapter itemAdapter;
     private DatabaseReference myref = MainActivity.db.getReference();
-    private Map<String, String> childrenNames = new HashMap<>();
-    private List<String> nameSelection = new ArrayList<>();
+    private Map<String, String> idToName, nameToId;
+    private List<String> filters, nameSelection;
     private LocalDate date;
     private Button applyFilter, resetFilter, startDate, endDate;
+    private String user;
 
 
     public ParentHistoryFragment() {
@@ -56,8 +55,12 @@ public class ParentHistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        List<String> filters = Arrays.asList("Zones", "Triggers", "Symptoms", "Triages", "Medicines");
+        idToName = new HashMap<>();
+        nameToId = new HashMap<>();
+        nameSelection = new ArrayList<>();
+        filters = new ArrayList<>();
+
+        //        filters = Arrays.asList("Zones", "Triggers", "Symptoms", "Triages", "Medicines");
         filterAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, filters);
         filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -68,8 +71,8 @@ public class ParentHistoryFragment extends Fragment {
         itemAdapter = new AdapterHistory(itemList);
 
         date = LocalDate.now().plusDays(1);
+        setupAllData();
 
-        getChildrenNames();
         return inflater.inflate(R.layout.fragment_parent_history, container, false);
     }
 
@@ -93,11 +96,24 @@ public class ParentHistoryFragment extends Fragment {
         endDate = view.findViewById(R.id.HistoryEndDate);
 
 
+        childspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+               if (user == "provider" && position != 0) { getChildFilters(nameSelection.get(position)); }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         applyFilter.setOnClickListener(v -> {
             String filter = spinner.getSelectedItem().toString();
             String start = startDate.getText().toString();
             String end = endDate.getText().toString();
             String child = childspinner.getSelectedItem().toString();
+            if (child == "All Children") { child = null; }
+            changeAdapter(filter, start, end, child);
         });
         resetFilter.setOnClickListener(v -> {
             spinner.setSelection(0);
@@ -109,35 +125,42 @@ public class ParentHistoryFragment extends Fragment {
         endDate.setOnClickListener(v -> showDatePicker(v));
     }
 
-    private void changeAdapter(String type, String start, String end) {
-        String path;
-        switch (type) {
-            case "Symptoms":
-                path = "symptoms";
-                break;
-            case "Triggers":
-                path = "triggers";
-                break;
-            case "Zones":
-                path = "zone";
-                break;
-            case "Triages":
-                path = "triage";
-                break;
-            case "Medicines":
-                path = "medicineLogs";
-                break;
-            default:
-                path = "medicineLogs";
-        }
-        getData(path, start, end);
+    private void setupAllData() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+        myref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child("parent-users").hasChild(uid)) {
+                    user = "parent";
+                    filters = Arrays.asList("Zones", "Triages", "Rescue", "Controller");
+                } else if (snapshot.child("child-users").hasChild(uid)) {
+                    user = "child";
+                } else {
+                    user = "provider";
+                }
+                getChildrenIds();
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
-    private void getChildrenNames() {
+    private void getChildrenIds() {
         List<String> children = new ArrayList<>();
+        DatabaseReference parentRef = null;
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference parentRef = myref.child("parent-users").child(uid).child("child-ids");
+        switch (user) {
+            case "parent":
+                parentRef = myref.child("parent-users").child(uid).child("child-ids");
+                break;
+            case "provider":
+                parentRef = myref.child("provider-users").child(uid).child("access");
+                break;
+        }
         parentRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -159,20 +182,22 @@ public class ParentHistoryFragment extends Fragment {
         childRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                childrenNames.clear();
+                idToName.clear();
+                nameToId.clear();
                 nameSelection.clear();
                 for (String id : ids) {
-                    childrenNames.put(id, dataSnapshot.child(id).child("name").getValue(String.class));
+                    idToName.put(id, dataSnapshot.child(id).child("name").getValue(String.class));
+                    nameToId.put(dataSnapshot.child(id).child("name").getValue(String.class), id);
                 }
 
-                nameSelection.addAll(childrenNames.values());
-                if (childrenNames.isEmpty()) {
+                nameSelection.addAll(idToName.values());
+
+                if (idToName.isEmpty()) {
                     nameSelection.add(0, "No children yet");
-                } else {
-                    nameSelection.add(0, "All Children");
                 }
+
                 childrenAdapter.notifyDataSetChanged();
-                changeAdapter("Zones", "2000-01-01", date.toString());
+                getData("Zones", "2000-01-01", date.toString(), nameSelection.get(0));
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -181,32 +206,34 @@ public class ParentHistoryFragment extends Fragment {
         });
     }
 
-    private void showDatePicker(View v) {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    date = date.withYear(year).withMonth(month + 1).withDayOfMonth(dayOfMonth);
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-                    Button b = (Button) v;
-                    b.setText(date.format(formatter));
-                },
-                date.getYear(),
-                date.getMonthValue() - 1,
-                date.getDayOfMonth());
-        datePickerDialog.show();
+    private String getPath(String type) {
+        String path;
+        switch (type) {
+            case "Zones":
+                return "zone";
+            case "Triages":
+                return "triage";
+            case "Rescue":
+                return "medicineLogs";
+            case "Controller":
+                return "medicineLogs";
+            default:
+                return "zone";
+        }
     }
 
-    private void getAllId(String path, String start, String end) {
-
-    }
-
-    private void getData(String path, String start, String end) {
+    private void getData(String type, String start, String end, String child) {
+        String path = getPath(type);
         DatabaseReference childRef = myref.child(path);
         childRef.orderByChild("date").startAt(start).endAt(end).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 itemList.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    if (childrenNames.containsKey(dataSnapshot.child("child-id").getValue(String.class))) {
+                    if (child == null & idToName.containsKey(dataSnapshot.child("child-id").getValue(String.class))) {
+                        AdapterHistory.HistoryItem item = createItem(dataSnapshot, type);
+                        itemList.add(item);
+                    } else if (dataSnapshot.child("child-id").getValue(String.class).equals(child)) {
                         AdapterHistory.HistoryItem item = createItem(dataSnapshot, path);
                         itemList.add(item);
                     }
@@ -223,31 +250,67 @@ public class ParentHistoryFragment extends Fragment {
 
     private AdapterHistory.HistoryItem createItem(DataSnapshot snapshot, String type) {
         switch (type) {
-            case "symptoms":
-                Symptom symptom = snapshot.getValue(Symptom.class);
-                String author = symptom.getParent() ? "Parent" : "Child";
-                String situation = (symptom.getTriageId() == null) ? "Daily Check-in" : "Triage";
-                return new AdapterHistory.HistoryItem(childrenNames.get(symptom.getChildId()), symptom.getDate(),
-                        symptom.getName(), author, situation, type);
-            case "zone":
+            case "Zones":
                 Zone zone = snapshot.getValue(Zone.class);
-                return new AdapterHistory.HistoryItem(childrenNames.get(zone.getChildId()), zone.getDate(),
-                        String.valueOf(zone.getCount()), String.valueOf(zone.getCurPB()), zone.getStatus(), type);
-            case "triage":
+                return new AdapterHistory.HistoryItem(zone.getDate().split("T")[0],
+                        String.valueOf(zone.getCount()), String.valueOf(zone.getCurPB()), zone.getStatus());
+            case "Triages":
                 Triage triage = snapshot.getValue(Triage.class);
                 List<String> symptoms = triage.getSymptomList();
                 String emergency = triage.getEmergency() ? "Emergency" : "Non-Emergency";
                 String rescue = "1";
-                return new AdapterHistory.HistoryItem(childrenNames.get(triage.getChildId()), triage.getDate(),
-                        symptoms.get(0), emergency, rescue, type);
-            case "medicineLogs":
+                return new AdapterHistory.HistoryItem(triage.getDate().split("T")[0],
+                        symptoms.get(0), emergency, rescue);
+            case "Controller":
+            case "Rescue":
                 MedicineLog medicine = snapshot.getValue(MedicineLog.class);
-                String name = medicine.getRescue() ? "Rescue" : "Controller";
-                String status = "better";
-                return new AdapterHistory.HistoryItem(childrenNames.get(medicine.getChildId()), medicine.getDate(),
-                        name, String.valueOf(medicine.getDose()), status, type);
+                String pre = medicine.getPreStatus();
+                return new AdapterHistory.HistoryItem(medicine.getDate().split("T")[0],
+                        name, String.valueOf(medicine.getDose()), status);
             default:
                 return null;
         }
     };
+
+    private void showDatePicker(View v) {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    date = date.withYear(year).withMonth(month + 1).withDayOfMonth(dayOfMonth);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+                    Button b = (Button) v;
+                    b.setText(date.format(formatter));
+                },
+                date.getYear(),
+                date.getMonthValue() - 1,
+                date.getDayOfMonth());
+        datePickerDialog.show();
+    }
+
+    private void getChildFilters(String child) {
+        filters.clear();
+        switch (user) {
+            case "parent":
+                filters.addAll(Arrays.asList("Zones", "Triages", "Medicines"));
+                break;
+            case "provider":
+                DatabaseReference parentRef = myref.child("provider-users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("access").child(nameToId.get(child));
+                parentRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            if (childSnapshot.getValue(Boolean.class)) {
+                                filters.add(childSnapshot.getKey());
+                            }
+                        }
+                        filterAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(getContext(), "Failed to load filters: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+        }
+    }
 }

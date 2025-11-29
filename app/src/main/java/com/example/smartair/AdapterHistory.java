@@ -28,15 +28,13 @@ public class AdapterHistory extends ItemAdapter {
     }
 
     public static class HistoryItem extends Item {
-        String field1, field2, field3;
+        String field1, field2;
         String type;
 
-        public HistoryItem(String name, String date, String field1, String field2, String field3, String type) {
+        public HistoryItem(String name, String date, String field1, String field2) {
             super(name, date);
             this.field1 = field1;
             this.field2 = field2;
-            this.field3 = field3;
-            this.type = type;
         }
 
     }
@@ -57,7 +55,6 @@ public class AdapterHistory extends ItemAdapter {
         historyHolder.date.setText(historyItem.getDate());
         historyHolder.field1.setText(historyItem.field1);
         historyHolder.field2.setText(historyItem.field2);
-        historyHolder.field3.setText(historyItem.field3);
     }
 
 //    static void fetchData(ItemAdapter itemAdapter, String path) {
