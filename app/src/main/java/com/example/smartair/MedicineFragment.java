@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -186,7 +187,7 @@ public class MedicineFragment extends Fragment {
         int postCheck = Integer.parseInt(postCheckStr);
         boolean isRescue = "Rescue".equals(medicineType);
 
-        String childId = "placeholder_child_id"; // TODO: Replace with actual child ID
+        String childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         MedicineLog log = new MedicineLog(dateTime.toString(), childId, preCheck, postCheck, isRescue, dose, "");
 
