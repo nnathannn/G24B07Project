@@ -40,7 +40,7 @@ public class MedicineFragment extends Fragment {
     private Button buttonSubmit, buttonDate, buttonTime;
     private MaterialButton buttonRescue, buttonController;
     private EditText editDoseCount, editPreCheck, editPostCheck;
-    private String medicineType;
+    private String medicineType, uid;
     private LocalDateTime dateTime;
 
     // RecyclerView components
@@ -61,6 +61,7 @@ public class MedicineFragment extends Fragment {
 
         initializeViews(view);
         databaseReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("medicineLogs");
+        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         dateTime = LocalDateTime.now();
         setupClickListeners();
         setupRecyclerView();
@@ -92,9 +93,11 @@ public class MedicineFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 medicineLogList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    MedicineLog log = snapshot.getValue(MedicineLog.class);
-                    if (log != null) {
-                        medicineLogList.add(log);
+                    if ( uid == snapshot.child("child-id").getValue()) {
+                        MedicineLog log = snapshot.getValue(MedicineLog.class);
+                        if (log != null) {
+                            medicineLogList.add(log);
+                        }
                     }
                 }
                 Collections.reverse(medicineLogList);
@@ -187,9 +190,8 @@ public class MedicineFragment extends Fragment {
         int postCheck = Integer.parseInt(postCheckStr);
         boolean isRescue = "Rescue".equals(medicineType);
 
-        String childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        MedicineLog log = new MedicineLog(dateTime.toString(), childId, preCheck, postCheck, isRescue, dose, "");
+        MedicineLog log = new MedicineLog(dateTime.toString(), uid, preCheck, postCheck, isRescue, dose, "");
 
         databaseReference.push().setValue(log)
                 .addOnSuccessListener(aVoid -> {
