@@ -2,6 +2,8 @@ package com.example.smartair;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -24,19 +26,50 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class HomeParent extends AppCompatActivity {
-    String temporary_parent_id = "parent1";
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
     String user;
+    String parentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        parentId = getUser().getUid();
 
-        replaceFragment(new HomeParentFragment());
+        if (savedInstanceState == null) {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                    .child("parent-users").child(parentId)
+                    .child("first-run");
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    boolean isFirstRun = snapshot.getValue(Boolean.class);
+                    if (snapshot.getValue(Boolean.class) == null) {
+                        isFirstRun = true;
+                    }
+                    if (isFirstRun) {
+                        Bundle args = new Bundle();
+                        args.putString("role", "parent");
+                        View parentBottomNavView = findViewById(R.id.parentBottomNavView);
+                        parentBottomNavView.setVisibility(View.INVISIBLE);
+                        OnboardingFragment fragment = new OnboardingFragment();
+                        fragment.setArguments(args);
+                        replaceFragment(fragment);
+                        ref.setValue(false);
+                    } else {
+                        replaceFragment(new HomeParentFragment());
+                    }
+                }
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(HomeParent.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    replaceFragment(new HomeParentFragment());
+                }
+            });
+        }
+
+//        replaceFragment(new HomeParentFragment());
 
         binding.parentBottomNavView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -79,14 +112,13 @@ public class HomeParent extends AppCompatActivity {
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
     private void checkRole() {
-        String uid = getUser().getUid();
         DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
         myref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child("parent-users").hasChild(uid)) {
+                if (snapshot.child("parent-users").hasChild(parentId)) {
                     user = "parent";
-                } else if (snapshot.child("child-users").hasChild(uid)) {
+                } else if (snapshot.child("child-users").hasChild(parentId)) {
                     user = "child";
                 } else {
                     user = "provider";
