@@ -6,13 +6,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.fragment.NavHostFragment;
 
 public class TriageDecisionCardFragment extends Fragment {
-    private Button emergencyCallButton;
-    private Button homeStepsButton;
+    private String triageID;
+    private String childID;
+    private AppCompatButton emergencyCallButton;
+    private AppCompatButton homeStepsButton;
 
     public TriageDecisionCardFragment() {
         // Required empty public constructor
@@ -20,20 +23,41 @@ public class TriageDecisionCardFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_triage_decision_card, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_triage_decision_card, container, false);
 
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        if (getArguments() != null) {
+            triageID = getArguments().getString("triageID");
+            childID = getArguments().getString("childID");
+        }
 
-        // redirect to each page when choosing the button
+        // navigate to each page when choosing the button
         emergencyCallButton = view.findViewById(R.id.emergency_call_button);
-        emergencyCallButton.setOnClickListener(v -> { loadFragment(new TriageEmergencyFragment()); });
+        emergencyCallButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TriageEmergencyFragment fragment = new TriageEmergencyFragment();
+                Bundle args = new Bundle();
+                args.putString("triageID", triageID);
+                fragment.setArguments(args);
+                loadFragment(fragment);
+            }
+        });
 
         homeStepsButton = view.findViewById(R.id.home_steps_button);
-        homeStepsButton.setOnClickListener(v -> { loadFragment(new TriageHomeStepsFragment()); });
-    }
+        homeStepsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TriageHomeStepsFragment fragment = new TriageHomeStepsFragment();
+                Bundle args = new Bundle();
+                args.putString("triageID", triageID);
+                args.putString("childID", childID);
+                fragment.setArguments(args);
+                loadFragment(fragment);
+            }
+        });
 
+        return view;
+    }
     private void loadFragment(Fragment fragment) {
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmentContainerView, fragment);

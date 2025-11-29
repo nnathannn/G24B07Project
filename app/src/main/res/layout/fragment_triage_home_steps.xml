@@ -41,7 +41,7 @@
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="@id/timer"
         app:layout_constraintTop_toBottomOf="@id/timer_number"
-        app:layout_constraintBottom_toTopOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/steps_recycler">
 
         <TextView
             android:id="@+id/cur_pef_title"
@@ -67,19 +67,31 @@
             app:layout_constraintStart_toStartOf="@id/cur_pef_box" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--    recycler view -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/steps_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cur_pef_box"
+        app:layout_constraintBottom_toTopOf="@id/stop_timer_button"
+        tools:listitem="@layout/item_home_steps"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/stop_timer_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
+        android:padding="15dp"
+        android:background="@drawable/smalled_rounded_edges_background"
         android:backgroundTint="@color/white"
         android:text="Stop Timer"
         android:textSize="20sp"
         android:textColor="@color/black"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="parent"
+        android:textAllCaps="false"
+        app:layout_constraintTop_toBottomOf="@+id/steps_recycler"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

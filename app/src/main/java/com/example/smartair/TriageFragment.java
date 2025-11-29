@@ -81,7 +81,7 @@ public class TriageFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String name = snapshot.child("username").getValue(String.class);
+                    String name = snapshot.child("name").getValue(String.class);
                     String dob = snapshot.child("DOB").getValue(String.class);
                     String notes = snapshot.child("notes").getValue(String.class);
                     if (name != null && dob != null && notes != null) {
@@ -133,12 +133,12 @@ public class TriageFragment extends Fragment {
                 if (flag3.isChecked()) symptomList.add(flag3.getText().toString());
 
                 List<String> pefList = new ArrayList<>();
-                List<String> rescueList = new ArrayList<>();
 
                 DatabaseReference triageRef = db.getReference("triage");
                 DatabaseReference childTriagesRef = db.getReference("child-triages").child(childID);
-                Triage triage = new Triage(childID, LocalDateTime.now().toString(), flag3.isChecked(),
-                        "", symptomList, pefList, rescueList);
+                Triage triage = new Triage(childID, LocalDateTime.now().toString(),
+                        flag3.isChecked() ? "Emergency" : "",
+                        "", symptomList, pefList, 0);
                 DatabaseReference triageRefPush = triageRef.push();
                 triageRefPush.setValue(triage).addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -185,11 +185,18 @@ public class TriageFragment extends Fragment {
                 }
 
                 // navigate to another fragment
-                if (flag3.isChecked()) loadFragment(new TriageEmergencyFragment());
+                if (flag3.isChecked()) {
+                    TriageEmergencyFragment fragment = new TriageEmergencyFragment();
+                    Bundle args = new Bundle();
+                    args.putString("triageID", triageRefPush.getKey());
+                    fragment.setArguments(args);
+                    loadFragment(fragment);
+                }
                 else {
                     TriageInputPEFRescueFragment fragment = new TriageInputPEFRescueFragment();
                     Bundle args = new Bundle();
-                    args.putString("triageId", triageRefPush.getKey());
+                    args.putString("triageID", triageRefPush.getKey());
+                    args.putString("childID", childID);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }

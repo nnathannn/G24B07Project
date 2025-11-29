@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -9,7 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,22 +23,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TriageHomeStepsFragment extends Fragment {
     private FirebaseDatabase db;
-    private static final long START_TIME_IN_MILLIS = 600000;
-    private TextView timer;
-    private CountDownTimer countDownTimer;
-    private long timeLeftInMillis = START_TIME_IN_MILLIS;
-    private Button stopTimerButton;
-    private List<String> steps;
-    private int currentIndex = 0;
-    private TextView stepTitle;
-    private TextView stepDesc;
-    private Button nextStepButton;
     private String childID;
+    private String triageID;
+    private TextView timer;
+    private Button stopTimerButton;
+    private CountDownTimer countDownTimer;
+    private long timeLeftInMillis = 600000; // 10 minutes
+    private List<String> steps;
+    private RecyclerView recyclerView;
+    private TriageHomeStepsAdapter adapter;
 
     public TriageHomeStepsFragment() {
         // Required empty public constructor
@@ -48,34 +52,46 @@ public class TriageHomeStepsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_triage_home_steps, container, false);
     }
 
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            childID = getArguments().getString("childID");
+            triageID = getArguments().getString("triageID");
+        }
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-        timer = view.findViewById(R.id.timer);
 
-        // update later : retrieve childID from the user
-        childID = "11";
+        db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
+        timer = view.findViewById(R.id.timer_number);
+        steps = new ArrayList<>();
+        adapter = new TriageHomeStepsAdapter(steps);
+        recyclerView = view.findViewById(R.id.steps_recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
 
         // start the timer
         startTimer();
 
         // set background and each zone steps
-        fetchPB(view);
-
-        // set the steps
-        stepTitle = view.findViewById(R.id.step_title);
-        stepDesc = view.findViewById(R.id.step_desc);
-        nextStepButton = view.findViewById(R.id.next_step_button);
-        updateStep();
-        nextStepButton.setOnClickListener(v -> updateStep());
+        getPB(view);
 
         // stop button timer
         stopTimerButton = view.findViewById(R.id.stop_timer_button);
-        stopTimerButton.setOnClickListener(v -> {
-            if (countDownTimer != null) {
-                countDownTimer.cancel();
-                //
+        stopTimerButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onClick(View v) {
+                if (countDownTimer != null) {
+                    // stop the timer
+                    countDownTimer.cancel();
+                    // update triage end time and navigate to home page
+                    DatabaseReference triageRef = db.getReference("triage").child(triageID);
+                    triageRef.child("endDate").setValue(LocalDateTime.now().toString());
+                    loadFragment(new HomePageFragment());
+                }
             }
         });
     }
@@ -88,10 +104,15 @@ public class TriageHomeStepsFragment extends Fragment {
                 updateTimer();
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onFinish() {
                 // Timer has finished
                 timer.setText("00:00:00");
+                // update triage end time and navigate to emergency
+                DatabaseReference triageRef = db.getReference("triage").child(triageID);
+                triageRef.child("endDate").setValue(LocalDateTime.now().toString());
+                loadFragment(new TriageEmergencyFragment());
             }
         }.start();
     }
@@ -101,20 +122,25 @@ public class TriageHomeStepsFragment extends Fragment {
         int seconds = (int) (timeLeftInMillis / 1000) % 60;
         int milliseconds = (int) (timeLeftInMillis % 1000);
 
-        String timeLeftFormatted = String.format("%02d:%02d%02d", minutes, seconds, milliseconds);
+        String timeLeftFormatted = String.format("%02d:%02d:%02d", minutes, seconds, milliseconds);
         timer.setText(timeLeftFormatted);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (countDownTimer != null) { countDownTimer.cancel(); }
+        if (countDownTimer != null) countDownTimer.cancel();
     }
 
-    private void fetchPB(View view) {
-        DatabaseReference ref = db.getReference("child-users")
-                .child(childID)
-                .child("PB");
+    private void loadFragment(Fragment fragment) {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmentContainerView, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void getPB(View view) {
+        DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -132,13 +158,16 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void getPEF(View view, Double curPB) {
-        DatabaseReference ref = db.getReference("pef").child("pef-id");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference ref = db.getReference("pef");
+        ref.orderByChild("childID").equalTo(childID).limitToLast(1)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    Double curPEF = snapshot.getValue(PEF.class).getCount();
-                    if (curPEF != null) updateBackground(view, curPB, curPEF);
+                    for (DataSnapshot pefSnapshot : snapshot.getChildren()) {
+                        PEF curPEF = pefSnapshot.getValue(PEF.class);
+                        if (curPEF != null) setZone(view, curPB, curPEF.getCount());
+                    }
                 }
             }
 
@@ -149,7 +178,7 @@ public class TriageHomeStepsFragment extends Fragment {
         });
     }
 
-    private void updateBackground(View view, Double curPB, Double curPEF) {
+    private void setZone(View view, Double curPB, Double curPEF) {
         int percentage = (int) (curPEF * 100 / curPB);
         String color = percentage >= 80 ? "green" : (percentage >= 50 ? "yellow" : "red");
 
@@ -159,36 +188,37 @@ public class TriageHomeStepsFragment extends Fragment {
         View curPEFBox = view.findViewById(R.id.cur_pef_box);
         switch (color) {
             case "green":
-                curPEFBox.setBackgroundColor(R.color.green);
-                steps = new ArrayList<>();
-                // add steps based on zone
+                curPEFBox.setBackgroundColor(getResources().getColor(R.color.green));
+                steps.add("Stop all physical activity immediately and sit upright in a comfortable, slightly forward-leaning position.");
+                steps.add("Give 1–2 puffs of the rescue inhaler using a spacer. Takes slow, deep breaths with each puff.");
+                steps.add("Take slow breathing through the nose and out through pursed lips for 1–2 minutes.");
+                steps.add("Loosen tight clothing around the neck or chest (jackets, scarves, heavy sweaters).");
+                steps.add("Sip warm water to help relax the chest and throat muscles.");
+                adapter.notifyDataSetChanged();
                 break;
             case "yellow":
-                curPEFBox.setBackgroundColor(R.color.pale_yellow);
-                steps = new ArrayList<>();
-                // add steps based on zone
+                curPEFBox.setBackgroundColor(getResources().getColor(R.color.pale_yellow));
+                steps.add("Sit upright; do not lie down (lying can make breathing worse).");
+                steps.add("Give 2–4 puffs of the rescue inhaler using a spacer.");
+                steps.add("Take slow, controlled breaths after each puff.");
+                steps.add("Keep the environment calm and quiet. Fright or crying worsens breathing. Anxiety also increases the severity of an asthma attack");
+                steps.add("Remove all possible triggers — move to clean air, away from strong smells, smoke, or cold wind.");
+                steps.add("Sip warm fluids (avoid cold drinks during attacks).");
+                adapter.notifyDataSetChanged();
                 break;
             case "red":
-                curPEFBox.setBackgroundColor(R.color.red);
-                steps = new ArrayList<>();
-                // add steps based on zone
+                curPEFBox.setBackgroundColor(getResources().getColor(R.color.red));
+                steps.add("Immediately stop all activity and sit upright, leaning slightly forward.");
+                steps.add("Give 4–6 puffs of the rescue inhaler through a spacer.");
+                steps.add("After each puff, take slow, deep breaths if possible.");
+                steps.add("Keep calm and comfortable. Panic increases airway constriction.");
+                steps.add("If possible, move into a quiet, warm, well-ventilated area. Avoid cold air or sudden temperature changes.");
+                steps.add("If the attack does not improve within 10–15 minutes, give another 4 puffs of the rescue medicine.");
+                adapter.notifyDataSetChanged();
                 break;
             default:
-                curPEFBox.setBackgroundColor(R.color.white);
-                steps = new ArrayList<>();
+                curPEFBox.setBackgroundColor(getResources().getColor(R.color.white));
                 break;
-        }
-    }
-
-    private void updateStep() {
-        if (!steps.isEmpty() && currentIndex < steps.size()) {
-            String currentStep = steps.get(currentIndex);
-            stepTitle.setText("Step " + (currentIndex + 1));
-            stepDesc.setText(currentStep);
-            currentIndex++;
-            // if the timer still running and not pushing the stop button,
-            // return to step 1 after finishing every step
-            currentIndex %= steps.size();
         }
     }
 }
