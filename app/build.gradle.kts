@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.recyclerview)
     implementation(libs.fragment)
+    implementation(libs.viewpager2)
     implementation(libs.gms)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
