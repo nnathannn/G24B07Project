@@ -70,7 +70,7 @@ public class ParentHistoryFragment extends Fragment {
         itemList = new ArrayList<>();
         itemAdapter = new AdapterHistory(itemList);
 
-        date = LocalDate.now().plusDays(1);
+        date = LocalDate.now();
         setupAllData();
 
         return inflater.inflate(R.layout.fragment_parent_history, container, false);
@@ -229,6 +229,7 @@ public class ParentHistoryFragment extends Fragment {
     private void getData(String type, String start, String end, String child) {
         String path = getPath(type);
         DatabaseReference childRef = myref.child(path);
+        end += "T23:59:59.999999";
         childRef.orderByChild("date").startAt(start).endAt(end).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -303,10 +304,11 @@ public class ParentHistoryFragment extends Fragment {
     private void showDatePicker(View v) {
         DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
                 (view, year, month, dayOfMonth) -> {
-                    date = date.withYear(year).withMonth(month + 1).withDayOfMonth(dayOfMonth);
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+                    LocalDate inputDate = date.withYear(year).withMonth(month + 1).withDayOfMonth(dayOfMonth);
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
                     Button b = (Button) v;
-                    b.setText(date.format(formatter));
+//                    b.setText(date.format(formatter));
+                    b.setText(inputDate.toString());
                 },
                 date.getYear(),
                 date.getMonthValue() - 1,
