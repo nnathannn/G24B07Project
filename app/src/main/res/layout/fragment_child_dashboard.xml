@@ -41,6 +41,23 @@
             app:layout_constraintTop_toBottomOf="@id/textChildName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+        
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonDailyCheckIn"
+            android:layout_width="174dp"
+            android:layout_height="32dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="34dp"
+            android:text="Input Daily Check In"
+            android:textSize="14sp"
+            android:textColor="@color/another_blue"
+            android:textStyle="bold"
+            android:backgroundTint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:cornerRadius="10dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -78,7 +95,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="112dp"
                 android:layout_margin="24dp"
-                android:backgroundTint="@color/green"
+                android:backgroundTint="#A9A9A9"
                 app:layout_constraintStart_toStartOf="@id/constraintLayout"
                 app:layout_constraintEnd_toEndOf="@id/constraintLayout"
                 app:layout_constraintTop_toTopOf="@id/constraintLayout"
@@ -103,10 +120,10 @@
                         />
 
                     <TextView
-                        android:id="@+id/zonePercentage"
+                        android:id="@+id/textZonePercentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="80%"
+                        android:text="N/A"
                         android:textColor="@color/white"
                         android:textSize="60sp"
                         android:textStyle="bold"
@@ -116,16 +133,16 @@
                         app:layout_constraintStart_toStartOf="@id/constraintZone"/>
 
                     <TextView
-                        android:id="@+id/zoneData"
+                        android:id="@+id/textZoneData"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PB:\nPEF:"
+                        android:text="PB: N/A\nPEF: N/A"
                         android:textSize="14sp"
                         android:textColor="@color/white"
-                        android:layout_marginStart="45dp"
-                        app:layout_constraintTop_toTopOf="@id/zonePercentage"
-                        app:layout_constraintBottom_toBottomOf="@id/zonePercentage"
-                        app:layout_constraintStart_toEndOf="@id/zonePercentage"
+                        android:layout_marginStart="-125dp"
+                        app:layout_constraintTop_toTopOf="@id/textZonePercentage"
+                        app:layout_constraintBottom_toBottomOf="@id/textZonePercentage"
+                        app:layout_constraintStart_toEndOf="@id/constraintZone"
                         />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -283,8 +300,62 @@
                 app:layout_constraintEnd_toStartOf="@id/switchDays"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
+        
     </com.google.android.material.card.MaterialCardView>
+    
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonLogin"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="4dp"
+        android:backgroundTint="@color/another_blue"
+        android:text="Login"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:layout_constraintStart_toStartOf="@id/cardView"
+        app:layout_constraintEnd_toStartOf="@id/buttonEdit"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:cornerRadius="10dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonEdit"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
+        android:backgroundTint="@color/white"
+        android:text="Edit"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/another_blue"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:layout_constraintStart_toEndOf="@id/buttonLogin"
+        app:layout_constraintEnd_toStartOf="@id/buttonDelete"
+        app:layout_constraintTop_toTopOf="@id/buttonLogin"
+        app:cornerRadius="10dp"
+        app:strokeColor="@color/another_blue"
+        app:strokeWidth="2dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonDelete"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:backgroundTint="@color/white"
+        android:text="Delete"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/another_blue"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:layout_constraintStart_toEndOf="@id/buttonEdit"
+        app:layout_constraintEnd_toEndOf="@id/cardView"
+        app:layout_constraintTop_toTopOf="@id/buttonLogin"
+        app:cornerRadius="10dp"
+        app:strokeColor="@color/another_blue"
+        app:strokeWidth="2dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
