@@ -1,7 +1,5 @@
 package com.example.smartair;
 
-import static com.firebase.ui.auth.data.model.User.getUser;
-
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;

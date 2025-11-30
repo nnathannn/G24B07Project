@@ -63,7 +63,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<ProviderAdapter.Provid
             childRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String childName = dataSnapshot.child(providerString.second).child("username").getValue(String.class);
+                    String childName = dataSnapshot.child(providerString.second).child("name").getValue(String.class);
                     childNameText.setText(childName);
                 }
                 @Override

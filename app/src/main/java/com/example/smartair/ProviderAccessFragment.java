@@ -1,5 +1,8 @@
 package com.example.smartair;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -38,7 +43,6 @@ public class ProviderAccessFragment extends Fragment {
             providerId = getArguments().getString(ARG_PARAM1);
             childId = getArguments().getString(ARG_PARAM2);
         }
-        Toast.makeText(getContext(), "Provider: " + providerId + " Child: " + childId, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -62,6 +66,54 @@ public class ProviderAccessFragment extends Fragment {
         childRef = FirebaseDatabase.getInstance().getReference("child-users").child(childId).child("provider").child(providerId);
         providerRef = FirebaseDatabase.getInstance().getReference("provider-users").child(providerId).child("access").child(childId);
         listenInitialValues();
+
+        Button revoke = view.findViewById(R.id.revokeProviderButton);
+
+        revoke.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showRevokeConfirmationDialog();
+            }
+        });
+        ImageButton download = view.findViewById(R.id.downloadButton);
+        download.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Download button clicked", Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void showRevokeConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Confirm Revocation")
+                .setMessage("Are you sure you want to permanently revoke access? This action cannot be undone.")
+                .setCancelable(false);
+        builder.setPositiveButton("Revoke", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                Map<String, Object> updates = new HashMap<>();
+                @SuppressLint("RestrictedApi") String childPath = childRef.getPath().toString();
+                updates.put(childPath, null);
+                @SuppressLint("RestrictedApi") String providerPath = providerRef.getPath().toString();
+                updates.put(providerPath, null);
+                ref.updateChildren(updates)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Log.d("FirebaseUpdate", "Provider access revoked successfully");
+                            }
+                            else {
+                                Toast.makeText(getContext(), "Update failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                            getParentFragmentManager().popBackStack();
+                        });
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(getContext(), "Revocation cancelled.", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void listenInitialValues() {
@@ -92,9 +144,9 @@ public class ProviderAccessFragment extends Fragment {
             Switch currentSwitch = entry.getValue();
             currentSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 Map<String, Object> updates = new HashMap<>();
-                String childPath = childRef.child(key).getPath().toString();
+                @SuppressLint("RestrictedApi") String childPath = childRef.child(key).getPath().toString();
                 updates.put(childPath, isChecked);
-                String providerPath = providerRef.child(key).getPath().toString();
+                @SuppressLint("RestrictedApi") String providerPath = providerRef.child(key).getPath().toString();
                 updates.put(providerPath, isChecked);
                 ref.updateChildren(updates)
                         .addOnCompleteListener(task -> {
