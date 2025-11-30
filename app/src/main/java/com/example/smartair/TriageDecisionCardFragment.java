@@ -13,7 +13,6 @@ import androidx.navigation.fragment.NavHostFragment;
 
 public class TriageDecisionCardFragment extends Fragment {
     private String triageID;
-    private String childID;
     private AppCompatButton emergencyCallButton;
     private AppCompatButton homeStepsButton;
 
@@ -27,7 +26,6 @@ public class TriageDecisionCardFragment extends Fragment {
 
         if (getArguments() != null) {
             triageID = getArguments().getString("triageID");
-            childID = getArguments().getString("childID");
         }
 
         // navigate to each page when choosing the button
@@ -50,7 +48,6 @@ public class TriageDecisionCardFragment extends Fragment {
                 TriageHomeStepsFragment fragment = new TriageHomeStepsFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
-                args.putString("childID", childID);
                 fragment.setArguments(args);
                 loadFragment(fragment);
             }

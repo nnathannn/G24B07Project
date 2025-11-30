@@ -17,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,8 +61,7 @@ public class TriageFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        // update later : retrieve childID from the user
-        childID = "11";
+        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // set up child data
         fetchChildData(view);
@@ -78,6 +78,7 @@ public class TriageFragment extends Fragment {
 
         DatabaseReference ref = db.getReference("child-users").child(childID);
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -196,7 +197,6 @@ public class TriageFragment extends Fragment {
                     TriageInputPEFRescueFragment fragment = new TriageInputPEFRescueFragment();
                     Bundle args = new Bundle();
                     args.putString("triageID", triageRefPush.getKey());
-                    args.putString("childID", childID);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }

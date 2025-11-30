@@ -1,11 +1,14 @@
 package com.example.smartair;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -17,7 +20,7 @@ import java.time.LocalDateTime;
 public class TriageEmergencyFragment extends Fragment {
     private FirebaseDatabase db;
     private String triageID;
-    private Button homeButton;
+    private AppCompatButton homeButton;
 
     public TriageEmergencyFragment() {
         // Required empty public constructor
@@ -35,6 +38,7 @@ public class TriageEmergencyFragment extends Fragment {
         if (getArguments() != null) triageID = getArguments().getString("triageID");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 

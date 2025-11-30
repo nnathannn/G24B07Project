@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Step n"
-            android:textSize="20sp"
+            android:textSize="25sp"
             android:textStyle="bold"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@id/step"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et nulla laoreet, blandit sapien volutpat, venenatis risus. Sed suscipit libero condimentum finibus aliquet. Ut aliquet ut est eget scelerisque. "
-            android:textSize="15sp"
+            android:textSize="20sp"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="@id/step"
             app:layout_constraintTop_toBottomOf="@id/step_title"/>

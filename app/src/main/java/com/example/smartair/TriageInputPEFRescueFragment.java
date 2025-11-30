@@ -1,7 +1,9 @@
 package com.example.smartair;
 
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -13,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -37,7 +40,6 @@ public class TriageInputPEFRescueFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            childID = getArguments().getString("childID");
             triageID = getArguments().getString("triageID");
         }
     }
@@ -55,11 +57,14 @@ public class TriageInputPEFRescueFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
+        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         inputRescue = view.findViewById(R.id.input_rescue_box);
         inputPEF = view.findViewById(R.id.input_pef_box);
         submit = view.findViewById(R.id.submit_rescue_pef);
 
         submit.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
                 // update rescue and pef in triage
@@ -117,7 +122,6 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 // navigate to decision card fragment
                 TriageDecisionCardFragment fragment = new TriageDecisionCardFragment();
                 Bundle args = new Bundle();
-                args.putString("childID", childID);
                 args.putString("triageID", triageID);
                 fragment.setArguments(args);
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
