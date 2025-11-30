@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChildDashboardFragment extends Fragment {
 
@@ -40,6 +42,7 @@ public class ChildDashboardFragment extends Fragment {
     private LocalDateTime currDate;
     private MaterialButton buttonDailyCheckIn, buttonLogin, buttonEdit, buttonDelete;
     private MaterialCardView cardZone;
+    private List<MedicineLog> medicineLogs;
 
     @Nullable
     @Override
@@ -52,8 +55,17 @@ public class ChildDashboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (getArguments() != null) {
+            uid = getArguments().getString("uid");
+        }
+
+        if (uid == null || uid.isEmpty()) {
+            Toast.makeText(getContext(), "Child ID not found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         currDate = LocalDateTime.now();
+        medicineLogs = new ArrayList<>();
         initializeView(view);
         fetchDataFromDatabase();
     }
@@ -74,8 +86,13 @@ public class ChildDashboardFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    // Set name, DOB, and Notes
     private void fetchDataFromDatabase() {
+        fetchChildData();
+        fetchZoneData();
+//        fetchRescueData();
+    }
+
+    private void fetchChildData() {
         DatabaseReference childReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-users").child(uid);
         childReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -99,6 +116,9 @@ public class ChildDashboardFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void fetchZoneData() {
         DatabaseReference childZoneReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-zones").child(uid);
         childZoneReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -107,8 +127,10 @@ public class ChildDashboardFragment extends Fragment {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     newest = dataSnapshot;
                 }
-                String zoneKey = newest.getKey();
-                setZoneValues(zoneKey);
+                if (newest != null) {
+                    String zoneKey = newest.getKey();
+                    setZoneValues(zoneKey);
+                }
             }
 
 
@@ -125,21 +147,23 @@ public class ChildDashboardFragment extends Fragment {
         zoneReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String curPB = snapshot.child("curPB").getValue(String.class);
-                String count = snapshot.child("count").getValue(String.class);
+                Integer curPB = snapshot.child("curPB").getValue(Integer.class);
+                Integer count = snapshot.child("count").getValue(Integer.class);
                 String status = snapshot.child("status").getValue(String.class);
-                LocalDateTime date = LocalDateTime.parse(snapshot.child("date").getValue(String.class));
+                String dateStr = snapshot.child("date").getValue(String.class);
+
+                if(curPB == null || count == null || status == null || dateStr == null) return;
+
+                LocalDateTime date = LocalDateTime.parse(dateStr);
                 if (date.getDayOfYear() == currDate.getDayOfYear() && date.getYear() == currDate.getYear()) {
                     textZoneData.setText("PB: " + curPB + "\nPEF: " + count);
-                    int percentage = (int) (Double.parseDouble(count) / Double.parseDouble(curPB) * 100);
+                    int percentage = (int) ((count * 100) / curPB);
                     textZonePercentage.setText(percentage + "%");
-                    if (status.equals("green")) {
+                    if (status.equals("Green")) {
                         cardZone.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#31D219")));
-                    }
-                    else if (status.equals("yellow")) {
+                    } else if (status.equals("Yellow")) {
                         cardZone.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F4C945")));
-                    }
-                    else {
+                    } else {
                         cardZone.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EC3131")));
                     }
                 }
@@ -150,14 +174,32 @@ public class ChildDashboardFragment extends Fragment {
         });
     }
 
+//    private void fetchRescueData() {
+//        DatabaseReference medicineReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-medicineLogs").child(uid);
+//        medicineReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                medicineLogs.clear();
+//                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+//                    MedicineLog medicineLog = dataSnapshot.getValue(MedicineLog.class);
+//                    if (medicineLog != null) {
+//                        medicineLogs.add(medicineLog);
+//                    }
+//                }
+//            }
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//            }
+//        });
+//    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int calculateAge(String dob) {
         if (dob == null || dob.isEmpty()) {
             return 0;
         }
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-            LocalDate birthDate = LocalDate.parse(dob, formatter);
+            LocalDate birthDate = LocalDate.parse(dob);
             return Period.between(birthDate, LocalDate.now()).getYears();
         } catch (DateTimeParseException e) {
             return 0;
