@@ -29,7 +29,6 @@ public class HomeParent extends AppCompatActivity {
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
-    String user;
     String parentId;
 
     @Override
@@ -91,15 +90,6 @@ public class HomeParent extends AppCompatActivity {
             return false;
         });
 
-        checkRole();
-
-//        EdgeToEdge.enable(this);
-//        setContentView(R.layout.activity_home_parent);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
     }
 
     private void replaceFragment(Fragment fragment){
@@ -111,24 +101,4 @@ public class HomeParent extends AppCompatActivity {
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
-    private void checkRole() {
-        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
-        myref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child("parent-users").hasChild(parentId)) {
-                    user = "parent";
-                } else if (snapshot.child("child-users").hasChild(parentId)) {
-                    user = "child";
-                } else {
-                    user = "provider";
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
 }
