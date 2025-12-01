@@ -40,7 +40,6 @@ public class HomeProvider extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         providerId = getUser().getUid();
-
         if (savedInstanceState == null) {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                     .child("provider-users").child(providerId)
@@ -70,8 +69,6 @@ public class HomeProvider extends AppCompatActivity {
                 }
             });
         }
-
-//        replaceFragment(new HomeProviderFragment());
 
         binding.providerNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
