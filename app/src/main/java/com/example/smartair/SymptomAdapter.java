@@ -40,12 +40,19 @@ public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomV
             cardViewSymptom = itemView.findViewById(R.id.cardViewSymptom);
             textSymptom = itemView.findViewById(R.id.textSymptom);
             textSymptomDate = itemView.findViewById(R.id.textSymptomDate);
+
             recycler = itemView.findViewById(R.id.recyclerViewSymptoms);
+            triggerList = new ArrayList<>();
+
             recycler.setHasFixedSize(true);
-            recycler.setLayoutManager(new LinearLayoutManager(itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
+            recycler.setLayoutManager(
+                    new LinearLayoutManager(itemView.getContext(),
+                            LinearLayoutManager.HORIZONTAL, false));
             adapter = new TriggerListAdapter(triggerList);
             recycler.setAdapter(adapter);
         }
+
+
     }
 
     @NonNull
@@ -61,24 +68,40 @@ public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomV
     public void onBindViewHolder(@NonNull SymptomAdapter.SymptomViewHolder holder, int position) {
         Symptom symptom = symptoms.get(position);
 
-        holder.triggerList.addAll(symptom.getTriggerList());
+        // triggers
+        holder.triggerList.clear();
+        if (symptom.getTriggerList() != null) {
+            holder.triggerList.addAll(symptom.getTriggerList());
+        }
         holder.adapter.notifyDataSetChanged();
 
-        //symptom text
+        // symptom name
         holder.textSymptom.setText(symptom.getName());
 
-        //date text
-        LocalDateTime dateTime = LocalDateTime.parse(symptom.getDate());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
-        holder.textSymptomDate.setText(dateTime.format(formatter));
+        // ---- formatted date ----
+        String rawDate = symptom.getDate();
+        String displayDate = rawDate;   // fallback
 
+        if (rawDate != null) {
+            try {
+                LocalDateTime dt = LocalDateTime.parse(rawDate); // parses ISO string
+                DateTimeFormatter fmt =
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                displayDate = dt.format(fmt);
+            } catch (Exception ignored) {
+                // if some old row is just "2025-11-19", we just show raw string
+            }
+        }
 
-
-
-
+        holder.textSymptomDate.setText(displayDate);
     }
 
-@Override
+
+
+
+
+
+    @Override
 public int getItemCount() {
         return symptoms != null ? symptoms.size() : 0;
         }

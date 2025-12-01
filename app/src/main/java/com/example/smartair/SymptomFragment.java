@@ -1,9 +1,13 @@
 package com.example.smartair;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,77 +15,198 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SymptomFragment extends Fragment {
 
+    // UI
     private AutoCompleteTextView symptomDropdown;
-    //private AutoCompleteTextView triggerDropdown;
-    private RecyclerView recycler;
+    private MaterialAutoCompleteTextView triggerDropdown;
+    private RecyclerView recyclerViewSymptoms;
+    private Button buttonDate, buttonTime, buttonSubmit;
 
+    // Firebase
+    private DatabaseReference databaseReference;   // /symptom
+    private String uid;
+
+    // Recycler
+    private List<Symptom> symptomLogList;
+    private SymptomAdapter symptomAdapter;
+
+    // dropdown data
+    private final String[] symptomTypes = new String[]{
+            "Night waking",
+            "Activity limits",
+            "Cough",
+            "Wheezing",
+            "Can't speak full sentences",
+            "Chest pulling in",
+            "Blue/gray lips/nails"
+    };
+
+    private final String[] triggers = new String[]{
+            "Exercise",
+            "Cold air",
+            "Dust",
+            "Pets",
+            "Smoke",
+            "Illness",
+            "Strong odors"
+    };
+
+    // which triggers are selected
+    private boolean[] triggerSelected;
+
+    // date & time
+    private LocalDateTime dateTime;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // 1) Inflate your fragment layout
         return inflater.inflate(R.layout.fragment_symptom, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recycler = view.findViewById(R.id.recyclerViewSymptoms);
-        List<Symptom> symptomList = new ArrayList<>();
-        SymptomAdapter adapter = new SymptomAdapter(symptomList);
-        recycler.setAdapter(adapter);
-        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        //Fetch data
+        initializeViews(view);
 
-        // 2) Find the two dropdown views from the inflated layout
+        databaseReference = FirebaseDatabase
+                .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
+                .getReference("symptom");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            uid = user.getUid();
+        } else {
+            uid = "11"; // fallback for testing
+        }
+
+        dateTime = LocalDateTime.now();
+
+        setupRecyclerView();
+        setupClickListeners();
+
+        // keep this ON now:
+        fetchDataFromFirebase();
+    }
+
+
+    // ---------------------- view binding ----------------------
+
+    private void initializeViews(View view) {
+        recyclerViewSymptoms = view.findViewById(R.id.recyclerViewSymptoms);
+
         symptomDropdown = view.findViewById(R.id.filledExposed);
-        //triggerDropdown = view.findViewById(R.id.filledExposed2);
+        triggerDropdown = view.findViewById(R.id.filledExposed2);
 
-        // 3) Data for the first dropdown (Symptom type)
-        String[] symptomTypes = new String[]{
-                "Night waking",
-                "Activity limits",
-                "Cough",
-                "Wheezing"
-        };
+        buttonDate = view.findViewById(R.id.buttonDate);
+        buttonTime = view.findViewById(R.id.buttonTime);
+        buttonSubmit = view.findViewById(R.id.buttonSymptomSubmit);
+    }
 
-        ArrayAdapter<String> symptomAdapter = new ArrayAdapter<>(
-                requireContext(),                   // context
-                R.layout.item_symptom_dropdown,     // row layout for each item
-                symptomTypes                        // data
-        );
-        symptomDropdown.setAdapter(symptomAdapter);
+    // ---------------------- RecyclerView ----------------------
 
-        String[] triggers = new String[]{
-                "Exercise",
-                "Cold air",
-                "Dust",
-                "Pets",
-                "Smoke",
-                "Illness",
-                "Strong odors"
-        };
+    private void setupRecyclerView() {
+        recyclerViewSymptoms.setLayoutManager(new LinearLayoutManager(getContext()));
+        symptomLogList = new ArrayList<>();
+        symptomAdapter = new SymptomAdapter(symptomLogList);
+        recyclerViewSymptoms.setAdapter(symptomAdapter);
+    }
 
-        ArrayAdapter<String> triggerAdapter = new ArrayAdapter<>(
+    // ---------------------- Firebase read ----------------------
+
+    private void fetchDataFromFirebase() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                symptomLogList.clear();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    try {
+                        // 1) Safely get child-id in ANY format (string / number)
+                        Object childIdObj = snapshot.child("child-id").getValue();
+                        if (childIdObj == null) {
+                            continue; // skip weird row
+                        }
+                        String childIdStr = String.valueOf(childIdObj);
+
+                        // 2) Only take logs that match current uid
+                        if (!childIdStr.equals(uid)) {
+                            continue;
+                        }
+
+                        // 3) Try to parse into Symptom class
+                        Symptom log = snapshot.getValue(Symptom.class);
+                        if (log == null) {
+                            continue;
+                        }
+
+                        // 4) Optional: make sure triggerList is at least an empty list
+                        if (log.getTriggerList() == null) {
+                            log.setTriggerList(new ArrayList<>());
+                        }
+
+                        symptomLogList.add(log);
+
+                    } catch (Exception e) {
+                        // If a row has unexpected types / missing fields,
+                        // just skip that row instead of crashing the whole screen.
+                        e.printStackTrace(); // (Logcat only, won't crash)
+                    }
+                }
+
+                // newest first
+                Collections.reverse(symptomLogList);
+                symptomAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(),
+                        "Failed to load symptom logs.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // ---------------------- Click listeners ----------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void setupClickListeners() {
+        // Symptom dropdown (single-select)
+        ArrayAdapter<String> symptomAdapterDrop = new ArrayAdapter<>(
                 requireContext(),
                 R.layout.item_symptom_dropdown,
-                triggers
+                symptomTypes
         );
-        //triggerDropdown.setAdapter(triggerAdapter);
+        symptomDropdown.setAdapter(symptomAdapterDrop);
 
         symptomDropdown.setOnItemClickListener((parent, v, position, id) -> {
             String selected = symptomDropdown.getText().toString();
@@ -90,13 +215,166 @@ public class SymptomFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         });
 
-//        triggerDropdown.setOnItemClickListener((parent, v, position, id) -> {
-//            String selected = triggerDropdown.getText().toString();
-//            Toast.makeText(requireContext(),
-//                    "Trigger: " + selected,
-//                    Toast.LENGTH_SHORT).show();
-//        });
+        // Trigger dropdown (multi-select)
+        setupTriggerDropdown();
+
+        // Date & Time pickers
+        buttonDate.setOnClickListener(v -> showDatePicker());
+        buttonTime.setOnClickListener(v -> showTimePicker());
+
+        // Submit to Firebase
+        buttonSubmit.setOnClickListener(v -> submitSymptomLog());
     }
 
+    // ---------------------- Trigger multi-select ----------------------
 
+    private void setupTriggerDropdown() {
+        triggerSelected = new boolean[triggers.length];
+
+        final ArrayAdapter<String> triggerAdapter = new ArrayAdapter<String>(
+                requireContext(),
+                R.layout.item_trigger_dropdown,
+                R.id.text,
+                triggers
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                View row = convertView;
+                if (row == null) {
+                    row = LayoutInflater.from(getContext())
+                            .inflate(R.layout.item_trigger_dropdown, parent, false);
+                }
+
+                TextView text = row.findViewById(R.id.text);
+                CheckBox checkBox = row.findViewById(R.id.checkBox);
+
+                text.setText(triggers[position]);
+
+                checkBox.setOnCheckedChangeListener(null);
+                checkBox.setChecked(triggerSelected[position]);
+
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    triggerSelected[position] = isChecked;
+                    updateTriggerText();
+                });
+
+                return row;
+            }
+        };
+
+        triggerDropdown.setAdapter(triggerAdapter);
+
+        triggerDropdown.setOnItemClickListener((parent, v, position, id) -> {
+            triggerSelected[position] = !triggerSelected[position];
+            triggerAdapter.notifyDataSetChanged();
+            updateTriggerText();
+            triggerDropdown.showDropDown();
+        });
+    }
+
+    private void updateTriggerText() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < triggers.length; i++) {
+            if (triggerSelected[i]) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(triggers[i]);
+            }
+        }
+        triggerDropdown.setText(sb.toString(), false);
+        triggerDropdown.setSelection(triggerDropdown.getText().length());
+    }
+
+    private List<String> getSelectedTriggers() {
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < triggers.length; i++) {
+            if (triggerSelected[i]) {
+                list.add(triggers[i]);
+            }
+        }
+        return list;
+    }
+
+    // ---------------------- Date & Time pickers ----------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void showDatePicker() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    dateTime = dateTime.withYear(year)
+                            .withMonth(month + 1)
+                            .withDayOfMonth(dayOfMonth);
+
+                    DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern("MMM d, yyyy");
+                    buttonDate.setText(dateTime.format(formatter));
+                },
+                dateTime.getYear(),
+                dateTime.getMonthValue() - 1,
+                dateTime.getDayOfMonth()
+        );
+        datePickerDialog.show();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void showTimePicker() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                requireContext(),
+                (view, hourOfDay, minute) -> {
+                    dateTime = dateTime.withHour(hourOfDay).withMinute(minute);
+
+                    DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern("h:mm a");
+                    buttonTime.setText(dateTime.format(formatter));
+                },
+                dateTime.getHour(),
+                dateTime.getMinute(),
+                false
+        );
+        timePickerDialog.show();
+    }
+
+    // ---------------------- Submit to Firebase ----------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void submitSymptomLog() {
+        String symptomName = symptomDropdown.getText().toString().trim();
+        List<String> selectedTriggers = getSelectedTriggers();
+
+        if (symptomName.isEmpty()) {
+            Toast.makeText(getContext(),
+                    "Please choose a symptom",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (selectedTriggers.isEmpty()) {
+            Toast.makeText(getContext(),
+                    "Please choose at least one trigger",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean parentFlag = false;   // this screen is for the child
+        String triageId = "";
+
+        Symptom log = new Symptom(
+                uid,                    // id → mapped to child-id by Item
+                dateTime.toString(),    // ISO date string
+                parentFlag,
+                symptomName,
+                triageId,
+                selectedTriggers
+        );
+
+        databaseReference.push().setValue(log)
+                .addOnSuccessListener(aVoid ->
+                        Toast.makeText(getContext(),
+                                "Symptom saved!",
+                                Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(),
+                                "Failed to save: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
+    }
 }
