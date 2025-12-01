@@ -8,12 +8,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
@@ -32,13 +34,15 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChildDashboardFragment extends Fragment {
 
     private SwitchMaterial switchDays;
-    private String uid;
-    private TextView textChildName, textChildData, textZonePercentage, textZoneData, timeLastRescue, countWeeklyRescue;
+    private String uid; // child Id
+    private TextView textChildName, textChildDOB, textChildNotes, textZonePercentage, textZonePB, textZonePEF, timeLastRescue, countWeeklyRescue;
     private LocalDateTime currDate;
     private MaterialButton buttonDailyCheckIn, buttonLogin, buttonEdit, buttonDelete;
     private MaterialCardView cardZone;
@@ -59,8 +63,6 @@ public class ChildDashboardFragment extends Fragment {
             uid = getArguments().getString("uid");
         }
 
-        Log.d("DEBUG_DASHBOARD", "Child ID: " + uid);
-
         if (uid == null || uid.isEmpty()) {
             Toast.makeText(getContext(), "Child ID not found.", Toast.LENGTH_SHORT).show();
             return;
@@ -69,22 +71,26 @@ public class ChildDashboardFragment extends Fragment {
         currDate = LocalDateTime.now();
         medicineLogs = new ArrayList<>();
         initializeView(view);
+        setupClickListeners();
         fetchDataFromDatabase();
     }
 
+
     private void initializeView(View view) {
         textChildName = view.findViewById(R.id.textChildName);
-        textChildData = view.findViewById(R.id.textChildData);
+        textChildDOB = view.findViewById(R.id.textChildDOB);
+        textChildNotes = view.findViewById(R.id.textChildNotes);
         textZonePercentage = view.findViewById(R.id.textZonePercentage);
-        textZoneData = view.findViewById(R.id.textZoneData);
+        textZonePB = view.findViewById(R.id.textZonePB);
+        textZonePEF = view.findViewById(R.id.textZonePEF);
         timeLastRescue = view.findViewById(R.id.timeLastRescue);
         countWeeklyRescue = view.findViewById(R.id.countWeeklyRescue);
         switchDays = view.findViewById(R.id.switchDays);
         buttonDailyCheckIn = view.findViewById(R.id.buttonDailyCheckIn);
         buttonLogin = view.findViewById(R.id.buttonLogin);
         buttonEdit = view.findViewById(R.id.buttonEdit);
-        buttonDelete = view.findViewById(R.id.buttonDelete);
         cardZone = view.findViewById(R.id.cardZone);
+        buttonDelete = view.findViewById(R.id.buttonDelete);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -104,12 +110,14 @@ public class ChildDashboardFragment extends Fragment {
                     String name = snapshot.child("name").getValue(String.class);
                     String dob = snapshot.child("DOB").getValue(String.class);
                     String notes = snapshot.child("notes").getValue(String.class);
+                    Integer PB = snapshot.child("PB").getValue(Integer.class);
 
                     textChildName.setText(name);
 
                     int age = calculateAge(dob);
-                    String childData = "Date of Birth: " + dob + " (" + age + " years old)\nNotes: " + notes;
-                    textChildData.setText(childData);
+                    textChildDOB.setText("Date of Birth: " + dob + " (" + age + " years old)");
+                    textChildNotes.setText("Notes: " + notes);
+                    textZonePB.setText("PB: " + PB);
                 } else {
                     Toast.makeText(getContext(), "Child data not found.", Toast.LENGTH_SHORT).show();
                 }
@@ -156,11 +164,11 @@ public class ChildDashboardFragment extends Fragment {
                 String status = snapshot.child("status").getValue(String.class);
                 String dateStr = snapshot.child("date").getValue(String.class);
 
-                if(curPB == null || count == null || status == null || dateStr == null) return;
+                if(count == null || status == null || dateStr == null) return;
 
                 LocalDateTime date = LocalDateTime.parse(dateStr);
                 if (date.getDayOfYear() == currDate.getDayOfYear() && date.getYear() == currDate.getYear()) {
-                    textZoneData.setText("PB: " + curPB + "\nPEF: " + count);
+                    textZonePEF.setText("PEF: " + count);
                     int percentage = (int) ((count * 100) / curPB);
                     textZonePercentage.setText(percentage + "%");
                     if (status.equals("Green")) {
@@ -249,7 +257,6 @@ public class ChildDashboardFragment extends Fragment {
         countWeeklyRescue.setText(String.valueOf(rescueCount));
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int calculateAge(String dob) {
         if (dob == null || dob.isEmpty()) {
@@ -263,4 +270,70 @@ public class ChildDashboardFragment extends Fragment {
         }
     }
 
+    private void setupClickListeners() {
+        buttonDelete.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                    .setTitle("Confirm Deletion")
+                    .setMessage("Are you sure you want to delete this child?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        String parent_id = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        DatabaseReference childRef = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
+                                .getReference("parent-users")
+                                .child(parent_id)
+                                .child("child-ids")
+                                .child(uid);
+                        childRef.removeValue()
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(getContext(), "Child deleted successfully.", Toast.LENGTH_SHORT).show();
+                                    requireActivity().getSupportFragmentManager().popBackStack();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(getContext(), "Failed to delete child: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .setNegativeButton("No", null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        });
+        buttonEdit.setOnClickListener(v -> {
+            View editView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_child, null);
+            EditText editPB = editView.findViewById(R.id.editPB);
+            EditText editNotes = editView.findViewById(R.id.editNotes);
+            DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users").child(uid);
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Edit Child Information")
+                    .setView(editView)
+                    .setPositiveButton("Save", (dialog, which) -> {
+                        String newPB = editPB.getText().toString();
+                        String newNotes = editNotes.getText().toString();
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        if (!newPB.isEmpty()) {
+                            try {
+                                int newPBValue = Integer.parseInt(newPB);
+                                childUpdates.put("PB", newPBValue);
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getContext(), "Invalid PB value.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        if (!newNotes.isEmpty()) {
+                            childUpdates.put("notes", newNotes);
+                            textChildNotes.setText("Notes: " + newNotes);
+                        }
+                        if (!childUpdates.isEmpty()) {
+                            childRef.updateChildren(childUpdates)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Child information updated successfully.", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(getContext(), "Failed to update child information: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                        else {
+                            Toast.makeText(getContext(), "No changes made.", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+    }
 }
