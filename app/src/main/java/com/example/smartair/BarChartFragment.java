@@ -93,3 +93,20 @@ public class BarChartFragment extends Fragment {
         barChart.invalidate();
     }
 }
+
+/*
+Example of use:
+ArrayList<String> labels = new ArrayList<>();
+ArrayList<Float> values = new ArrayList<>();
+
+labels.add("2025-12-01");
+labels.add("2025-12-02");
+values.add(3f);
+values.add(7f);
+
+BarChartFragment fragment = BarChartFragment.newInstance("Medicine Logs", labels, values);
+getSupportFragmentManager()
+        .beginTransaction()
+        .replace(R.id.fragment_container, fragment)
+        .commit();
+*/
