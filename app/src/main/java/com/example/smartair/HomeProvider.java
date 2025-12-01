@@ -17,11 +17,13 @@ import com.example.smartair.databinding.ActivityHomeProviderBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class HomeProvider extends AppCompatActivity {
+public class HomeProvider extends AppCompatActivity implements UIDProvider {
 
     ActivityHomeProviderBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String providerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,8 @@ public class HomeProvider extends AppCompatActivity {
         fragmentTransaction.replace(R.id.providerHomeLayout, fragment);
         fragmentTransaction.commit();
     }
+
+    public String getUid() { return providerId; }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 }

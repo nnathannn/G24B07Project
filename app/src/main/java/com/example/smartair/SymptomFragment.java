@@ -93,12 +93,7 @@ public class SymptomFragment extends Fragment {
                 .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
                 .getReference("symptom");
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            uid = user.getUid();
-        } else {
-            uid = "11";
-        }
+        uid = ((UIDProvider) getActivity()).getUid();
 
         dateTime = LocalDateTime.now();
 
@@ -320,6 +315,7 @@ public class SymptomFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void submitSymptomLog() {
+
         String symptomName = symptomDropdown.getText().toString().trim();
         List<String> selectedTriggers = getSelectedTriggers();
 

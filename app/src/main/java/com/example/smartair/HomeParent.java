@@ -17,7 +17,7 @@ import com.example.smartair.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class HomeParent extends AppCompatActivity {
+public class HomeParent extends AppCompatActivity implements UIDProvider {
     String temporary_parent_id = "parent1";
     ActivityHomeParentBinding binding;
 
@@ -66,6 +66,8 @@ public class HomeParent extends AppCompatActivity {
         fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
         fragmentTransaction.commit();
     }
+
+    public String getUid() { return temporary_parent_id; }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 

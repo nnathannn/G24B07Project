@@ -10,15 +10,17 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class ChildActivity extends AppCompatActivity {
+public class ChildActivity extends AppCompatActivity implements UIDProvider {
 
-    private FirebaseAuth myauth = FirebaseAuth.getInstance();
+    private String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home_child);
+
+        checkUser();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeChildFragment());
@@ -32,5 +34,13 @@ public class ChildActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
+    public String getUid() { return uid; }
+
+    public void checkUser() {
+        if (getIntent().getStringExtra("childId") == null) {
+            uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            uid = getIntent().getStringExtra("childId");
+        }
+    }
 }
