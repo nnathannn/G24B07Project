@@ -27,8 +27,6 @@ import java.time.temporal.ChronoUnit;
 
 public class ProviderChildDashboard extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -80,17 +78,27 @@ public class ProviderChildDashboard extends Fragment {
         childref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int i = 0;
                 title.setText(snapshot.child("name").getValue(String.class) + "'s Data");
                 DataSnapshot accessNode = snapshot.child("provider").child(providerId);
                 for (DataSnapshot child : accessNode.getChildren()) {
                     if (child.getKey().equals("summary") && child.getValue(Boolean.class)) {
                         addSummary(snapshot.child("schedule").child("start-date").getValue(String.class),
                                 snapshot.child("schedule").child("end-date").getValue(String.class));
+                        i++;
                     } else if (child.getKey().equals("trigger") && child.getValue(Boolean.class)) {
                         addTrigger();
+                        i++;
                     } else if (child.getKey().equals("controller") && child.getValue(Boolean.class)) {
 
+                        i++;
                     }
+                }
+                if ( i == 0) {
+                    TextView noData = new TextView(getContext());
+                    noData.setText("No data shared");
+                    noData.setTextSize(24);
+                    layout.addView(noData, 0);
                 }
             }
 
@@ -118,7 +126,7 @@ public class ProviderChildDashboard extends Fragment {
         summaryTitle.setText("Controller Adherence Summary");
         summaryTitle.setTextSize(24);
         summaryTitle.setPadding(0, 16, 0, 0);
-        layout.addView(summaryTitle, 2);
+        layout.addView(summaryTitle, 0);
 
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
@@ -127,15 +135,16 @@ public class ProviderChildDashboard extends Fragment {
         TextView scheduleStart = new TextView(getContext());
         scheduleStart.setText("Start of schedule: " + start);
         scheduleStart.setTextSize(16);
-        layout.addView(scheduleStart, 3);
+        layout.addView(scheduleStart, 1);
 
         TextView scheduleEnd = new TextView(getContext());
         scheduleEnd.setText("End of schedule: " + end);
         scheduleEnd.setTextSize(16);
-        layout.addView(scheduleEnd, 4);
+        layout.addView(scheduleEnd, 2);
 
         TextView adherence = new TextView(getContext());
         adherence.setTextSize(16);
+        layout.addView(adherence, 3);
 
 
         DatabaseReference childref = myref.child("medicineLogs");
@@ -150,7 +159,6 @@ public class ProviderChildDashboard extends Fragment {
                     }
                 }
                 adherence.setText("Adherence: " + (count*100/days) + "%");
-                layout.addView(adherence, 5);
             }
 
             @Override
