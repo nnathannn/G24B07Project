@@ -99,7 +99,7 @@ public class TriageHomeStepsFragment extends Fragment {
                     triageRef.child("endDate").setValue(LocalDateTime.now().toString());
                     // navigate to home page
                     FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragmentContainerView, new HomePageFragment());
+                    transaction.replace(R.id.fragmentContainerView, new HomeChildFragment());
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }

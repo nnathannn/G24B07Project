@@ -54,7 +54,7 @@ public class TriageEmergencyFragment extends Fragment {
         homeButton = view.findViewById(R.id.home_button);
         homeButton.setOnClickListener(v -> {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragmentContainerView, new HomePageFragment());
+            transaction.replace(R.id.fragmentContainerView, new HomeChildFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
