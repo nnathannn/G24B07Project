@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -65,6 +66,43 @@ public class ProviderAccessFragment extends Fragment {
         switchMap.put("summary", summarySwitch);
         childRef = FirebaseDatabase.getInstance().getReference("child-users").child(childId).child("provider").child(providerId);
         providerRef = FirebaseDatabase.getInstance().getReference("provider-users").child(providerId).child("access").child(childId);
+
+        TextView providerName = view.findViewById(R.id.providerAccessName);
+        TextView childName = view.findViewById(R.id.childAccessName);
+        DatabaseReference findChild = FirebaseDatabase.getInstance().getReference("child-users").child(childId);
+        DatabaseReference findProvider = FirebaseDatabase.getInstance().getReference("provider-users").child(providerId);
+
+        findChild.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    childName.setText(snapshot.child("name").getValue(String.class));
+                }
+                else {
+                    Toast.makeText(getContext(), "Child does not exist", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        findProvider.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    providerName.setText(snapshot.child("name").getValue(String.class));
+                } else {
+                    Toast.makeText(getContext(), "Provider does not exist", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
         listenInitialValues();
 
         Button revoke = view.findViewById(R.id.revokeProviderButton);
