@@ -11,8 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class HomeParentFragment extends Fragment {
-    String temporaryParentId = "parent1";
+    String temporaryParentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     public HomeParentFragment() {}
 

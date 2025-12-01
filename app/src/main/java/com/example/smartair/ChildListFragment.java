@@ -129,7 +129,7 @@
                 bundle.putString("uid", clickedId);
                 Fragment fragment = new ChildDashboardFragment();
                 fragment.setArguments(bundle);
-                requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.child_list_fragment_container, fragment).addToBackStack(null).commit();
+                requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.parent_frame_layout, fragment).addToBackStack(null).commit();
             }
         }
     }
