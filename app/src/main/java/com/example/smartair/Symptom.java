@@ -11,7 +11,7 @@ public class Symptom extends Item {
 
     public Symptom() {}
 
-    public Symptom(String id, LocalDateTime startDate, boolean parent, String name,
+    public Symptom(String id, String startDate, boolean parent, String name,
                    String triageId, List<String> triggerList) {
         super(startDate, id);
 
