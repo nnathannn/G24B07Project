@@ -25,18 +25,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class HomeParent extends AppCompatActivity {
+public class HomeParent extends AppCompatActivity implements UIDProvider {
     ActivityHomeParentBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
-    String parentId;
+    String parentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        parentId = getUser().getUid();
 
         if (savedInstanceState == null) {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
@@ -98,6 +97,8 @@ public class HomeParent extends AppCompatActivity {
         fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
         fragmentTransaction.commit();
     }
+
+    public String getUid() { return parentId; }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
