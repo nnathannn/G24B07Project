@@ -34,9 +34,6 @@ public class TriageFragment extends Fragment {
     private FirebaseDatabase db;
     private String childID;
     private TextView childName;
-    private TextView childDOB;
-    private TextView childAge;
-    private TextView childNotes;
     private CheckBox flag1;
     private CheckBox flag2;
     private CheckBox flag3;
@@ -57,19 +54,20 @@ public class TriageFragment extends Fragment {
         childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // set up child data
-        fetchChildData(view);
+        childName = view.findViewById(R.id.child_name);
+        fetchChildData();
 
         // check flags; input symptom, triage, child-symptoms, child-triages; navigate to right page
-        checkFlag(view);
+        flag1 = view.findViewById(R.id.flag1);
+        flag2 = view.findViewById(R.id.flag2);
+        flag3 = view.findViewById(R.id.flag3);
+        submitFlag = view.findViewById(R.id.submit_triage);
+        checkFlag();
 
         return view;
     }
 
-    private void fetchChildData(View view) {
-        childName = view.findViewById(R.id.child_name);
-        childDOB = view.findViewById(R.id.child_dob);
-        childAge = view.findViewById(R.id.child_age);
-
+    private void fetchChildData() {
         DatabaseReference ref = db.getReference("child-users").child(childID);
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -77,16 +75,8 @@ public class TriageFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String name = snapshot.child("name").getValue(String.class);
-                    String dob = snapshot.child("DOB").getValue(String.class);
-                    if (name != null && dob != null) {
+                    if (name != null) {
                         childName.setText(name);
-                        childDOB.setText("Date of Birth: " + dob + " ");
-
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        LocalDate birthDate = LocalDate.parse(dob, formatter);
-                        LocalDate currentDate = LocalDate.now();
-                        int age = Period.between(birthDate, currentDate).getYears();
-                        childAge.setText("(" + age + " years old)");
                     }
                     else {
                         Toast.makeText(getContext(), "Could not find child's data.", Toast.LENGTH_SHORT).show();
@@ -105,12 +95,7 @@ public class TriageFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void checkFlag(View view) {
-        flag1 = view.findViewById(R.id.flag1);
-        flag2 = view.findViewById(R.id.flag2);
-        flag3 = view.findViewById(R.id.flag3);
-        submitFlag = view.findViewById(R.id.submit_triage);
-
+    private void checkFlag() {
         submitFlag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

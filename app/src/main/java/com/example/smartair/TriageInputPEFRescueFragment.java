@@ -90,12 +90,6 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 triageRef.child("pefList").setValue(pefList);
 
                 if (!curPEF.isEmpty()) {
-                    // input current PEF
-                    PEF pef = new PEF(LocalDateTime.now().toString(), childID, Double.parseDouble(curPEF));
-                    db.getReference("pef").push().setValue(pef).addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-
                     // retrieve current PB of the child and input current zone
                     DatabaseReference pb = db.getReference("child-users").child(childID).child("PB");
                     pb.get().addOnSuccessListener(dataSnapshot -> {
