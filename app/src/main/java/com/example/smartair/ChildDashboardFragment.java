@@ -59,6 +59,8 @@ public class ChildDashboardFragment extends Fragment {
             uid = getArguments().getString("uid");
         }
 
+        Log.d("DEBUG_DASHBOARD", "Child ID: " + uid);
+
         if (uid == null || uid.isEmpty()) {
             Toast.makeText(getContext(), "Child ID not found.", Toast.LENGTH_SHORT).show();
             return;
@@ -89,12 +91,13 @@ public class ChildDashboardFragment extends Fragment {
     private void fetchDataFromDatabase() {
         fetchChildData();
         fetchZoneData();
-//        fetchRescueData();
+        fetchRescueData();
     }
 
     private void fetchChildData() {
         DatabaseReference childReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-users").child(uid);
         childReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -145,6 +148,7 @@ public class ChildDashboardFragment extends Fragment {
         if (zoneKey == null) { return; }
         DatabaseReference zoneReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("zone").child(zoneKey);
         zoneReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Integer curPB = snapshot.child("curPB").getValue(Integer.class);
@@ -174,24 +178,77 @@ public class ChildDashboardFragment extends Fragment {
         });
     }
 
-//    private void fetchRescueData() {
-//        DatabaseReference medicineReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-medicineLogs").child(uid);
-//        medicineReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                medicineLogs.clear();
-//                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-//                    MedicineLog medicineLog = dataSnapshot.getValue(MedicineLog.class);
-//                    if (medicineLog != null) {
-//                        medicineLogs.add(medicineLog);
-//                    }
-//                }
-//            }
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//            }
-//        });
-//    }
+    private void fetchRescueData() {
+        DatabaseReference medicineReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("child-medicineLogs").child(uid);
+        medicineReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                medicineLogs.clear();
+                List<String> logKeys = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String key = dataSnapshot.getKey();
+                    logKeys.add(key);
+                }
+                setRescueValues(logKeys);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void setRescueValues(List<String> logKeys) {
+        DatabaseReference medicineRef = FirebaseDatabase.getInstance().getReference("medicineLogs");
+        medicineLogs.clear();
+        for (String key : logKeys) {
+            medicineRef.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    MedicineLog log = snapshot.getValue(MedicineLog.class);
+                    if (log == null) {
+                        return;
+                    }
+                    medicineLogs.add(log);
+                    if (medicineLogs.size() == logKeys.size()) {
+                        processRescueLogs(medicineLogs);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void processRescueLogs(List<MedicineLog> medicineLogs) {
+        LocalDateTime lastDate = null;
+        LocalDateTime startOfLastWeek = currDate.minusDays(currDate.getDayOfWeek().getValue() - 1).minusWeeks(1);
+        int rescueCount = 0;
+        for (MedicineLog medicineLog : medicineLogs) {
+            String dateStr = medicineLog.getDate().substring(0, 16);
+            LocalDateTime date = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+            if (date.isAfter(startOfLastWeek)) {
+                rescueCount++;
+                if (lastDate == null || date.isAfter(lastDate)) {
+                    lastDate = date;
+                }
+            }
+        }
+        if (lastDate != null) {
+            String formattedDate = lastDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy'\n'HH:mm"));
+            timeLastRescue.setText(formattedDate);
+        } else {
+            timeLastRescue.setText("N/A");
+        }
+        countWeeklyRescue.setText(String.valueOf(rescueCount));
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int calculateAge(String dob) {
