@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class ParentSignUpFragment extends Fragment {
@@ -45,7 +46,15 @@ public class ParentSignUpFragment extends Fragment {
                 String emailText = email.getText().toString();
                 String passwordText = password.getText().toString();
                 GetStartedActivity activity = (GetStartedActivity) getActivity();
-                activity.signUp(emailText, passwordText, "parent", nameText);
+                if (nameText.isEmpty() || emailText.isEmpty() || passwordText.isEmpty()) {
+                    Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
+                } else if (!activity.passwordCheck(passwordText)) {
+
+                } else if (!activity.emailCheck(emailText)) {
+
+                } else {
+                    activity.signUp(emailText, passwordText, "parent", nameText);
+                }
             }
         });
 
@@ -64,4 +73,5 @@ public class ParentSignUpFragment extends Fragment {
         fragmentTransaction.replace(R.id.GetStartedContainer, fragment);
         fragmentTransaction.commit();
     }
+
 }
