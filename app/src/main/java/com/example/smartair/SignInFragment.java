@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 public class SignInFragment extends Fragment {
 
@@ -30,31 +33,32 @@ public class SignInFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_child_sign_in, container, false);
+        View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
         EditText user = view.findViewById(R.id.sign_in_user);
         EditText password = view.findViewById(R.id.sign_in_password);
-        CheckBox check = view.findViewById(R.id.sign_in_check);
         Button submit = view.findViewById(R.id.sign_in_submit);
         TextView sign_up = view.findViewById(R.id.sign_up);
+        TextView recovery = view.findViewById(R.id.Recovery);
 
 
-        submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        submit.setOnClickListener(v -> {
                 String userText = user.getText().toString();
                 String passwordText = password.getText().toString();
                 GetStartedActivity activity = (GetStartedActivity) getActivity();
-                activity.signIn(userText, passwordText);
-            }
+                if (userText.isEmpty() || passwordText.isEmpty()) {
+                    Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
+                } else {
+                    activity.signIn(userText, passwordText);
+                }
         });
 
-        sign_up.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                replaceFragment(new RoleSelectionFragment());
-            }
+        sign_up.setOnClickListener(v ->{
+            replaceFragment(new RoleSelectionFragment());
         });
 
+        recovery.setOnClickListener(v -> {
+            replaceFragment(new AccountRecoveryFragment());
+        });
 
         return view;
     }

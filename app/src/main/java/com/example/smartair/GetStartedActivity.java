@@ -1,5 +1,7 @@
 package com.example.smartair;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -59,9 +61,6 @@ public class GetStartedActivity extends AppCompatActivity {
                             logUser(role, name);
                             Intent i = new Intent(GetStartedActivity.this, SignIn.class);
                             startActivity(i);
-                        } else {
-                            Toast.makeText(GetStartedActivity.this, "Authentication failed. Email/Username and Password does not match our records.", Toast.LENGTH_LONG).show();
-                            System.out.println("Error sign up");
                         }
                     }
                 });
@@ -77,7 +76,7 @@ public class GetStartedActivity extends AppCompatActivity {
                             Intent i = new Intent(GetStartedActivity.this, SignIn.class);
                             startActivity(i);
                         } else {
-                            System.out.println("Error sign in");
+                            Toast.makeText(GetStartedActivity.this, "Email/Username and Password does not match our records.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -106,5 +105,23 @@ public class GetStartedActivity extends AppCompatActivity {
             return user + "@g24b07project.examplefakedomain";
         }
 
+    }
+    public boolean passwordCheck(String password) {
+        if (password.length() < 8) {
+            Toast.makeText(GetStartedActivity.this, "Password must be 8 characters minimum", Toast.LENGTH_LONG).show();
+            return false;
+        } else if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#]).*")) {
+            Toast.makeText(GetStartedActivity.this, "Weak password", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean emailCheck(String email) {
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\\.[a-zA-Z]+$")) {
+            Toast.makeText(GetStartedActivity.this, "Invalid email", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 }

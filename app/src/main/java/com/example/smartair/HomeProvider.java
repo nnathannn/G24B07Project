@@ -40,7 +40,6 @@ public class HomeProvider extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         providerId = getUser().getUid();
-
         if (savedInstanceState == null) {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                     .child("provider-users").child(providerId)
@@ -71,8 +70,6 @@ public class HomeProvider extends AppCompatActivity {
             });
         }
 
-//        replaceFragment(new HomeProviderFragment());
-
         binding.providerNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if(itemId == R.id.providerHome){
@@ -87,7 +84,6 @@ public class HomeProvider extends AppCompatActivity {
         });
 
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home_provider);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

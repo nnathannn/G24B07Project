@@ -33,7 +33,6 @@ public class HomeParent extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         binding = ActivityHomeParentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -91,13 +90,6 @@ public class HomeParent extends AppCompatActivity {
             return false;
         });
 
-//        EdgeToEdge.enable(this);
-//        setContentView(R.layout.activity_home_parent);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
     }
 
     private void replaceFragment(Fragment fragment){
