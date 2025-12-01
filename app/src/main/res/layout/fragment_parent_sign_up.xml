@@ -156,7 +156,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:lineSpacingExtra="4sp"
-        android:text="Password must be 8 characters minimum\nPassword must have at least one number\nPassword must have at least one special character"
+        android:text="Password must be 8 characters minimum\nPassword must have at least one number\nPassword must have at least one uppercase and lowercase letter\nPassword must have at least one special character"
         android:textColor="@color/dark_grey"
         android:textSize="10sp"
         app:layout_constraintStart_toStartOf="@+id/textInputLayout3"

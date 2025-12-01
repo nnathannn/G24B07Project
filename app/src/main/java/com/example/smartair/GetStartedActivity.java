@@ -110,7 +110,7 @@ public class GetStartedActivity extends AppCompatActivity {
         if (password.length() < 8) {
             Toast.makeText(GetStartedActivity.this, "Password must be 8 characters minimum", Toast.LENGTH_LONG).show();
             return false;
-        } else if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).*")) {
+        } else if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#]).*")) {
             Toast.makeText(GetStartedActivity.this, "Weak password", Toast.LENGTH_LONG).show();
             return false;
         }
@@ -118,7 +118,7 @@ public class GetStartedActivity extends AppCompatActivity {
     }
 
     public boolean emailCheck(String email) {
-        if (!email.matches(".@[a-zA-Z]+\\.[a-zA-Z]+$")) {
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\\.[a-zA-Z]+$")) {
             Toast.makeText(GetStartedActivity.this, "Invalid email", Toast.LENGTH_LONG).show();
             return false;
         }
