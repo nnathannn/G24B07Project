@@ -96,16 +96,17 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="48dp"
         android:layout_marginEnd="64dp"
+        android:backgroundTint="@color/darker_blue"
         android:paddingTop="15dp"
         android:paddingBottom="15dp"
         android:text="Sign Up"
         app:cornerRadius="10dp"
-        android:backgroundTint="@color/darker_blue"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />
+        app:layout_constraintTop_toBottomOf="@+id/textView11" />
 
     <View
         android:id="@+id/divider"
@@ -147,5 +148,18 @@
             android:textColor="@color/dark_blue" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:lineSpacingExtra="4sp"
+        android:text="Password must be 8 characters minimum\nPassword must have at least one number\nPassword must have at least one special character"
+        android:textColor="@color/dark_grey"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout3"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
