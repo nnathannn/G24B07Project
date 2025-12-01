@@ -72,17 +72,17 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
         holder.textMedicineDate.setText(dateTime.format(formatter));
         // status text and card color
-        if (medicineLog.getPreStatus() > medicineLog.getPostStatus()) {
+        if (medicineLog.getPrePostStatus().equals("Worse")) {
             holder.textStatus.setText("Worse");
             holder.cardViewStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EC3131")));
         }
-        else if (medicineLog.getPreStatus() == medicineLog.getPostStatus()) {
+        else if (medicineLog.getPrePostStatus().equals("Same")) {
             holder.textStatus.setText("Same");
-            holder.cardViewStatus.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#F4C945")));
+            holder.cardViewStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F4C945")));
         }
         else {
             holder.textStatus.setText("Better");
-            holder.cardViewStatus.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#31D219")));
+            holder.cardViewStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#31D219")));
         }
     }
 

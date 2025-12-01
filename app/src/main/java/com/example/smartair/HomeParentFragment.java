@@ -12,14 +12,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class HomeParentFragment extends Fragment {
-    String temporaryParentId = "parent1";
+    String parentId;
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     public HomeParentFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        parentId  = getUser().getUid();
         return inflater.inflate(R.layout.fragment_home_parent, container, false);
     }
 
@@ -29,7 +34,7 @@ public class HomeParentFragment extends Fragment {
 
         if(getChildFragmentManager().findFragmentById(R.id.child_list_fragment_container) == null) {
             Bundle bundle = new Bundle();
-            bundle.putString("parent_user_id", temporaryParentId);
+            bundle.putString("parent_user_id", parentId);
 
             getChildFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
@@ -48,4 +53,5 @@ public class HomeParentFragment extends Fragment {
         });
     }
 
+    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 }

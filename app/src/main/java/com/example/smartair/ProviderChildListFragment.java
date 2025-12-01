@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,18 +23,19 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChildListFragment extends Fragment implements ChildAdapter.OnItemClickListener {
+public class ProviderChildListFragment extends Fragment implements ChildAdapter.OnItemClickListener {
 
-    private String parentUserId;
-    private DatabaseReference parentChildrenRef;
+    private String providerId;
+    private DatabaseReference providerChildrenRef;
     private ChildAdapter adapter;
     private List<String> childList;
     private RecyclerView recyclerView;
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentUserId = requireArguments().getString("parent_user_id");
+        providerId = getUser().getUid();
     }
 
     @Override
@@ -43,22 +46,20 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
         childList = new ArrayList<>();
         adapter = new ChildAdapter(childList, this);
         recyclerView.setAdapter(adapter);
-        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        if(parentUserId == null || parentUserId.isEmpty()){
-            Toast.makeText(getContext(), "Parent user ID does not exist", Toast.LENGTH_LONG).show();
+        if(providerId == null || providerId.isEmpty()){
+            Toast.makeText(getContext(), "Provider user ID does not exist", Toast.LENGTH_LONG).show();
         }
         else {
-            parentChildrenRef = FirebaseDatabase.getInstance().getReference("parent-users").child(parentUserId).child("child-ids");
+            providerChildrenRef = FirebaseDatabase.getInstance().getReference("provider-users").child(providerId).child("access");
             loadChildIds();
         }
-
         return view;
     }
 
     private void loadChildIds() {
-        parentChildrenRef.addValueEventListener(new ValueEventListener() {
+        providerChildrenRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<String> ids = new ArrayList<>();
@@ -76,7 +77,7 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
                 else{
                     childList.clear();
                     adapter.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "No children found. Go add children.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "No children found.", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
@@ -117,4 +118,52 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
     public void onItemClick(String clickedString) {
         Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
     }
+    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
+
+//    // TODO: Rename parameter arguments, choose names that match
+//    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+//    private static final String ARG_PARAM1 = "param1";
+//    private static final String ARG_PARAM2 = "param2";
+//
+//    // TODO: Rename and change types of parameters
+//    private String mParam1;
+//    private String mParam2;
+//
+//    public ProviderChildListFragment() {
+//        // Required empty public constructor
+//    }
+//
+//    /**
+//     * Use this factory method to create a new instance of
+//     * this fragment using the provided parameters.
+//     *
+//     * @param param1 Parameter 1.
+//     * @param param2 Parameter 2.
+//     * @return A new instance of fragment ProviderChildListFragment.
+//     */
+//    // TODO: Rename and change types and number of parameters
+//    public static ProviderChildListFragment newInstance(String param1, String param2) {
+//        ProviderChildListFragment fragment = new ProviderChildListFragment();
+//        Bundle args = new Bundle();
+//        args.putString(ARG_PARAM1, param1);
+//        args.putString(ARG_PARAM2, param2);
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
+//
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        if (getArguments() != null) {
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+//        }
+//    }
+//
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+//                             Bundle savedInstanceState) {
+//        // Inflate the layout for this fragment
+//        return inflater.inflate(R.layout.fragment_provider_child_list, container, false);
+//    }
 }
