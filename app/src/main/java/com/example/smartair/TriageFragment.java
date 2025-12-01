@@ -82,7 +82,7 @@ public class TriageFragment extends Fragment {
                         childName.setText(name);
                         childDOB.setText("Date of Birth: " + dob + " ");
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                         LocalDate birthDate = LocalDate.parse(dob, formatter);
                         LocalDate currentDate = LocalDate.now();
                         int age = Period.between(birthDate, currentDate).getYears();
