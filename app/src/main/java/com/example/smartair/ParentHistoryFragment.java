@@ -285,7 +285,7 @@ public class ParentHistoryFragment extends Fragment {
             case "Triages":
                 Triage triage = snapshot.getValue(Triage.class);
                 List<String> symptoms = triage.getSymptomList();
-                String emergency = triage.getEmergency() ? "Emergency" : "Non-Emergency";
+                String emergency = triage.getEmergency() == "Emergency" ? "Emergency" : "Non-Emergency";
                 String rescue = "1";
                 return new AdapterHistory.HistoryItem(triage.getDate().split("T")[0],
                         symptoms.get(0), emergency, rescue);
