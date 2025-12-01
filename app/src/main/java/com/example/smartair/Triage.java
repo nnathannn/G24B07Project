@@ -19,6 +19,9 @@ public class Triage extends Item {
         this.endDate = endDate;
         this.emergency = emergency;
         this.symptomList = symptomList;
+        if (pef <= 0) {
+            throw new IllegalArgumentException("PEF must be a positive number.");
+        }
         this.pef = pef;
         if (rescue < 0) {
             throw new IllegalArgumentException("Rescue must be a non-negative integer.");
@@ -35,7 +38,12 @@ public class Triage extends Item {
     public void setEmergency(String emergency) { this.emergency = emergency;}
     public void setEndDate(String endDate) { this.endDate = endDate;}
     public void setSymptomList(List<String> symptomList) { this.symptomList = symptomList;}
-    public void setPef(double pef) { this.pef = pef;}
+    public void setPef(double pef) {
+        if (pef <= 0) {
+            throw new IllegalArgumentException("PEF must be a positive number.");
+        }
+        this.pef = pef;
+    }
     public void setRescue(int rescue) throws IllegalArgumentException {
         if (rescue < 0) {
             throw new IllegalArgumentException("Rescue must be a non-negative integer.");
