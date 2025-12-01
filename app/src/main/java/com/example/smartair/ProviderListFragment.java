@@ -4,14 +4,19 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,27 +26,34 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChildListFragment extends Fragment implements ChildAdapter.OnItemClickListener {
+
+public class ProviderListFragment extends Fragment implements ProviderAdapter.OnItemClickListener {
 
     private String parentUserId;
     private DatabaseReference parentChildrenRef;
-    private ChildAdapter adapter;
-    private List<String> childList;
+    private ProviderAdapter adapter;
+    private List<Pair<String, String>> providerList;
     private RecyclerView recyclerView;
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentUserId = requireArguments().getString("parent_user_id");
+        if(getUser()!=null){
+            parentUserId = getUser().getUid();
+        }
+        else{
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_child_list, container, false);
-        recyclerView = view.findViewById(R.id.child_recycler_view);
-        childList = new ArrayList<>();
-        adapter = new ChildAdapter(childList, this);
+        View view = inflater.inflate(R.layout.fragment_provider_list, container, false);
+        recyclerView = view.findViewById(R.id.providerRecycler);
+        providerList = new ArrayList<>();
+        adapter = new ProviderAdapter(providerList, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -71,12 +83,12 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
                     }
                 }
                 if(!ids.isEmpty()){
-                    fetchChildNames(ids);
+                    fetchChildProvider(ids);
                 }
                 else{
-                    childList.clear();
+                    providerList.clear();
                     adapter.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "No children found. Go add children.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "No children found. Please add children.", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
@@ -86,19 +98,18 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
         });
     }
 
-    private void fetchChildNames(List<String> childIds) {
+    private void fetchChildProvider(List<String> childIds) {
         DatabaseReference childrenRef = FirebaseDatabase.getInstance().getReference("child-users");
         childrenRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                childList.clear();
+                providerList.clear();
                 for (String childId : childIds) {
                     if (dataSnapshot.hasChild(childId)) {
                         DataSnapshot childNode = dataSnapshot.child(childId);
-                        if (childNode.hasChild("name")) {
-                            String childName = childNode.child("name").getValue(String.class);
-                            if (childName != null) {
-                                childList.add(childName);
+                        if(childNode.hasChild("provider")){
+                            for(DataSnapshot providerSnapshot : childNode.child("provider").getChildren()){
+                                providerList.add(new Pair<>(providerSnapshot.getKey(), childId));
                             }
                         }
                     }
@@ -114,7 +125,19 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
     }
 
     @Override
-    public void onItemClick(String clickedString) {
-        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedString, Toast.LENGTH_LONG).show();
+    public void onItemClick(Pair<String, String> clickedString) {
+        Bundle bundle = new Bundle();
+        bundle.putString("child_id", clickedString.second);
+        bundle.putString("provider_id", clickedString.first);
+        Fragment fragment = new ProviderAccessFragment();
+        fragment.setArguments(bundle);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.providerListContainer, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
+
+    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
+
 }
