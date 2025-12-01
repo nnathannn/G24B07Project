@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
 public class MedicineLog extends Item {
+    @PropertyName("prePostStatus")
+    private String prePostStatus;
     @PropertyName("preStatus")
     private int preStatus;
     @PropertyName("postStatus")
@@ -25,8 +27,9 @@ public class MedicineLog extends Item {
 
     public MedicineLog() {}
 
-    public MedicineLog(String date, String id, int preStatus, int postStatus, boolean rescue, int dose, String medName) throws IllegalArgumentException {
+    public MedicineLog(String date, String id, String prePostStatus,int preStatus, int postStatus, boolean rescue, int dose, String medName) throws IllegalArgumentException {
         super(date, id);
+        this.prePostStatus = prePostStatus;
 
         if (postStatus < 1 || postStatus >5) {
             throw new IllegalArgumentException("Post-status must be between 1 and 5");
@@ -45,6 +48,9 @@ public class MedicineLog extends Item {
         this.medName = medName;
     }
 
+
+    @PropertyName("prePostStatus")
+    public String getPrePostStatus() {return prePostStatus;}
     @PropertyName("preStatus")
     public int getPreStatus() {return preStatus;}
     @PropertyName("postStatus")
@@ -57,7 +63,15 @@ public class MedicineLog extends Item {
     @PropertyName("med-name")
     public String getMedName() {return medName;}
 
+    @PropertyName("prePostStatus")
+    public void setPrePostStatus(String prePostStatus) {
+        if (!prePostStatus.equals("Better") && !prePostStatus.equals("Same") && !prePostStatus.equals("Worse")) {
+            throw new IllegalArgumentException("prePostStatus must be better, same, or worse");
+        }
+        this.prePostStatus = prePostStatus;
+    }
 
+    
     @PropertyName("preStatus")
     public void setPreStatus(int preStatus) {
         if (preStatus< 1 || preStatus>5) {
