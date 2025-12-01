@@ -39,21 +39,17 @@ import java.util.List;
 
 public class SymptomFragment extends Fragment {
 
-    // UI
     private AutoCompleteTextView symptomDropdown;
     private MaterialAutoCompleteTextView triggerDropdown;
     private RecyclerView recyclerViewSymptoms;
     private Button buttonDate, buttonTime, buttonSubmit;
 
-    // Firebase
-    private DatabaseReference databaseReference;   // /symptom
+    private DatabaseReference databaseReference;
     private String uid;
 
-    // Recycler
     private List<Symptom> symptomLogList;
     private SymptomAdapter symptomAdapter;
 
-    // dropdown data
     private final String[] symptomTypes = new String[]{
             "Night waking",
             "Activity limits",
@@ -74,10 +70,7 @@ public class SymptomFragment extends Fragment {
             "Strong odors"
     };
 
-    // which triggers are selected
     private boolean[] triggerSelected;
-
-    // date & time
     private LocalDateTime dateTime;
 
     @Nullable
@@ -104,20 +97,19 @@ public class SymptomFragment extends Fragment {
         if (user != null) {
             uid = user.getUid();
         } else {
-            uid = "11"; // fallback for testing
+            uid = "11";
         }
 
         dateTime = LocalDateTime.now();
 
         setupRecyclerView();
         setupClickListeners();
-
-        // keep this ON now:
         fetchDataFromFirebase();
     }
 
 
-    // ---------------------- view binding ----------------------
+
+
 
     private void initializeViews(View view) {
         recyclerViewSymptoms = view.findViewById(R.id.recyclerViewSymptoms);
@@ -130,7 +122,7 @@ public class SymptomFragment extends Fragment {
         buttonSubmit = view.findViewById(R.id.buttonSymptomSubmit);
     }
 
-    // ---------------------- RecyclerView ----------------------
+
 
     private void setupRecyclerView() {
         recyclerViewSymptoms.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -139,7 +131,7 @@ public class SymptomFragment extends Fragment {
         recyclerViewSymptoms.setAdapter(symptomAdapter);
     }
 
-    // ---------------------- Firebase read ----------------------
+
 
     private void fetchDataFromFirebase() {
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -149,25 +141,21 @@ public class SymptomFragment extends Fragment {
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     try {
-                        // 1) Safely get child-id in ANY format (string / number)
                         Object childIdObj = snapshot.child("child-id").getValue();
                         if (childIdObj == null) {
-                            continue; // skip weird row
+                            continue;
                         }
                         String childIdStr = String.valueOf(childIdObj);
 
-                        // 2) Only take logs that match current uid
                         if (!childIdStr.equals(uid)) {
                             continue;
                         }
 
-                        // 3) Try to parse into Symptom class
                         Symptom log = snapshot.getValue(Symptom.class);
                         if (log == null) {
                             continue;
                         }
 
-                        // 4) Optional: make sure triggerList is at least an empty list
                         if (log.getTriggerList() == null) {
                             log.setTriggerList(new ArrayList<>());
                         }
@@ -175,13 +163,10 @@ public class SymptomFragment extends Fragment {
                         symptomLogList.add(log);
 
                     } catch (Exception e) {
-                        // If a row has unexpected types / missing fields,
-                        // just skip that row instead of crashing the whole screen.
-                        e.printStackTrace(); // (Logcat only, won't crash)
+                        e.printStackTrace();
                     }
                 }
 
-                // newest first
                 Collections.reverse(symptomLogList);
                 symptomAdapter.notifyDataSetChanged();
             }
@@ -196,11 +181,10 @@ public class SymptomFragment extends Fragment {
     }
 
 
-    // ---------------------- Click listeners ----------------------
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setupClickListeners() {
-        // Symptom dropdown (single-select)
         ArrayAdapter<String> symptomAdapterDrop = new ArrayAdapter<>(
                 requireContext(),
                 R.layout.item_symptom_dropdown,
@@ -215,18 +199,16 @@ public class SymptomFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         });
 
-        // Trigger dropdown (multi-select)
         setupTriggerDropdown();
 
-        // Date & Time pickers
+
         buttonDate.setOnClickListener(v -> showDatePicker());
         buttonTime.setOnClickListener(v -> showTimePicker());
 
-        // Submit to Firebase
+
         buttonSubmit.setOnClickListener(v -> submitSymptomLog());
     }
 
-    // ---------------------- Trigger multi-select ----------------------
 
     private void setupTriggerDropdown() {
         triggerSelected = new boolean[triggers.length];
@@ -295,7 +277,7 @@ public class SymptomFragment extends Fragment {
         return list;
     }
 
-    // ---------------------- Date & Time pickers ----------------------
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void showDatePicker() {
@@ -335,7 +317,6 @@ public class SymptomFragment extends Fragment {
         timePickerDialog.show();
     }
 
-    // ---------------------- Submit to Firebase ----------------------
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void submitSymptomLog() {
@@ -355,12 +336,12 @@ public class SymptomFragment extends Fragment {
             return;
         }
 
-        boolean parentFlag = false;   // this screen is for the child
+        boolean parentFlag = false;   // accessed through child page
         String triageId = "";
 
         Symptom log = new Symptom(
-                uid,                    // id → mapped to child-id by Item
-                dateTime.toString(),    // ISO date string
+                uid,
+                dateTime.toString(),
                 parentFlag,
                 symptomName,
                 triageId,
