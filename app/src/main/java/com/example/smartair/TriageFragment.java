@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,13 +50,7 @@ public class TriageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_triage, container, false);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_triage, container, false);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
@@ -68,13 +61,14 @@ public class TriageFragment extends Fragment {
 
         // check flags; input symptom, triage, child-symptoms, child-triages; navigate to right page
         checkFlag(view);
+
+        return view;
     }
 
     private void fetchChildData(View view) {
         childName = view.findViewById(R.id.child_name);
         childDOB = view.findViewById(R.id.child_dob);
         childAge = view.findViewById(R.id.child_age);
-        childNotes = view.findViewById(R.id.child_notes);
 
         DatabaseReference ref = db.getReference("child-users").child(childID);
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -84,11 +78,9 @@ public class TriageFragment extends Fragment {
                 if (snapshot.exists()) {
                     String name = snapshot.child("name").getValue(String.class);
                     String dob = snapshot.child("DOB").getValue(String.class);
-                    String notes = snapshot.child("notes").getValue(String.class);
-                    if (name != null && dob != null && notes != null) {
+                    if (name != null && dob != null) {
                         childName.setText(name);
                         childDOB.setText("Date of Birth: " + dob + " ");
-                        childNotes.setText(notes);
 
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                         LocalDate birthDate = LocalDate.parse(dob, formatter);
