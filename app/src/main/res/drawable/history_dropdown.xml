@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/light_grey" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/outline_arrow_drop_down_24"
+        android:gravity="center_vertical|end"
+        android:end="0dp"/>
+</layer-list>
