@@ -117,7 +117,7 @@ public class HomeChildFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<String> dates = new ArrayList<>();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    if (childSnapshot.child("child-id").getValue(String.class).equals(uid)) {
+                    if (childSnapshot.child("child-id").getValue(String.class).equals(uid) && !childSnapshot.child("rescue").getValue(Boolean.class)) {
                         String date = childSnapshot.child("date").getValue(String.class).split("T")[0];
                         if (!dates.contains(date)) {
                             dates.add(date);
