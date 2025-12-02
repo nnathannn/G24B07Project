@@ -3,6 +3,8 @@ package com.example.smartair;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,8 +47,17 @@ public class AccountRecoveryFragment extends Fragment {
                     Toast.makeText(getContext(), "Email sent", Toast.LENGTH_LONG).show();
                 }
             });
+            replaceFragment(new SignInFragment());
         });
 
         return view;
+    }
+
+    private void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.GetStartedContainer, fragment);
+        fragmentTransaction.commit();
     }
 }

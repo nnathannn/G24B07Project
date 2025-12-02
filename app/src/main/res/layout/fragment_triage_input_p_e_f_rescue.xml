@@ -85,4 +85,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/input_pef_box"/>
 
+    <TextView
+        android:id="@+id/safety_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:layout_marginHorizontal="30dp"
+        android:text="This is guidance, not a diagnosis. \n If in doubt, call emergency."
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
