@@ -2,6 +2,7 @@ package com.example.smartair;
 
 import static java.security.AccessController.getContext;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.widget.Toast;
 
@@ -50,4 +51,6 @@ public class SignInPresenter {
         }
         view.displayErrorToast(message);
     }
+
+    public Activity getActivity() { return view.getActivity(); }
 }

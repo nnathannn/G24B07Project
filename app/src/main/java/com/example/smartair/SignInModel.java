@@ -27,7 +27,7 @@ public class SignInModel {
 
     public void signIn(SignInPresenter presenter, String user, String password) {
         myauth.signInWithEmailAndPassword(user, password)
-                .addOnCompleteListener(presenter.view.getActivity(), t -> {
+                .addOnCompleteListener(presenter.getActivity(), t -> {
                         if (t.isSuccessful()) {
                             checkUserRole(presenter, t.getResult().getUser().getUid());
                         } else {
