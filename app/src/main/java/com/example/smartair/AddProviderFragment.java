@@ -1,64 +1,130 @@
 package com.example.smartair;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AddProviderFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class AddProviderFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String parentId;
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     public AddProviderFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AddProviderFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AddProviderFragment newInstance(String param1, String param2) {
-        AddProviderFragment fragment = new AddProviderFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        parentId = myauth.getCurrentUser().getUid();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_provider, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_provider, container, false);
+        EditText inputChildUname = view.findViewById(R.id.inputChildUname);
+        Button addProviderButton = view.findViewById(R.id.add_provider_button);
+        addProviderButton.setOnClickListener(v -> {
+            String childUname = inputChildUname.getText().toString();
+            if(childUname.isEmpty()){
+                inputChildUname.setError("Please enter a child username");
+                return;
+            }
+            else{
+                checkUname(childUname);
+            }
+        });
+        return view;
+    }
+
+    private void checkUname(String Uname){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("parent-users")
+                .child(parentId).child("child-ids");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+                    String childId = ds.getKey();
+                    checkChild(childId, Uname);
+                }
+                Toast.makeText(getContext(), "No child matches the username.", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("Error: " + databaseError.getMessage());
+            }
+        });
+
+    }
+
+    private void checkChild(String childId, String Uname){
+        DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users")
+                .child(childId);
+        childRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String childName = dataSnapshot.child("name").getValue(String.class);
+                if (childName!=null && childName.equals(Uname)) {
+                    createToken(childId, Uname);
+                    FragmentManager fragmentManager = getParentFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.replace(R.id.parent_frame_layout, new ManageProviderAccessFragment());
+                    fragmentTransaction.commit();
+                    return;
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("Error: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void createToken(String childId, String Uname){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("invite-code");
+        String token = ref.push().getKey();
+        ref.child(parentId).child(token).child("child-id").setValue(childId);
+        ref.child(parentId).child(token).child("child-name").setValue(Uname);
+        ref.child(parentId).child(token).child("code").setValue(token);
+        LocalDate currentDate = LocalDate.now();
+        LocalDate futureDate = currentDate.plusDays(7);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String expiryDate = futureDate.format(formatter);
+        ref.child(parentId).child(token).child("end-date").setValue(expiryDate);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Invite Code Generated for" + Uname);
+        builder.setMessage("The provider invite code for " + Uname + " is " + token + ". You can see it in the pending invite code page.");
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        builder.setCancelable(true);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
