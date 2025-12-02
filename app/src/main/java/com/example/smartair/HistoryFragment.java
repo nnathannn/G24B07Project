@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -50,6 +51,7 @@ public class HistoryFragment extends Fragment {
     private List<String> filters, nameSelection, listSymptom, listTrigger;
     private LocalDate date;
     private Button applyFilter, resetFilter, startDate, endDate;
+    private ImageButton exportButton;
     private String user, uid;
     private LinearLayout layout;
     private Boolean triggerAccess = false;
@@ -128,6 +130,46 @@ public class HistoryFragment extends Fragment {
 
         layout = view.findViewById(R.id.filterLayout);
         layoutHelper = view.findViewById(R.id.layoutHelper);
+
+        exportButton = view.findViewById(R.id.button8);
+
+        exportButton.setOnClickListener(v -> {
+
+            Toast.makeText(v.getContext(), "Export clicked", Toast.LENGTH_SHORT).show();
+
+            if (itemList == null || itemList.isEmpty()) {
+                Toast.makeText(requireContext(), "No data to export", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String filter = spinner.getSelectedItem() != null
+                    ? spinner.getSelectedItem().toString()
+                    : "";
+
+            String child = childspinner.getSelectedItem() != null
+                    ? childspinner.getSelectedItem().toString()
+                    : "";
+
+            String start = startDate.getText().toString();
+            String end = endDate.getText().toString();
+
+            if (start.equals("Start Date")) {
+                start = date.minusDays(179).toString();
+            }
+            if (end.equals("End Date")) {
+                end = date.toString();
+            }
+
+            PDFExportButton.exportParentHistory(
+                    requireContext(),
+                    child,
+                    filter,
+                    start,
+                    end,
+                    itemList
+            );
+        });
+
 
         childspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
