@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -347,6 +348,7 @@ public class HistoryFragment extends Fragment {
                 if (itemList.isEmpty()) {
                     Toast.makeText(getContext(), "No data found", Toast.LENGTH_SHORT).show();
                 } else {
+                    Collections.reverse(itemList);
                     switch (type) {
                         case "Zones":
                             itemList.add(0, new AdapterHistory.HistoryItem("Date", "PEF", "PB", "Status"));
