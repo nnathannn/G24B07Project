@@ -11,11 +11,15 @@
     android:elevation="25dp"
     app:cardCornerRadius="15dp">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gradient_blue">
+
     <LinearLayout
         android:id="@+id/providerCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_blue"
         android:orientation="vertical"
         android:padding="20dp"
         >
@@ -42,4 +46,11 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/editIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        app:srcCompat="@drawable/edit_icon_foreground" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
