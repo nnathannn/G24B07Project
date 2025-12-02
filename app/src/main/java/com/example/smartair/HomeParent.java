@@ -176,10 +176,12 @@ public class HomeParent extends AppCompatActivity implements UIDProvider {
         String controller = db.getReference("child-inventory").child(uid).push().getKey();
         if (rescue != null) {
             db.getReference("child-inventory").child(uid).child(rescue).setValue(true);
+            db.getReference("inventory").child(rescue).child("child-id").setValue(uid);
             db.getReference("inventory").child(rescue).child("rescue").setValue(true);
         }
         if (controller != null) {
             db.getReference("child-inventory").child(uid).child(controller).setValue(true);
+            db.getReference("inventory").child(controller).child("child-id").setValue(uid);
             db.getReference("inventory").child(controller).child("rescue").setValue(false);
         }
         db.getReference("parent-users").child(parentId).child("child-ids").child(uid).setValue(true);

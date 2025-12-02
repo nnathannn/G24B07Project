@@ -61,18 +61,38 @@ public class InventoryAdapter extends ItemAdapter {
         InventoryAdapter.InventoryViewHolder inventoryHolder = (InventoryAdapter.InventoryViewHolder) holder;
         String childId = inventory.getChildId();
         DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users").child(childId);
-        childRef.child("username").get().addOnSuccessListener(dataSnapshot -> {
+        childRef.child("name").get().addOnSuccessListener(dataSnapshot -> {
             String childName = dataSnapshot.getValue(String.class);
             inventoryHolder.medChildName.setText(childName);
         });
         if(inventory.getRescue()){
-            inventoryHolder.medName.setText("Rescue | " + inventory.getMedName());
+            if(inventory.getMedName()==null || inventory.getMedName().isEmpty() || inventory.getMedName().equals("null")){
+                inventoryHolder.medName.setText("Rescue");
+            }
+            else{
+                inventoryHolder.medName.setText("Rescue | " + inventory.getMedName());
+            }
         }
         else{
-            inventoryHolder.medName.setText("Controller | " + inventory.getMedName());
+            if(inventory.getMedName()==null || inventory.getMedName().isEmpty() || inventory.getMedName().equals("null")){
+                inventoryHolder.medName.setText("Controller");
+            }
+            else{
+                inventoryHolder.medName.setText("Controller | " + inventory.getMedName());
+            }
         }
-        inventoryHolder.purchaseDate.setText("Purchase Date: " + inventory.getPurchaseDate());
-        inventoryHolder.expiryDate.setText("Expiry Date: " + inventory.getExpiryDate());
+        if (inventory.getPurchaseDate()==null || inventory.getPurchaseDate().isEmpty() || inventory.getPurchaseDate().equals("null")){
+            inventoryHolder.purchaseDate.setText("Purchase date not set yet");
+        }
+        else{
+            inventoryHolder.purchaseDate.setText("Purchase Date: " + inventory.getPurchaseDate());
+        }
+        if (inventory.getExpiryDate()==null || inventory.getExpiryDate().isEmpty() || inventory.getExpiryDate().equals("null")){
+            inventoryHolder.expiryDate.setText("Expiry date not set yet");
+        }
+        else{
+            inventoryHolder.expiryDate.setText("Expiry Date: " + inventory.getExpiryDate());
+        }
         inventoryHolder.amountLeft.setText("Amount Left: " + Double.toString(inventory.getAmountLeft()));
         inventoryHolder.bind(inventory, listener);
     }
