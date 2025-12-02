@@ -38,13 +38,15 @@ public class SignInModel {
 
     public void checkUserRole(SignInPresenter presenter, String uid) {
         myref.get().addOnSuccessListener(dataSnapshot -> {
+            String role;
             if (dataSnapshot.child("parent-users").child(uid).exists()) {
-                presenter.startSignIn("parent");
+                role = "parent";
             } else if (dataSnapshot.child("provider-users").child(uid).exists()) {
-                    presenter.startSignIn("provider");
+                role = "provider";
             } else {
-                presenter.startSignIn("child");
+               role = "child";
             }
+            presenter.startSignIn(role);
         });
     }
 }
