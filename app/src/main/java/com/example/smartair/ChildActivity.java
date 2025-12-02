@@ -19,8 +19,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class ChildActivity extends AppCompatActivity {
-    String childId;
+public class ChildActivity extends AppCompatActivity implements UIDProvider {
+
+    private String childId;
     private FirebaseAuth myauth = FirebaseAuth.getInstance();
 
     @Override
@@ -28,8 +29,8 @@ public class ChildActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_home_child);
-        EdgeToEdge.enable(this);
-        childId = getUser().getUid(); //TO BE UPDATED
+
+        checkUser();
 
         if (savedInstanceState == null) {
 
@@ -68,5 +69,13 @@ public class ChildActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
+    public String getUid() { return childId; }
+
+    public void checkUser() {
+        if (getIntent().getStringExtra("childId") == null) {
+            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            childId = getIntent().getStringExtra("childId");
+        }
+    }
 }
