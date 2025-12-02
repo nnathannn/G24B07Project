@@ -44,7 +44,7 @@ public class ChildDashboardFragment extends Fragment {
     private String uid; // child Id
     private TextView textChildName, textChildDOB, textChildNotes, textZonePercentage, textZonePB, textZonePEF, timeLastRescue, countWeeklyRescue;
     private LocalDateTime currDate;
-    private MaterialButton buttonDailyCheckIn, buttonLogin, buttonEdit, buttonDelete;
+    private MaterialButton buttonDailyCheckIn, buttonLogin, buttonSettings, buttonDelete;
     private MaterialCardView cardZone;
     private List<MedicineLog> medicineLogs;
 
@@ -88,7 +88,7 @@ public class ChildDashboardFragment extends Fragment {
         switchDays = view.findViewById(R.id.switchDays);
         buttonDailyCheckIn = view.findViewById(R.id.buttonDailyCheckIn);
         buttonLogin = view.findViewById(R.id.buttonLogin);
-        buttonEdit = view.findViewById(R.id.buttonEdit);
+        buttonSettings = view.findViewById(R.id.buttonSettings);
         cardZone = view.findViewById(R.id.cardZone);
         buttonDelete = view.findViewById(R.id.buttonDelete);
     }
@@ -295,18 +295,28 @@ public class ChildDashboardFragment extends Fragment {
             AlertDialog dialog = builder.create();
             dialog.show();
         });
-        buttonEdit.setOnClickListener(v -> {
+        buttonSettings.setOnClickListener(v -> {
             View editView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_child, null);
             EditText editPB = editView.findViewById(R.id.editPB);
             EditText editNotes = editView.findViewById(R.id.editNotes);
+            EditText editStreak = editView.findViewById(R.id.editStreak);
+            EditText editSessions = editView.findViewById(R.id.editSessions);
+            EditText editRescueDays = editView.findViewById(R.id.editRescueDays);
             DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users").child(uid);
-            new AlertDialog.Builder(getContext())
+            DatabaseReference badgesRef = FirebaseDatabase.getInstance().getReference("badge").child(uid);
+            new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                     .setTitle("Edit Child Information")
                     .setView(editView)
                     .setPositiveButton("Save", (dialog, which) -> {
                         String newPB = editPB.getText().toString();
                         String newNotes = editNotes.getText().toString();
+                        String newStreak = editStreak.getText().toString();
+                        String newSessions = editSessions.getText().toString();
+                        String newRescueDays = editRescueDays.getText().toString();
                         Map<String, Object> childUpdates = new HashMap<>();
+                        Map<String, Object> streakUpdates = new HashMap<>();
+                        Map<String, Object> sessionsUpdates = new HashMap<>();
+                        Map<String, Object> rescueDaysUpdates = new HashMap<>();
                         if (!newPB.isEmpty()) {
                             try {
                                 int newPBValue = Integer.parseInt(newPB);
@@ -319,6 +329,33 @@ public class ChildDashboardFragment extends Fragment {
                             childUpdates.put("notes", newNotes);
                             textChildNotes.setText("Notes: " + newNotes);
                         }
+                        if (!newStreak.isEmpty()) {
+                            try {
+                                int newStreakValue = Integer.parseInt(newStreak);
+                                streakUpdates.put("threshold", newStreakValue);
+                                badgesRef.child("perfect-controller").updateChildren(streakUpdates);
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getContext(), "Invalid Streak value.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        if (!newSessions.isEmpty()) {
+                            try {
+                                int newSessionsValue = Integer.parseInt(newSessions);
+                                sessionsUpdates.put("threshold", newSessionsValue);
+                                badgesRef.child("high-quality").updateChildren(sessionsUpdates);
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getContext(), "Invalid Sessions value.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        if (!newRescueDays.isEmpty()) {
+                            try {
+                                int newRescueDaysValue = Integer.parseInt(newRescueDays);
+                                rescueDaysUpdates.put("threshold", newRescueDaysValue);
+                                badgesRef.child("low-rescue").updateChildren(rescueDaysUpdates);
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(getContext(), "Invalid Rescue Days value.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                         if (!childUpdates.isEmpty()) {
                             childRef.updateChildren(childUpdates)
                                     .addOnSuccessListener(aVoid -> {
@@ -327,6 +364,9 @@ public class ChildDashboardFragment extends Fragment {
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(getContext(), "Failed to update child information: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                     });
+                        }
+                        else if (!streakUpdates.isEmpty() || !sessionsUpdates.isEmpty() || !rescueDaysUpdates.isEmpty()) {
+                            Toast.makeText(getContext(), "Child badge thresholds updated successfully.", Toast.LENGTH_SHORT).show();
                         }
                         else {
                             Toast.makeText(getContext(), "No changes made.", Toast.LENGTH_SHORT).show();
