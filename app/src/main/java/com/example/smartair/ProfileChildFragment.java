@@ -86,16 +86,18 @@ public class ProfileChildFragment extends Fragment {
     }
 
     private void changePassword() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Change Password");
-
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_change_password, null);
-        builder.setView(view);
 
         EditText newPassInput = view.findViewById(R.id.new_pass_input);
         EditText confirmPassInput = view.findViewById(R.id.confirm_pass_input);
+        Button saveButton = view.findViewById(R.id.save_button);
+        Button cancelButton = view.findViewById(R.id.cancel_button);
 
-        builder.setPositiveButton("Submit", (dialog, which) -> {
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(view)
+                .setCancelable(true)
+                .create();
+        saveButton.setOnClickListener(v -> {
             String newPass = newPassInput.getText().toString();
             String confirmPass = confirmPassInput.getText().toString();
 
@@ -105,10 +107,11 @@ public class ProfileChildFragment extends Fragment {
             }
 
             updatePassword(newPass);
+            dialog.dismiss();
         });
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> { dialog.dismiss(); });
-        builder.create().show();
+        dialog.show();
     }
 
     private void updatePassword(String newPass) {
