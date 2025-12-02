@@ -185,6 +185,12 @@ public class HomeParent extends AppCompatActivity implements UIDProvider {
             db.getReference("inventory").child(controller).child("rescue").setValue(false);
         }
         db.getReference("parent-users").child(parentId).child("child-ids").child(uid).setValue(true);
+        db.getReference("badge").child(uid).child("high-quality").child("completed").setValue(false);
+        db.getReference("badge").child(uid).child("high-quality").child("treshold").setValue(10);
+        db.getReference("badge").child(uid).child("low-rescue").child("completed").setValue(false);
+        db.getReference("badge").child(uid).child("low-rescue").child("treshold").setValue(4);
+        db.getReference("badge").child(uid).child("perfect-controller").child("completed").setValue(false);
+        db.getReference("badge").child(uid).child("perfect-controller").child("treshold").setValue(7);
     }
 
     public boolean passwordCheck(String password) {

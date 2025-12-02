@@ -1,6 +1,7 @@
 package com.example.smartair;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -14,6 +15,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Objects;
+
 public class AddChildFragment extends Fragment {
 
     public AddChildFragment() {
@@ -22,6 +28,22 @@ public class AddChildFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private void showDatePickerDialog(EditText dateEditText) {
+        final Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(Objects.requireNonNull(getContext()),
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    Calendar selectedCal = Calendar.getInstance();
+                    selectedCal.set(selectedYear, selectedMonth, selectedDay);
+                    String formattedDate = dateFormat.format(selectedCal.getTime());
+                    dateEditText.setText(formattedDate);
+                }, year, month, day);
+        datePickerDialog.show();
     }
 
     @Override
@@ -35,6 +57,11 @@ public class AddChildFragment extends Fragment {
         EditText inputPassw = (EditText) view.findViewById(R.id.inputPassw);
         Button submitButton = (Button) view.findViewById(R.id.addChildButton);
 
+        inputDOB.setOnClickListener(v -> {
+            showDatePickerDialog(inputDOB);
+        });
+        inputDOB.setFocusable(false);
+
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,8 +71,8 @@ public class AddChildFragment extends Fragment {
                 String note = inputNote.getText().toString();
                 String passw = inputPassw.getText().toString();
                 HomeParent activity = (HomeParent) getActivity();
-                if (name.isEmpty() || dob.isEmpty() || pb.isEmpty() || note.isEmpty()) {
-                    Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                if (name.isEmpty() || dob.isEmpty() || pb.isEmpty()) {
+                    Toast.makeText(getContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show();
                 }
                 else if (!(activity.passwordCheck(passw))) {
 
