@@ -287,7 +287,13 @@
                 app:layout_constraintEnd_toEndOf="@id/constraintLayout"
                 app:cardCornerRadius="20dp"
                 app:strokeColor="@color/another_blue"
-                app:strokeWidth="2dp">
+                app:strokeWidth="2dp"
+                android:padding="8dp">
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/containerLineChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
             </com.google.android.material.card.MaterialCardView>
 

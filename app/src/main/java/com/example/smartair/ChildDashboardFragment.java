@@ -74,6 +74,7 @@ public class ChildDashboardFragment extends Fragment {
         initializeView(view);
         setupClickListeners();
         fetchDataFromDatabase();
+        loadTrendChart();
     }
 
 
@@ -269,6 +270,26 @@ public class ChildDashboardFragment extends Fragment {
         } catch (DateTimeParseException e) {
             return 0;
         }
+    }
+
+    private void loadTrendChart() {
+        ArrayList<String> labels = new ArrayList<>();
+        ArrayList<Float> values = new ArrayList<>();
+
+        // Example dummy data (replace with real data later)
+        labels.add("2025-12-01");
+        labels.add("2025-12-02");
+        labels.add("2025-12-03");
+        values.add(2f);
+        values.add(5f);
+        values.add(3f);
+
+        LineChartFragment fragment = LineChartFragment.newInstance("Trend", labels, values);
+
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.containerLineChart, fragment)
+                .commit();
     }
 
     private void setupClickListeners() {
