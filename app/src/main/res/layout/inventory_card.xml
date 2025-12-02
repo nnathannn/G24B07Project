@@ -71,6 +71,15 @@
             android:text="Amount Left:"
             android:textColor="@color/black"
             android:textSize="15sp" />
+        <TextView
+            android:id="@+id/lastUpdatedBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="3dp"
+            android:text="Last Updated by:"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
 
     </LinearLayout>
 
