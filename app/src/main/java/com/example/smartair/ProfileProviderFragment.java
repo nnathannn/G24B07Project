@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,8 @@ public class ProfileProviderFragment extends Fragment {
 
         // show data
         showData();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        email.setText(user.getEmail());
 
         // update password
         password.setOnClickListener(v -> changePassword());
@@ -69,9 +72,7 @@ public class ProfileProviderFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String nameValue = snapshot.child("name").getValue(String.class);
-                    String emailValue = snapshot.child("email").getValue(String.class);
                     name.setText(nameValue);
-                    email.setText(emailValue);
                 }
                 else {
                     Toast.makeText(getContext(), "Error: Child not found", Toast.LENGTH_SHORT).show();
@@ -93,25 +94,47 @@ public class ProfileProviderFragment extends Fragment {
         Button saveButton = view.findViewById(R.id.save_button);
         Button cancelButton = view.findViewById(R.id.cancel_button);
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setView(view)
                 .setCancelable(true)
                 .create();
+
         saveButton.setOnClickListener(v -> {
             String newPass = newPassInput.getText().toString();
             String confirmPass = confirmPassInput.getText().toString();
 
-            if (!newPass.equals(confirmPass)) {
-                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
-                return;
+            if (newPass.isEmpty() || confirmPass.isEmpty()){
+                Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
             }
-
-            updatePassword(newPass);
-            dialog.dismiss();
+            else if (!newPass.equals(confirmPass)) {
+                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+            }
+            else if (!passwordCheck(newPass)) {
+                Toast.makeText(getContext(), "Please input new password as requirement below", Toast.LENGTH_LONG).show();
+            }
+            else {
+                updatePassword(newPass);
+                dialog.dismiss();
+            }
         });
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+    }
+
+    private boolean passwordCheck(String newPass) {
+        boolean checkUpper = false;
+        boolean checkLower = false;
+        boolean checkNumber = false;
+        boolean checkSpecial = false;
+        for (int i = 0; i < newPass.length(); i++) {
+            if (Character.isUpperCase(newPass.charAt(i))) checkUpper = true;
+            else if (Character.isLowerCase(newPass.charAt(i))) checkLower = true;
+            else if (Character.isDigit(newPass.charAt(i))) checkNumber = true;
+            else if (String.valueOf(newPass.charAt(i)).matches("[!@#$%^&*()_+=<>?/{}~]")) checkSpecial = true;
+        }
+        return newPass.length() >= 8 && checkUpper && checkLower && checkNumber && checkSpecial;
     }
 
     private void updatePassword(String newPass) {
@@ -138,7 +161,7 @@ public class ProfileProviderFragment extends Fragment {
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setView(view)
                 .setCancelable(true)
                 .create();
@@ -150,7 +173,7 @@ public class ProfileProviderFragment extends Fragment {
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainerView, new SignInFragment())
+                    .replace(R.id.providerHomeLayout, new SignInFragment())
                     .commit();
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
             dialog.dismiss();

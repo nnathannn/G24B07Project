@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class HomeParentFragment extends Fragment {
     String parentId;
     FirebaseAuth myauth = FirebaseAuth.getInstance();
+    ImageButton account;
 
     public HomeParentFragment() {}
 
@@ -40,6 +42,15 @@ public class HomeParentFragment extends Fragment {
                     .add(R.id.child_list_fragment_container, ChildListFragment.class, bundle)
                     .commit();
         }
+
+        account = view.findViewById(R.id.imageButton3);
+        account.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.parent_frame_layout, new ProfileParentFragment());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
     }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
