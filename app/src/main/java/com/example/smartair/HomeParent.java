@@ -29,15 +29,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class HomeParent extends AppCompatActivity {
+public class HomeParent extends AppCompatActivity implements UIDProvider {
+
     ActivityHomeParentBinding binding;
-    private FirebaseAuth myauth = FirebaseAuth.getInstance();
-    private FirebaseDatabase db = FirebaseDatabase.getInstance();
-    String parentId;
+    FirebaseDatabase db = FirebaseDatabase.getInstance();
+    FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String parentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,14 +103,17 @@ public class HomeParent extends AppCompatActivity {
             }
             return false;
         });
+
     }
 
-    protected void replaceFragment(Fragment fragment){
+    private void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
         fragmentTransaction.commit();
     }
+
+    public String getUid() { return parentId; }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 
