@@ -470,6 +470,22 @@ public class ChildDashboardFragment extends Fragment {
             intent.putExtra("childId", uid);
             startActivity(intent);
         });
+        buttonDailyCheckIn.setOnClickListener(v -> {
+            boolean isParent = true;       // or false, depending on your logic
+
+            SymptomFragment fragment = new SymptomFragment();
+
+            Bundle args = new Bundle();
+            args.putString("uid", uid);
+            args.putBoolean("isParent", isParent);
+            fragment.setArguments(args);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.parent_frame_layout, fragment)  // whichever layout ID holds your fragments
+                    .addToBackStack(null)
+                    .commit();
+        });
         switchDays.setOnCheckedChangeListener((buttonView, isChecked) -> {
             is30Days = isChecked;
             loadTrendChart(is30Days);
