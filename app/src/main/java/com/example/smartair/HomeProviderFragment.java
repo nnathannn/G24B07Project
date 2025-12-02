@@ -38,7 +38,7 @@ public class HomeProviderFragment extends Fragment {
         account.setOnClickListener(v -> {
             FragmentManager fragmentManager = getParentFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.parent_frame_layout, new ProfileParentFragment());
+            fragmentTransaction.replace(R.id.providerHomeLayout, new ProfileProviderFragment());
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         });

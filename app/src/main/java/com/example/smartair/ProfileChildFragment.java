@@ -27,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 public class ProfileChildFragment extends Fragment {
     private FirebaseDatabase db;
     private String userID;
+    private String userType;
     private TextView name;
     private TextView dob;
     private EditText password;
@@ -43,7 +44,16 @@ public class ProfileChildFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile_child, container, false);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // check which user
+        if (getArguments() != null) {
+            userID = getArguments().getString("childID");
+            userType = "parent";
+        }
+        else {
+            userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            userType = "child";
+        }
 
         name = view.findViewById(R.id.name);
         dob = view.findViewById(R.id.dob);
@@ -55,9 +65,6 @@ public class ProfileChildFragment extends Fragment {
 
         // update password
         password.setOnClickListener(v -> changePassword());
-
-        // check which user is it
-
 
         // sign out
         signOut.setOnClickListener(v -> signOutDialog());
@@ -96,25 +103,47 @@ public class ProfileChildFragment extends Fragment {
         Button saveButton = view.findViewById(R.id.save_button);
         Button cancelButton = view.findViewById(R.id.cancel_button);
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setView(view)
                 .setCancelable(true)
                 .create();
+
         saveButton.setOnClickListener(v -> {
             String newPass = newPassInput.getText().toString();
             String confirmPass = confirmPassInput.getText().toString();
 
-            if (!newPass.equals(confirmPass)) {
-                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
-                return;
+            if (newPass.isEmpty() || confirmPass.isEmpty()){
+                Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
             }
-
-            updatePassword(newPass);
-            dialog.dismiss();
+            else if (!newPass.equals(confirmPass)) {
+                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+            }
+            else if (!passwordCheck(newPass)) {
+                Toast.makeText(getContext(), "Please input new password as requirement below", Toast.LENGTH_LONG).show();
+            }
+            else {
+                updatePassword(newPass);
+                dialog.dismiss();
+            }
         });
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+    }
+
+    private boolean passwordCheck(String newPass) {
+        boolean checkUpper = false;
+        boolean checkLower = false;
+        boolean checkNumber = false;
+        boolean checkSpecial = false;
+        for (int i = 0; i < newPass.length(); i++) {
+            if (Character.isUpperCase(newPass.charAt(i))) checkUpper = true;
+            else if (Character.isLowerCase(newPass.charAt(i))) checkLower = true;
+            else if (Character.isDigit(newPass.charAt(i))) checkNumber = true;
+            else if (String.valueOf(newPass.charAt(i)).matches("[!@#$%^&*()_+=<>?/{}~]")) checkSpecial = true;
+        }
+        return newPass.length() >= 8 && checkUpper && checkLower && checkNumber && checkSpecial;
     }
 
     private void updatePassword(String newPass) {
@@ -134,10 +163,6 @@ public class ProfileChildFragment extends Fragment {
         });
     }
 
-    private void checkUser() {
-        //
-    }
-
     private void signOutDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
 
@@ -145,7 +170,7 @@ public class ProfileChildFragment extends Fragment {
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setView(view)
                 .setCancelable(true)
                 .create();
@@ -155,10 +180,18 @@ public class ProfileChildFragment extends Fragment {
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
 
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainerView, new SignInFragment())
-                    .commit();
+            if (userType.equals("child")) {
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentContainerView, new SignInFragment())
+                        .commit();
+            }
+            else {
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.parent_frame_layout, new HomeParentFragment());
+            }
+
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
