@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -41,7 +42,7 @@ public class TriageHomeStepsFragment extends Fragment {
     private String childID;
     private String triageID;
     private TextView timer;
-    private Button stopTimerButton;
+    private AppCompatButton stopTimerButton;
     private CountDownTimer countDownTimer;
     private long timeLeftInMillis = 600000; // 10 minutes
     private List<String> steps;
@@ -157,6 +158,7 @@ public class TriageHomeStepsFragment extends Fragment {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                steps.clear();
                 if (snapshot.exists()) {
                     Double curPB = snapshot.getValue(Double.class);
                     if (curPB != null) getPEF(view, curPB);

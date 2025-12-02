@@ -22,7 +22,7 @@ public class PEFAdapter extends RecyclerView.Adapter<PEFAdapter.PEFViewHolder> {
         this.zones = zones;
     }
     public static class PEFViewHolder extends RecyclerView.ViewHolder {
-        TextView date, PB, count, percent;
+        TextView date, PB, count, percent, preMed, postMed;
         CardView cardView;
 
         public PEFViewHolder(@NonNull View itemView) {
@@ -30,6 +30,8 @@ public class PEFAdapter extends RecyclerView.Adapter<PEFAdapter.PEFViewHolder> {
             date = itemView.findViewById(R.id.pef_date);
             PB = itemView.findViewById(R.id.pef_curPB);
             count = itemView.findViewById(R.id.pef_count);
+            preMed = itemView.findViewById(R.id.pre_med);
+            postMed = itemView.findViewById(R.id.post_med);
             percent = itemView.findViewById(R.id.pef_percentage);
             cardView = itemView.findViewById(R.id.cardPEF);
         }
@@ -50,12 +52,16 @@ public class PEFAdapter extends RecyclerView.Adapter<PEFAdapter.PEFViewHolder> {
         String newDate = date.substring(0, 10) + " " + date.substring(11, 16);
         double pef = zone.getCount();
         double curPB = zone.getCurPB();
+        int preVal = zone.getPreMed();
+        int postVal = zone.getPostMed();
         String status = zone.getStatus();
         int percent = (int) (pef / curPB * 100);
 
         holder.date.setText(newDate);
         holder.PB.setText("PB: " + curPB);
         holder.count.setText("PEF: " + pef);
+        holder.preMed.setText("Pre-Medicine: " + preVal);
+        holder.postMed.setText("Post-Medicine: " + postVal);
         holder.percent.setText(percent + "%");
         if (status.equals("Green")) {
             holder.cardView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#48D718")));
