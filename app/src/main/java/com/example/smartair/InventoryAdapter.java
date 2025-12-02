@@ -66,14 +66,16 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         InventoryAdapter.InventoryViewHolder inventoryHolder = (InventoryAdapter.InventoryViewHolder) holder;
         String childId = inventory.getChildId();
         DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-users").child(childId);
-        childRef.child("username").get().addOnSuccessListener(dataSnapshot -> {
+        childRef.child("name").get().addOnSuccessListener(dataSnapshot -> {
             String childName = dataSnapshot.getValue(String.class);
-            if(inventory.getMedName()==null || inventory.getMedName().isEmpty() || inventory.getMedName().equals("null")){
-                inventoryHolder.medName.setText("Rescue");
+            if(childName!=null){
+                inventoryHolder.medChildName.setText(childName);
             }
             else{
-                inventoryHolder.medName.setText("Rescue | " + inventory.getMedName());
+                inventoryHolder.medChildName.setText("Child Name");
             }
+        }).addOnFailureListener(e -> {
+            inventoryHolder.medChildName.setText("Child Name");
         });
         if(inventory.getRescue()){
             if(inventory.getMedName()==null || inventory.getMedName().isEmpty() || inventory.getMedName().equals("null")){

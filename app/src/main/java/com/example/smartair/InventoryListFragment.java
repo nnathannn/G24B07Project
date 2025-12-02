@@ -128,6 +128,7 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChild(inventoryId)){
+                    System.out.println("Inventory ID: " + inventoryId);
                     DataSnapshot inventoryNode = dataSnapshot.child(inventoryId);
                     if(inventoryNode.exists()) {
                         itemList.add(new Pair<>(inventoryNode.getValue(Inventory.class), inventoryId));
@@ -146,7 +147,6 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
 
     @Override
     public void onItemClick(Pair<Inventory, String> clickedInventory) {
-        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: ", Toast.LENGTH_LONG).show();
         Bundle bundle = new Bundle();
         bundle.putString("child_id", clickedInventory.first.getChildId());
         bundle.putString("inventory_id", clickedInventory.second);
