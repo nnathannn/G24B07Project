@@ -153,7 +153,6 @@ public class HomeChildFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     Boolean isRescue = dataSnapshot.child("rescue").getValue(Boolean.class);
                     if (isRescue != null && isRescue == rescue) {
-                        System.out.println("YEYEYEYEYYE ID: " + id);
                         Fragment fragment = new EditInventoryFragment();
                         Bundle bundle = new Bundle();
                         bundle.putString("child_id", Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
