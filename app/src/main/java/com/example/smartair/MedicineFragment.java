@@ -2,10 +2,12 @@ package com.example.smartair;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,9 +40,9 @@ import java.util.Objects;
 public class MedicineFragment extends Fragment {
 
     private Button buttonSubmit, buttonDate, buttonTime;
-    private MaterialButton buttonRescue, buttonController;
+    private MaterialButton buttonRescue, buttonController, buttonWorse, buttonSame, buttonBetter;
     private EditText editDoseCount, editPreCheck, editPostCheck;
-    private String medicineType, uid;
+    private String medicineType, uid, prePostStatus;
     private LocalDateTime dateTime;
 
     // RecyclerView components
@@ -55,6 +57,7 @@ public class MedicineFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_medicine, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -74,6 +77,9 @@ public class MedicineFragment extends Fragment {
         buttonTime = view.findViewById(R.id.buttonTime);
         buttonRescue = view.findViewById(R.id.buttonRescue);
         buttonController = view.findViewById(R.id.buttonController);
+        buttonWorse = view.findViewById(R.id.buttonWorse);
+        buttonSame = view.findViewById(R.id.buttonSame);
+        buttonBetter = view.findViewById(R.id.buttonBetter);
         editDoseCount = view.findViewById(R.id.editDoseCount);
         editPreCheck = view.findViewById(R.id.editPreCheck);
         editPostCheck = view.findViewById(R.id.editPostCheck);
@@ -93,7 +99,7 @@ public class MedicineFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 medicineLogList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if ( uid == snapshot.child("child-id").getValue()) {
+                    if (uid.equals(snapshot.child("child-id").getValue(String.class))) {
                         MedicineLog log = snapshot.getValue(MedicineLog.class);
                         if (log != null) {
                             medicineLogList.add(log);
@@ -111,6 +117,7 @@ public class MedicineFragment extends Fragment {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setupClickListeners() {
         buttonRescue.setOnClickListener(v -> {
             medicineType = "Rescue";
@@ -124,13 +131,38 @@ public class MedicineFragment extends Fragment {
             buttonRescue.setStrokeColorResource(android.R.color.white);
         });
 
+        buttonWorse.setOnClickListener(v -> {
+            prePostStatus = "Worse";
+            buttonWorse.setStrokeColorResource(android.R.color.holo_blue_bright);
+            // buttonWorse.setStrokeColorResource(R.color.red);
+            buttonSame.setStrokeColorResource(R.color.pale_yellow);
+            buttonBetter.setStrokeColorResource(R.color.green);
+        });
+
+        buttonSame.setOnClickListener(v -> {
+            prePostStatus = "Same";
+            buttonSame.setStrokeColorResource(android.R.color.holo_blue_bright);
+            buttonWorse.setStrokeColorResource(R.color.red);
+//            buttonSame.setStrokeColorResource(R.color.pale_yellow);
+            buttonBetter.setStrokeColorResource(R.color.green);
+        });
+
+        buttonBetter.setOnClickListener(v -> {
+            prePostStatus = "Better";
+            buttonBetter.setStrokeColorResource(android.R.color.holo_blue_bright);
+            buttonWorse.setStrokeColorResource(R.color.red);
+            buttonSame.setStrokeColorResource(R.color.pale_yellow);
+//            buttonBetter.setStrokeColorResource(R.color.green);
+        });
+
         buttonDate.setOnClickListener(v -> showDatePicker());
         buttonTime.setOnClickListener(v -> showTimePicker());
         buttonSubmit.setOnClickListener(v -> submitMedicineLog());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(Objects.requireNonNull(getContext()),
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
                 (view, year, month, dayOfMonth) -> {
                     dateTime = dateTime.withYear(year).withMonth(month + 1).withDayOfMonth(dayOfMonth);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
@@ -142,8 +174,9 @@ public class MedicineFragment extends Fragment {
         datePickerDialog.show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showTimePicker() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(Objects.requireNonNull(getContext()),
+        TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
                 (view, hourOfDay, minute) -> {
                     dateTime = dateTime.withHour(hourOfDay).withMinute(minute);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
@@ -155,6 +188,7 @@ public class MedicineFragment extends Fragment {
         timePickerDialog.show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void submitMedicineLog() {
         String doseCountStr = editDoseCount.getText().toString();
         String preCheckStr = editPreCheck.getText().toString();
@@ -162,6 +196,10 @@ public class MedicineFragment extends Fragment {
 
         if (medicineType == null) {
             Toast.makeText(getContext(), "Please select a medicine type", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (prePostStatus == null) {
+            Toast.makeText(getContext(), "Please select a pre-post status", Toast.LENGTH_SHORT).show();
             return;
         }
         if (doseCountStr.isEmpty()) {
@@ -191,18 +229,28 @@ public class MedicineFragment extends Fragment {
         boolean isRescue = "Rescue".equals(medicineType);
 
 
-        MedicineLog log = new MedicineLog(dateTime.toString(), uid, preCheck, postCheck, isRescue, dose, "");
+        MedicineLog log = new MedicineLog(dateTime.toString(), uid, prePostStatus, preCheck, postCheck, isRescue, dose, "");
 
-        databaseReference.push().setValue(log)
+        DatabaseReference mainRef = databaseReference.push();
+        mainRef.setValue(log)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Log saved successfully!", Toast.LENGTH_SHORT).show();
-                    resetForm();
+                    DatabaseReference childRef = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
+                            .getReference("child-medicineLogs").child(uid).child(mainRef.getKey());
+                    childRef.setValue(true)
+                            .addOnSuccessListener(aVoid1 -> {
+                                Toast.makeText(getContext(), "Log saved successfully!", Toast.LENGTH_SHORT).show();
+                                resetForm();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(getContext(), "Failed to save log: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to save log: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void resetForm() {
         medicineType = null;
         dateTime = LocalDateTime.now();
@@ -216,5 +264,8 @@ public class MedicineFragment extends Fragment {
 
         buttonRescue.setStrokeColorResource(android.R.color.white);
         buttonController.setStrokeColorResource(android.R.color.white);
+        buttonWorse.setStrokeColorResource(R.color.red);
+        buttonSame.setStrokeColorResource(R.color.pale_yellow);
+        buttonBetter.setStrokeColorResource(R.color.green);
     }
 }
