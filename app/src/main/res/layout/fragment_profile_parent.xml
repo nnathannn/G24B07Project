@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ProfileFragment">
+    tools:context=".ProfileParentFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_nav_profile"
@@ -40,18 +40,26 @@
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@id/top_nav_profile"
         app:layout_constraintTop_toBottomOf="@id/top_nav_profile"/>
-    <EditText
-        android:id="@+id/name"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/name_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginHorizontal="30dp"
         android:background="@drawable/edit_profile_background"
-        android:text="Budi Merpati"
-        android:textSize="20sp"
-        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@id/name_title"
-        app:layout_constraintTop_toBottomOf="@id/name_title"/>
+        app:layout_constraintTop_toBottomOf="@id/name_title">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Budi Merpati"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/name_box"
+            app:layout_constraintTop_toTopOf="@id/name_box" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/email_title"
@@ -62,19 +70,27 @@
         android:textSize="20sp"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@id/name_title"
-        app:layout_constraintTop_toBottomOf="@id/name"/>
-    <EditText
-        android:id="@+id/email"
+        app:layout_constraintTop_toBottomOf="@id/name_box"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/email_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginHorizontal="30dp"
         android:background="@drawable/edit_profile_background"
-        android:text="budibudidamdam@gmail.com"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@id/email_title"
-        app:layout_constraintTop_toBottomOf="@id/email_title"/>
+        app:layout_constraintStart_toStartOf="@id/name_title"
+        app:layout_constraintTop_toBottomOf="@id/email_title">
+
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="budidudidam@email.com"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/email_box"
+            app:layout_constraintTop_toTopOf="@id/email_box"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/pass_title"
@@ -85,7 +101,7 @@
         android:textSize="20sp"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@id/name_title"
-        app:layout_constraintTop_toBottomOf="@id/email"/>
+        app:layout_constraintTop_toBottomOf="@id/email_box"/>
     <EditText
         android:id="@+id/password"
         android:layout_width="match_parent"
@@ -96,18 +112,21 @@
         android:text="**********"
         android:textSize="20sp"
         android:textColor="@color/black"
+        android:focusable="false"
+        android:clickable="true"
         app:layout_constraintStart_toStartOf="@id/pass_title"
         app:layout_constraintTop_toBottomOf="@id/pass_title"/>
 
-    <TextView
-        android:id="@+id/manage_children_title"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/sign_out"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="Manage Children"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@id/name_title"
-        app:layout_constraintTop_toBottomOf="@id/password"/>
+        android:layout_marginTop="30dp"
+        android:layout_marginHorizontal="100dp"
+        android:text="Sign Out"
+        android:backgroundTint="@color/another_blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/password" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

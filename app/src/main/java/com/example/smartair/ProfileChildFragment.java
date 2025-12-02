@@ -26,7 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class ProfileChildFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String userID;
     private TextView name;
     private TextView dob;
     private EditText password;
@@ -43,7 +43,7 @@ public class ProfileChildFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile_child, container, false);
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         name = view.findViewById(R.id.name);
         dob = view.findViewById(R.id.dob);
@@ -56,6 +56,9 @@ public class ProfileChildFragment extends Fragment {
         // update password
         password.setOnClickListener(v -> changePassword());
 
+        // check which user is it
+
+
         // sign out
         signOut.setOnClickListener(v -> signOutDialog());
 
@@ -63,7 +66,7 @@ public class ProfileChildFragment extends Fragment {
     }
 
     private void showData() {
-        DatabaseReference childRef = db.getReference().child("child-users").child(childID);
+        DatabaseReference childRef = db.getReference().child("child-users").child(userID);
         childRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -131,11 +134,23 @@ public class ProfileChildFragment extends Fragment {
         });
     }
 
+    private void checkUser() {
+        //
+    }
+
     private void signOutDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Sign Out");
-        builder.setMessage("Are you sure you want to sign out?");
-        builder.setPositiveButton("Yes", (dialog, which) -> {
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
+
+        TextView signOutText = view.findViewById(R.id.sign_out_text);
+        Button yesButton = view.findViewById(R.id.yes_button);
+        Button noButton = view.findViewById(R.id.no_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(view)
+                .setCancelable(true)
+                .create();
+
+        yesButton.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
@@ -145,9 +160,12 @@ public class ProfileChildFragment extends Fragment {
                     .replace(R.id.fragmentContainerView, new SignInFragment())
                     .commit();
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
         });
-        builder.setNegativeButton("No", (dialog, which) -> { dialog.dismiss(); });
-        builder.create().show();
+
+        noButton.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
 }
