@@ -48,6 +48,7 @@ public class ChildDashboardFragment extends Fragment {
     private MaterialButton buttonDailyCheckIn, buttonLogin, buttonSettings, buttonDelete;
     private MaterialCardView cardZone;
     private List<MedicineLog> medicineLogs;
+    boolean is30Days = false;
 
     @Nullable
     @Override
@@ -74,7 +75,7 @@ public class ChildDashboardFragment extends Fragment {
         initializeView(view);
         setupClickListeners();
         fetchDataFromDatabase();
-        loadTrendChart();
+        loadTrendChart(is30Days);
     }
 
 
@@ -272,24 +273,91 @@ public class ChildDashboardFragment extends Fragment {
         }
     }
 
-    private void loadTrendChart() {
-        ArrayList<String> labels = new ArrayList<>();
+    private void loadTrendChart(boolean is30Days) {
+        ArrayList<String> labels = createDateLabels(is30Days);
         ArrayList<Float> values = new ArrayList<>();
+        for (int i = 0; i < labels.size(); i++) {
+            values.add(0f);
+        }
+        DatabaseReference childRef = FirebaseDatabase.getInstance().getReference("child-medicineLogs").child(uid);
+        childRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    showChart(labels, values);
+                    return;
+                }
+                List<String> medicineKeys = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    medicineKeys.add(dataSnapshot.getKey());
+                }
+                if (medicineKeys.isEmpty()) {
+                    showChart(labels, values);
+                    return;
+                }
+                DatabaseReference medicineRef = FirebaseDatabase.getInstance().getReference("medicineLogs");
+                final int [] count = {0};
+                for (String key : medicineKeys) {
+                    Log.d("debug", "key: " + key);
+                    medicineRef.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot2) {
+                            Boolean rescue = snapshot2.child("rescue").getValue(Boolean.class);
+                            Log.d("debug", "rescue: " + rescue);
+                            String dateStr = snapshot2.child("date").getValue(String.class);
+                            Log.d("debug", "date: " + dateStr);
+                            if (rescue != null && dateStr != null) {
+                                LocalDate logDate;
+                                try {
+                                    logDate = LocalDate.parse(dateStr.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Log.d("debug", logDate.toString());
+                                    for (int i = 0; i < labels.size(); i++) {
+                                        LocalDate labelDate = LocalDate.now().minusDays(labels.size() - i - 1);
+                                        if (logDate.isEqual(labelDate)) {
+                                            values.set(i, values.get(i) + 1f);
+                                            break;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    Log.d("debug", "Error parsing date: " + e.getMessage());
+                                    return;
+                                }
+                            }
+                            count[0]++;
+                            if (count[0] == medicineKeys.size()) {
+                                showChart(labels, values);
+                                }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
 
-        // Example dummy data (replace with real data later)
-        labels.add("2025-12-01");
-        labels.add("2025-12-02");
-        labels.add("2025-12-03");
-        values.add(2f);
-        values.add(5f);
-        values.add(3f);
+    }
 
-        LineChartFragment fragment = LineChartFragment.newInstance("Trend", labels, values);
-
+    private void showChart(ArrayList<String> labels, ArrayList<Float> values) {
+        LineChartFragment fragment = LineChartFragment.newInstance("Rescue Medicine Use per Day", labels, values);
         getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.containerLineChart, fragment)
-                .commit();
+                .commitAllowingStateLoss();
+    }
+
+    private ArrayList<String> createDateLabels(boolean is30Days) {
+        ArrayList<String> labels = new ArrayList<>();
+        int days = is30Days ? 30 : 7;
+        LocalDate today = LocalDate.now();
+        for (int i = days - 1; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            labels.add(date.format(DateTimeFormatter.ofPattern("dd-MM")));
+        }
+        return labels;
     }
 
     private void setupClickListeners() {
@@ -401,6 +469,10 @@ public class ChildDashboardFragment extends Fragment {
             Intent intent = new Intent(getContext(), ChildActivity.class);
             intent.putExtra("childId", uid);
             startActivity(intent);
+        });
+        switchDays.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            is30Days = isChecked;
+            loadTrendChart(is30Days);
         });
     }
 }
