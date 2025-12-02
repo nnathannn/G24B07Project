@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentContainer;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import org.w3c.dom.Text;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 
 
 public class ProviderChildDashboard extends Fragment {
@@ -82,19 +84,19 @@ public class ProviderChildDashboard extends Fragment {
                 title.setText(snapshot.child("name").getValue(String.class) + "'s Data");
                 DataSnapshot accessNode = snapshot.child("provider").child(providerId);
                 for (DataSnapshot child : accessNode.getChildren()) {
-                    if (child.getKey().equals("summary") && child.getValue(Boolean.class)) {
+                    if (child.getKey().equals("controller") && child.getValue(Boolean.class)) {
                         addSummary(snapshot.child("schedule").child("start-date").getValue(String.class),
                                 snapshot.child("schedule").child("end-date").getValue(String.class));
                         i++;
                     } else if (child.getKey().equals("trigger") && child.getValue(Boolean.class)) {
                         addTrigger();
                         i++;
-                    } else if (child.getKey().equals("controller") && child.getValue(Boolean.class)) {
-
+                    } else if (child.getKey().equals("summary") && child.getValue(Boolean.class)) {
+                        addCharts();
                         i++;
                     }
                 }
-                if ( i == 0) {
+                if (i == 0) {
                     TextView noData = new TextView(getContext());
                     noData.setText("No data shared");
                     noData.setTextSize(24);
@@ -118,6 +120,7 @@ public class ProviderChildDashboard extends Fragment {
         TextView triggers = new TextView(getContext());
         triggers.setText("Exercise, Cold Air, Dust/Pets, Smoke, Illness, Perfume/Cleaners/Strong Odors");
         triggers.setTextSize(16);
+        triggers.setPadding(32, 0, 0, 0);
         layout.addView(triggers, 1);
     }
 
@@ -130,20 +133,23 @@ public class ProviderChildDashboard extends Fragment {
 
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
-        int days =  ((int)ChronoUnit.DAYS.between(startDate, endDate)) + 1;
+        int days = ((int) ChronoUnit.DAYS.between(startDate, endDate)) + 1;
 
         TextView scheduleStart = new TextView(getContext());
         scheduleStart.setText("Start of schedule: " + start);
         scheduleStart.setTextSize(16);
+        scheduleStart.setPadding(32, 0, 0, 0);
         layout.addView(scheduleStart, 1);
 
         TextView scheduleEnd = new TextView(getContext());
         scheduleEnd.setText("End of schedule: " + end);
         scheduleEnd.setTextSize(16);
+        scheduleEnd.setPadding(32, 0, 0,0);
         layout.addView(scheduleEnd, 2);
 
         TextView adherence = new TextView(getContext());
         adherence.setTextSize(16);
+        adherence.setPadding(32, 0, 0, 0);
         layout.addView(adherence, 3);
 
 
@@ -158,9 +164,61 @@ public class ProviderChildDashboard extends Fragment {
                         count++;
                     }
                 }
-                adherence.setText("Adherence: " + (count*100/days) + "%");
+                adherence.setText("Adherence: " + (count * 100 / days) + "%");
             }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void addCharts() {
+        TextView pefTitle  = new TextView(getContext());
+        pefTitle.setText("Average PEF Summary Chart");
+        pefTitle.setTextSize(24);
+        pefTitle.setPadding(0, 16, 0, 0);
+        layout.addView(pefTitle, 0);
+
+        LocalDate end = LocalDate.now().plusDays(1);
+        String startDate = end.minusMonths(3).toString();
+        String endDate = end.toString();
+
+
+        myref.child("zone").orderByChild("date").startAt(startDate).endAt(endDate).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<String> labels = new ArrayList<>();
+                ArrayList<Float> values = new ArrayList<>();
+                int count = 0;
+                int index = 0;
+                Float average = 0.0f;
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    if (childSnapshot.child("child-id").getValue(String.class).equals(childId)) {
+                        String date = childSnapshot.child("date").getValue(String.class).split("T")[0];
+                        if (!labels.contains(date)) {
+                            labels.add(date);
+                            values.add(childSnapshot.child("count").getValue(Float.class));
+                            count = 1;
+                            index = labels.size() - 1;
+                        } else {
+                            average = (values.get(index)*count + childSnapshot.child("count").getValue(Float.class)) / (count+1);
+                            count++;
+                            values.set(index, average);
+                        }
+                    }
+                }
+                LineChartFragment fragment = LineChartFragment.newInstance("Average PEF Summary Charts", labels, values);
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.ChildLayout, fragment)
+                        .commit();
+                TextView test = new TextView(getContext());
+                test.setText("TEST");
+                layout.addView(test);
+            }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
