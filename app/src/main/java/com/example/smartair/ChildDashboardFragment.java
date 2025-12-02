@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
@@ -374,6 +375,11 @@ public class ChildDashboardFragment extends Fragment {
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
+        });
+        buttonLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ChildActivity.class);
+            intent.putExtra("childId", uid);
+            startActivity(intent);
         });
     }
 }
