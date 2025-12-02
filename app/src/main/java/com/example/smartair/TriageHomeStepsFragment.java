@@ -157,6 +157,7 @@ public class TriageHomeStepsFragment extends Fragment {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                steps.clear();
                 if (snapshot.exists()) {
                     Double curPB = snapshot.getValue(Double.class);
                     if (curPB != null) getPEF(view, curPB);
