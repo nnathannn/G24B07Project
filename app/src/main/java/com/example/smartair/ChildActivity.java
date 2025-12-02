@@ -46,17 +46,26 @@ public class ChildActivity extends AppCompatActivity implements UIDProvider {
                     if (isFirstRun) {
                         Bundle args = new Bundle();
                         args.putString("role", "child");
+                        args.putString("childId", childId);
                         OnboardingFragment fragment = new OnboardingFragment();
                         fragment.setArguments(args);
                         loadFragment(fragment);
                         ref.setValue(false);
                     } else {
-                        loadFragment(new HomeChildFragment());
+                        HomeChildFragment fragment = new HomeChildFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("childId", childId);
+                        fragment.setArguments(bundle);
+                        loadFragment(fragment);
                     }
                 }
                 public void onCancelled(@NonNull DatabaseError error) {
                     Toast.makeText(ChildActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    loadFragment(new HomeChildFragment());
+                    HomeChildFragment fragment = new HomeChildFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("childId", childId);
+                    fragment.setArguments(bundle);
+                    loadFragment(fragment);
                 }
             });
         }

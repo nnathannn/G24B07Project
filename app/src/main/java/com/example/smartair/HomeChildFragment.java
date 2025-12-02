@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -22,12 +23,15 @@ public class HomeChildFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter badgeAdapter;
     private List<Item> itemList;
+    private String childId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
+
+        checkUser();
 
         //Copy the code up until fetchData() and change with respective view holders for recycler view
         recyclerView = view.findViewById(R.id.badgeRecycler);
@@ -62,9 +66,7 @@ public class HomeChildFragment extends Fragment {
 
         buttonDaily.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                loadFragment(new SymptomFragment());
-            }
+            public void onClick(View v) { loadFragment(new SymptomFragment()); }
         });
 
         buttonTechnique.setOnClickListener(new View.OnClickListener() {
@@ -74,12 +76,12 @@ public class HomeChildFragment extends Fragment {
             }
         });
 
-        buttonPEF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new PEFFragment());
-            }
-        });
+//        buttonPEF.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                loadFragment(new PEFFragment());
+//            }
+//        });
 
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +93,19 @@ public class HomeChildFragment extends Fragment {
         return view;
     }
 
+    private void checkUser() {
+        if (getArguments() == null) {
+            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            childId = getArguments().getString("childId");
+        }
+    }
+
     private void loadFragment(Fragment fragment) {
+        Bundle bundle = new Bundle();
+        bundle.putString("childId", childId);
+        fragment.setArguments(bundle);
+
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmentContainerView, fragment);
         transaction.addToBackStack(null);
