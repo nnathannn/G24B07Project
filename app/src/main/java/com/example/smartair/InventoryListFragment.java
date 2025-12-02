@@ -150,7 +150,7 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
         Bundle bundle = new Bundle();
         bundle.putString("child_id", clickedInventory.first.getChildId());
         bundle.putString("inventory_id", clickedInventory.second);
-        bundle.putString("updated_by", "parent");
+        bundle.putString("updated_by", "Parent");
         Fragment fragment = new EditInventoryFragment();
         fragment.setArguments(bundle);
         assert getActivity() != null;

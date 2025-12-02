@@ -143,14 +143,14 @@
                 android:hint="Amount Left out of 1 (100%)"/>
 
             <Button
-                android:id="@+id/addItemButton"
+                android:id="@+id/editItemButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="15dp"
                 android:backgroundTint="@color/darker_blue"
-                android:text="Add Item"
+                android:text="Edit Item"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 app:cornerRadius="10dp"
