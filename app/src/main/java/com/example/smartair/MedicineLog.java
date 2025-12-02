@@ -25,18 +25,19 @@ public class MedicineLog extends Item {
     @PropertyName("med-name")
     private String medName;
 
-    public MedicineLog() {}
+    public MedicineLog() {
+    }
 
     public MedicineLog(String date, String id, String prePostStatus,int preStatus, int postStatus, boolean rescue, int dose, String medName) throws IllegalArgumentException {
         super(date, id);
         this.prePostStatus = prePostStatus;
 
-        if (postStatus < 1 || postStatus >5) {
+        if (postStatus < 1 || postStatus > 5) {
             throw new IllegalArgumentException("Post-status must be between 1 and 5");
         }
         this.postStatus = postStatus;
 
-        if (preStatus < 1 || preStatus >5) {
+        if (preStatus < 1 || preStatus > 5) {
             throw new IllegalArgumentException("Pre-status must be between 1 and 5");
         }
         this.preStatus = preStatus;
@@ -52,16 +53,29 @@ public class MedicineLog extends Item {
     @PropertyName("prePostStatus")
     public String getPrePostStatus() {return prePostStatus;}
     @PropertyName("preStatus")
-    public int getPreStatus() {return preStatus;}
+    public int getPreStatus() {
+        return preStatus;
+    }
+
     @PropertyName("postStatus")
-    public int getPostStatus() {return postStatus;}
-   @PropertyName("rescue")
-    public boolean getRescue() {return rescue;}
+    public int getPostStatus() {
+        return postStatus;
+    }
+
+    @PropertyName("rescue")
+    public boolean getRescue() {
+        return rescue;
+    }
+
     @PropertyName("dose")
-    public int getDose() {return dose;}
+    public int getDose() {
+        return dose;
+    }
 
     @PropertyName("med-name")
-    public String getMedName() {return medName;}
+    public String getMedName() {
+        return medName;
+    }
 
     @PropertyName("prePostStatus")
     public void setPrePostStatus(String prePostStatus) {
@@ -74,7 +88,7 @@ public class MedicineLog extends Item {
     
     @PropertyName("preStatus")
     public void setPreStatus(int preStatus) {
-        if (preStatus< 1 || preStatus>5) {
+        if (preStatus < 1 || preStatus > 5) {
             throw new IllegalArgumentException("Pre-status must be between 1 and 5");
         }
         this.preStatus = preStatus;
@@ -82,26 +96,27 @@ public class MedicineLog extends Item {
 
     @PropertyName("postStatus")
     public void setPostStatus(int postStatus) {
-        if (postStatus< 1 || postStatus>5) {
+        if (postStatus < 1 || postStatus > 5) {
             throw new IllegalArgumentException("Post-status must be between 1 and 5");
         }
         this.postStatus = postStatus;
     }
 
-   @PropertyName("rescue")
-    public void setRescue(boolean rescue) {this.rescue = rescue;}
+    @PropertyName("rescue")
+    public void setRescue(boolean rescue) {
+        this.rescue = rescue;
+    }
 
     @PropertyName("dose")
-    public void setDose(int dose){
-        if (dose<= 0) {
+    public void setDose(int dose) {
+        if (dose <= 0) {
             throw new IllegalArgumentException(("Dose must be a positive number"));
         }
         this.dose = dose;
     }
-
     @PropertyName("med-name")
-    public void setMedName(String medName){
+    public void setMedName (String medName){
         this.medName = medName;
-    }
+        }
 
-}
+    }

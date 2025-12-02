@@ -51,3 +51,4 @@ public class Triage extends Item {
         this.rescue = rescue;
     }
 }
+

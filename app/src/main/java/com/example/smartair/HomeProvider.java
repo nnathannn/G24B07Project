@@ -25,12 +25,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class HomeProvider extends AppCompatActivity {
+public class HomeProvider extends AppCompatActivity implements UIDProvider {
 
     ActivityHomeProviderBinding binding;
 
     FirebaseAuth myauth = FirebaseAuth.getInstance();
-    String providerId;
+    String providerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +84,6 @@ public class HomeProvider extends AppCompatActivity {
             return false;
         });
 
-        EdgeToEdge.enable(this);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
     }
 
     private void replaceFragment(Fragment fragment){
@@ -97,6 +92,8 @@ public class HomeProvider extends AppCompatActivity {
         fragmentTransaction.replace(R.id.providerHomeLayout, fragment);
         fragmentTransaction.commit();
     }
+
+    public String getUid() { return providerId; }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 }
