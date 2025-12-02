@@ -60,23 +60,24 @@
 
 
             <TextView
-                android:id="@+id/enterNameTitle"
+                android:id="@+id/enterUnameTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="Name"
+                android:text="Username"
                 android:textColor="@color/black"
                 android:textSize="15sp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputName"
+                    android:id="@+id/inputUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name" />
+                    android:hint="Username" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -93,8 +94,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="DD-MM-YYYY"
+                android:hint="YYYY-MM-DD"
                 android:inputType="date" />
+
+            <TextView
+                android:id="@+id/enterPB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Personal Best"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputPB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Personal Best"
+                    android:inputType="number"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <TextView
                 android:id="@+id/enterNoteTitle"
@@ -106,35 +131,16 @@
                 android:textSize="15sp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputNote"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputNote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Notes" />
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/enterUsernameTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Username"
-                android:textColor="@color/black"
-                android:textSize="15sp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Username" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -147,11 +153,11 @@
                 android:textSize="15sp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputPassw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputPassw"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Password" />
@@ -164,7 +170,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="4dp"
                 android:lineSpacingExtra="4sp"
-                android:text="Password must be 8 characters minimum\nPassword must have at least one number, one special character, and one uppercase letter"
+                android:text="Password must be 8 characters minimum\nPassword must have at least one number, one special character, one lowercase and uppercase letter\nUsername must be alphanumeric"
                 android:textColor="@color/dark_grey"
                 android:textSize="10sp" />
 

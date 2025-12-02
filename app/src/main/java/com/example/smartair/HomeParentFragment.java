@@ -44,7 +44,6 @@ public class HomeParentFragment extends Fragment {
 
         ImageButton addChildButton = view.findViewById(R.id.addSymbolChildButton);
         addChildButton.setOnClickListener(v -> {
-            System.out.println("klik add child");
             FragmentManager fragmentManager = getParentFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.parent_frame_layout, new AddChildFragment());
