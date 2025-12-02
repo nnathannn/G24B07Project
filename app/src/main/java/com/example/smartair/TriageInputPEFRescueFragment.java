@@ -26,7 +26,7 @@ import java.util.List;
 
 public class TriageInputPEFRescueFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String childId;
     private String triageID;
     private EditText inputPEF;
     private EditText inputPreMed;
@@ -60,7 +60,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        checkUser();
 
         inputRescue = view.findViewById(R.id.input_rescue_box);
         inputPEF = view.findViewById(R.id.input_pef_box);
@@ -105,11 +105,11 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 if (!pef.isEmpty()) {
                     triageRef.child("pef").setValue(Double.parseDouble(pef));
                     // retrieve current PB of the child and input current zone
-                    DatabaseReference pb = db.getReference("child-users").child(childID).child("PB");
+                    DatabaseReference pb = db.getReference("child-users").child(childId).child("PB");
                     pb.get().addOnSuccessListener(dataSnapshot -> {
                         if (dataSnapshot.exists()) {
                             double curPB = dataSnapshot.getValue(Double.class);
-                            Zone zone = new Zone(LocalDateTime.now().toString(), childID, Double.parseDouble(pef), curPB
+                            Zone zone = new Zone(LocalDateTime.now().toString(), childId, Double.parseDouble(pef), curPB
                                     , preMed.isEmpty() ? 0 : Integer.parseInt(preMed)
                                     , postMed.isEmpty() ? 0 : Integer.parseInt(postMed));
                             DatabaseReference zoneRef = db.getReference("zone").push();
@@ -118,7 +118,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
                             });
 
                             // input child-zones
-                            DatabaseReference childZonesRef = db.getReference("child-zones").child(childID);
+                            DatabaseReference childZonesRef = db.getReference("child-zones").child(childId);
                             childZonesRef.child(zoneRef.getKey()).setValue(true).addOnFailureListener(e -> {
                                 Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
@@ -134,6 +134,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 TriageDecisionCardFragment fragment = new TriageDecisionCardFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
+                args.putString("childId", childId);
                 fragment.setArguments(args);
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragmentContainerView, fragment);
@@ -141,5 +142,13 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 transaction.commit();
             }
         });
+    }
+
+    private void checkUser() {
+        if (getArguments() == null) {
+            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            childId = getArguments().getString("childId");
+        }
     }
 }

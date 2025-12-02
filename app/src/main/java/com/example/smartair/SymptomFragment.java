@@ -45,7 +45,8 @@ public class SymptomFragment extends Fragment {
     private Button buttonDate, buttonTime, buttonSubmit;
 
     private DatabaseReference databaseReference;
-    private String uid;
+    private String childId;
+    private boolean isParent;
 
     private List<Symptom> symptomLogList;
     private SymptomAdapter symptomAdapter;
@@ -93,7 +94,7 @@ public class SymptomFragment extends Fragment {
                 .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
                 .getReference("symptom");
 
-        uid = ((UIDProvider) getActivity()).getUid();
+        checkUser();
 
         dateTime = LocalDateTime.now();
 
@@ -102,7 +103,15 @@ public class SymptomFragment extends Fragment {
         fetchDataFromFirebase();
     }
 
-
+    private void checkUser() {
+        childId = getArguments().getString("childId");
+        if (!getArguments().getBoolean("isParent")) {
+            isParent = false;
+        }
+        else {
+            isParent = true;
+        }
+    }
 
 
 
@@ -142,7 +151,7 @@ public class SymptomFragment extends Fragment {
                         }
                         String childIdStr = String.valueOf(childIdObj);
 
-                        if (!childIdStr.equals(uid)) {
+                        if (!childIdStr.equals(childId)) {
                             continue;
                         }
 
@@ -332,15 +341,12 @@ public class SymptomFragment extends Fragment {
             return;
         }
 
-        boolean parentFlag = false;   // accessed through child page
-        String triageId = "";
-
         Symptom log = new Symptom(
-                uid,
+                childId,
                 dateTime.toString(),
-                parentFlag,
+                isParent,
                 symptomName,
-                triageId,
+                "",
                 selectedTriggers
         );
 

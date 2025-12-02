@@ -33,7 +33,7 @@ import java.util.List;
 
 public class TriageFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String childId;
     private TextView childName;
     private CheckBox flag1;
     private CheckBox flag2;
@@ -52,7 +52,7 @@ public class TriageFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        checkUser();
 
         // set up child data
         childName = view.findViewById(R.id.child_name);
@@ -69,7 +69,7 @@ public class TriageFragment extends Fragment {
     }
 
     private void fetchChildData() {
-        DatabaseReference ref = db.getReference("child-users").child(childID);
+        DatabaseReference ref = db.getReference("child-users").child(childId);
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -112,8 +112,8 @@ public class TriageFragment extends Fragment {
                 if (flag3.isChecked()) symptomList.add(flag3.getText().toString());
 
                 DatabaseReference triageRef = db.getReference("triage");
-                DatabaseReference childTriagesRef = db.getReference("child-triages").child(childID);
-                Triage triage = new Triage(childID, LocalDateTime.now().toString(),
+                DatabaseReference childTriagesRef = db.getReference("child-triages").child(childId);
+                Triage triage = new Triage(childId, LocalDateTime.now().toString(),
                         flag3.isChecked() ? "Emergency" : "",
                         "", symptomList, 1.0, 0);
                 DatabaseReference triageRefPush = triageRef.push();
@@ -126,9 +126,9 @@ public class TriageFragment extends Fragment {
 
                 // input symptom and child-symptoms
                 DatabaseReference symptomRef = db.getReference("symptom");
-                DatabaseReference childSymptomsRef = db.getReference("child-symptoms").child(childID);
+                DatabaseReference childSymptomsRef = db.getReference("child-symptoms").child(childId);
                 if (flag1.isChecked()) {
-                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                    Symptom symptom = new Symptom(childId, LocalDateTime.now().toString(), false,
                             flag1.getText().toString(), triageRefPush.getKey(), null);
                     DatabaseReference symptomRefPush = symptomRef.push();
                     symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
@@ -139,7 +139,7 @@ public class TriageFragment extends Fragment {
                     });
                 }
                 if (flag2.isChecked()) {
-                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                    Symptom symptom = new Symptom(childId, LocalDateTime.now().toString(), false,
                             flag2.getText().toString(), triageRefPush.getKey(), null);
                     DatabaseReference symptomRefPush = symptomRef.push();
                     symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
@@ -150,7 +150,7 @@ public class TriageFragment extends Fragment {
                     });
                 }
                 if (flag3.isChecked()) {
-                    Symptom symptom = new Symptom(childID, LocalDateTime.now().toString(), false,
+                    Symptom symptom = new Symptom(childId, LocalDateTime.now().toString(), false,
                             flag3.getText().toString(), triageRefPush.getKey(), null);
                     DatabaseReference symptomRefPush = symptomRef.push();
                     symptomRefPush.setValue(symptom).addOnFailureListener(e -> {
@@ -166,6 +166,7 @@ public class TriageFragment extends Fragment {
                     TriageEmergencyFragment fragment = new TriageEmergencyFragment();
                     Bundle args = new Bundle();
                     args.putString("triageID", triageRefPush.getKey());
+                    args.putString("childId", childId);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }
@@ -173,6 +174,7 @@ public class TriageFragment extends Fragment {
                     TriageInputPEFRescueFragment fragment = new TriageInputPEFRescueFragment();
                     Bundle args = new Bundle();
                     args.putString("triageID", triageRefPush.getKey());
+                    args.putString("childId", childId);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }
@@ -185,5 +187,13 @@ public class TriageFragment extends Fragment {
         transaction.replace(R.id.fragmentContainerView, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    private void checkUser() {
+        if (getArguments() == null) {
+            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            childId = getArguments().getString("childId");
+        }
     }
 }

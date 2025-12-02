@@ -76,12 +76,10 @@ public class HomeChildFragment extends Fragment {
             }
         });
 
-//        buttonPEF.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                loadFragment(new PEFFragment());
-//            }
-//        });
+        buttonPEF.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { loadFragment(new PEFFragment()); }
+        });
 
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override

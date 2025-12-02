@@ -39,7 +39,7 @@ import java.util.List;
 
 public class TriageHomeStepsFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String childId;
     private String triageID;
     private TextView timer;
     private AppCompatButton stopTimerButton;
@@ -73,7 +73,7 @@ public class TriageHomeStepsFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        checkUser();
 
         timer = view.findViewById(R.id.timer_number);
         steps = new ArrayList<>();
@@ -101,8 +101,12 @@ public class TriageHomeStepsFragment extends Fragment {
                     DatabaseReference triageRef = db.getReference("triage").child(triageID);
                     triageRef.child("endDate").setValue(LocalDateTime.now().toString());
                     // navigate to home page
+                    HomeChildFragment fragment = new HomeChildFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("childId", childId);
+                    fragment.setArguments(bundle);
                     FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragmentContainerView, new HomeChildFragment());
+                    transaction.replace(R.id.fragmentContainerView, fragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }
@@ -130,6 +134,7 @@ public class TriageHomeStepsFragment extends Fragment {
                 TriageEmergencyFragment fragment = new TriageEmergencyFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
+                args.putString("childId", childId);
                 fragment.setArguments(args);
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragmentContainerView, fragment);
@@ -154,7 +159,7 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void getPB(View view) {
-        DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
+        DatabaseReference ref = db.getReference("child-users").child(childId).child("PB");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -173,7 +178,7 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void getPEF(View view, Double curPB) {
-        DatabaseReference ref = db.getReference("child-zones").child(childID);
+        DatabaseReference ref = db.getReference("child-zones").child(childId);
         ref.limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -304,6 +309,14 @@ public class TriageHomeStepsFragment extends Fragment {
             default:
                 curPEFBox.setBackgroundColor(getResources().getColor(R.color.white));
                 break;
+        }
+    }
+
+    private void checkUser() {
+        if (getArguments() == null) {
+            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            childId = getArguments().getString("childId");
         }
     }
 }
