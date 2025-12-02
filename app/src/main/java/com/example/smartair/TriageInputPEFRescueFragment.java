@@ -69,7 +69,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
             public void onClick(View v) {
                 // update rescue and pef in triage
                 String rescue = inputRescue.getText().toString();
-                String curPEF = inputPEF.getText().toString();
+                String pef = inputPEF.getText().toString();
                 if (rescue.isEmpty()) {
                     Toast.makeText(getContext(), "Please input number of rescue trial.", Toast.LENGTH_SHORT).show();
                     return;
@@ -79,23 +79,21 @@ public class TriageInputPEFRescueFragment extends Fragment {
                     return;
                 }
 
-                List<String> pefList = new ArrayList<>();
                 DatabaseReference triageRef = db.getReference("triage").child(triageID);
-                if (!curPEF.isEmpty() && Double.parseDouble(curPEF) <= 0) {
+                if (!pef.isEmpty() && Double.parseDouble(pef) <= 0) {
                     Toast.makeText(getContext(), "PEF should be a positive number.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                pefList.add(curPEF);
-                triageRef.child("rescueList").setValue(Integer.parseInt(rescue));
-                triageRef.child("pefList").setValue(pefList);
 
-                if (!curPEF.isEmpty()) {
+                triageRef.child("rescue").setValue(Integer.parseInt(rescue));
+                if (!pef.isEmpty()) {
+                    triageRef.child("pef").setValue(Double.parseDouble(pef));
                     // retrieve current PB of the child and input current zone
                     DatabaseReference pb = db.getReference("child-users").child(childID).child("PB");
                     pb.get().addOnSuccessListener(dataSnapshot -> {
                         if (dataSnapshot.exists()) {
                             double curPB = dataSnapshot.getValue(Double.class);
-                            Zone zone = new Zone(LocalDateTime.now().toString(), childID, Double.parseDouble(curPEF), curPB);
+                            Zone zone = new Zone(LocalDateTime.now().toString(), childID, Double.parseDouble(pef), curPB);
                             DatabaseReference zoneRef = db.getReference("zone").push();
                             zoneRef.setValue(zone).addOnFailureListener(e -> {
                                 Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -112,6 +110,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
                         }
                     });
                 }
+                else triageRef.child("pef").setValue(0.0);
 
                 // navigate to decision card fragment
                 TriageDecisionCardFragment fragment = new TriageDecisionCardFragment();

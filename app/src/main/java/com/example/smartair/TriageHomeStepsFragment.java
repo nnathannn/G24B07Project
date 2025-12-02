@@ -30,8 +30,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 
 public class TriageHomeStepsFragment extends Fragment {
@@ -150,13 +152,6 @@ public class TriageHomeStepsFragment extends Fragment {
         if (countDownTimer != null) countDownTimer.cancel();
     }
 
-    private void loadFragment(Fragment fragment) {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmentContainerView, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     private void getPB(View view) {
         DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -189,8 +184,17 @@ public class TriageHomeStepsFragment extends Fragment {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot zoneSnapshot) {
                                     if (zoneSnapshot.exists()) {
+                                        String date = zoneSnapshot.child("date").getValue(String.class);
+                                        LocalDate curDate = LocalDateTime.parse(date).toLocalDate();
                                         Double curPEF = zoneSnapshot.child("count").getValue(Double.class);
-                                        if (curPEF != null) setZone(view, curPB, curPEF);
+                                        if (curPEF != null) {
+                                            if (date != null && curDate.equals(LocalDate.now())) {
+                                                setZone(view, curPB, curPEF);
+                                            }
+                                            else {
+                                                setZone(view, null, null);
+                                            }
+                                        }
                                     }
                                 }
 
@@ -218,6 +222,21 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void setZone(View view, Double curPB, Double curPEF) {
+        if (curPB == null || curPEF == null) {
+            db.getReference("triage").child(triageID).child("emergency").setValue("Non-Emergency");
+            steps.add("Stop all physical activity immediately and sit upright in a comfortable, slightly forward-leaning position.");
+            adapter.notifyDataSetChanged();
+            steps.add("Give 1–2 puffs of the rescue inhaler using a spacer. Takes slow, deep breaths with each puff.");
+            adapter.notifyDataSetChanged();
+            steps.add("Take slow breathing through the nose and out through pursed lips for 1–2 minutes.");
+            adapter.notifyDataSetChanged();
+            steps.add("Loosen tight clothing around the neck or chest (jackets, scarves, heavy sweaters).");
+            adapter.notifyDataSetChanged();
+            steps.add("Sip warm water to help relax the chest and throat muscles.");
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
         int percentage = (int) (curPEF * 100 / curPB);
         String color = percentage >= 80 ? "green" : (percentage >= 50 ? "yellow" : "red");
 
@@ -226,6 +245,7 @@ public class TriageHomeStepsFragment extends Fragment {
 
         DatabaseReference triageRef = db.getReference("triage").child(triageID);
         CardView curPEFBox = view.findViewById(R.id.cur_pef_box);
+
         switch (color) {
             case "green":
                 // set emergency category in database

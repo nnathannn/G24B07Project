@@ -110,13 +110,11 @@ public class TriageFragment extends Fragment {
                 if (flag2.isChecked()) symptomList.add(flag2.getText().toString());
                 if (flag3.isChecked()) symptomList.add(flag3.getText().toString());
 
-                List<String> pefList = new ArrayList<>();
-
                 DatabaseReference triageRef = db.getReference("triage");
                 DatabaseReference childTriagesRef = db.getReference("child-triages").child(childID);
                 Triage triage = new Triage(childID, LocalDateTime.now().toString(),
                         flag3.isChecked() ? "Emergency" : "",
-                        "", symptomList, pefList, 0);
+                        "", symptomList, 1.0, 0);
                 DatabaseReference triageRefPush = triageRef.push();
                 triageRefPush.setValue(triage).addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
