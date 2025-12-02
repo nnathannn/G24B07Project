@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.media.Image;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -30,11 +31,14 @@ public class ManageProviderAccessFragment extends Fragment {
         addProviderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = getParentFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(R.id.parent_frame_layout, new AddProviderFragment());
-                fragmentTransaction.commit();
+                replaceFragment(new AddProviderFragment());
+            }
+        });
+        ImageButton pendingButton = view.findViewById(R.id.pendingButton);
+        pendingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replaceFragment(new PendingProviderFragment());
             }
         });
         return view;
@@ -50,5 +54,13 @@ public class ManageProviderAccessFragment extends Fragment {
                     .commit();
         }
 
+    }
+
+    private void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
+        fragmentTransaction.commit();
     }
 }
