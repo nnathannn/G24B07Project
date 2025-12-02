@@ -68,7 +68,7 @@ public class AddProviderFragment extends Fragment {
                     String childId = ds.getKey();
                     checkChild(childId, Uname);
                 }
-                Toast.makeText(getContext(), "No child matches the username.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "No child matches the username.", Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
