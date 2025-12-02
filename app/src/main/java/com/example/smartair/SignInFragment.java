@@ -52,10 +52,20 @@ public class SignInFragment extends Fragment {
                 presenter.attemptSignIn(userText, passwordText);
         });
 
-        sign_up.setOnClickListener(v -> { presenter.loadFragment("sign_up"); });
+        sign_up.setOnClickListener(v -> { replaceFragment(new RoleSelectionFragment()); });
 
-        recovery.setOnClickListener(v -> { presenter.loadFragment("recovery"); });
+        recovery.setOnClickListener(v -> { replaceFragment(new AccountRecoveryFragment()); });
 
         return view;
+    }
+
+    public void displayErrorToast(String message) { Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show(); }
+
+    public void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.GetStartedContainer, fragment);
+        fragmentTransaction.commit();
     }
 }

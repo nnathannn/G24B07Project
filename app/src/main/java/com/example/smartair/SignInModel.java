@@ -31,7 +31,7 @@ public class SignInModel {
                         if (t.isSuccessful()) {
                             checkUserRole(presenter, t.getResult().getUser().getUid());
                         } else {
-                            Toast.makeText(presenter.view.getContext(), "Email/Username or Password does not match our records.", Toast.LENGTH_LONG).show();
+                            presenter.showError("Email/Username or Password does not match our records.", "database");
                         }
                     });
     }

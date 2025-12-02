@@ -21,7 +21,7 @@ public class SignInPresenter {
 
     public void attemptSignIn(String user, String password) {
         if (user.isEmpty() || password.isEmpty()) {
-            Toast.makeText(view.getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
+            showError("Please fill in all fields.", "logic");
         } else {
             if (!user.contains("@")) {
                 user += "@g24b07project.examplefakedomain";
@@ -42,21 +42,12 @@ public class SignInPresenter {
         view.startActivity(i);
     }
 
-    public void loadFragment(String fragment) {
-        if (fragment.equals("sign_up")) {
-            replaceFragment(new RoleSelectionFragment());
-        } else if (fragment.equals("recovery")) {
-            replaceFragment(new AccountRecoveryFragment());
-        } else {
-            Toast.makeText(view.getContext(), "Invalid fragment", Toast.LENGTH_LONG).show();
+    public void showError(String message, String type) {
+        if (type.equals("logic")) {
+            message = "Logic error: " + message;
+         } else if (type.equals("database")) {
+            message = "Database error: " + message;
         }
-    }
-
-    private void replaceFragment(Fragment fragment){
-        FragmentManager fragmentManager = view.getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.replace(R.id.GetStartedContainer, fragment);
-        fragmentTransaction.commit();
+        view.displayErrorToast(message);
     }
 }
