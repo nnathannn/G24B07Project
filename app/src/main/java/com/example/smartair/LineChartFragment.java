@@ -51,7 +51,7 @@ public class LineChartFragment extends Fragment {
         lineChart = view.findViewById(R.id.lineChart);
 
         if (getArguments() != null) {
-            chartTitle = getArguments().getString("title");
+            chartTitle = getArguments().getString("chartTitle");
             labels = getArguments().getStringArrayList("labels");
             values = (ArrayList<Float>) getArguments().getSerializable("values");
         }
