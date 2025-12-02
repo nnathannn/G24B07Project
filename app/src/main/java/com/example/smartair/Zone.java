@@ -38,7 +38,7 @@ public class Zone extends Item {
         }
         this.count = count;
     }
-    
+
     public void setStatus(double count, double curPB) throws IllegalArgumentException {
         this.count = count;
         this.curPB = curPB;
