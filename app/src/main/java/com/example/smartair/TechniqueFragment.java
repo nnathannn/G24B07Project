@@ -1,119 +1,178 @@
 package com.example.smartair;
 
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-public class TechniqueFragment extends Fragment {
+import java.util.Arrays;
+
+public class TechniqueFragment extends Fragment
+        implements TechniqueStepFragment.VideoCompleteListener {
 
     private static final int TOTAL_STEPS = 5;
 
-    // TODO: Rename and change types of parameters
-    private ImageView stepImage;
-    private TextView stepCaption;
+    private ViewPager2 viewPager;
     private Button buttonSkip;
     private Button buttonCompleted;
 
+    private TechniqueAdapter adapter;
+
     private int currentStep = 0;
-    private int completedStep = 0;
+    private int completedSteps = 0;
 
+    private final boolean[] videoFinished = new boolean[TOTAL_STEPS];
 
-    public TechniqueFragment() { }
+    // false = image, true = video
+    private final boolean[] isVideoStep = new boolean[]{
+            false,
+            false,
+            true,
+            true,
+            false
+    };
 
-    /*private int[] stepImageContents = {
-            R.drawable.step1,
-            R.drawable.step2,
-            R.drawable.step3,
-            R.drawable.step4,
-            R.drawable.step5
-    }; */
-
-    private String[] stepCaptionContents = {
-            "Seal lips",
-            "Take a slow and deep breath",
-            "Hold breath for ~10 seconds",
-            "Wait 30-60 seconds between puffs",
-            "Use spacer/mask if needed"
+    private final int[] mediaResIds = new int[]{
+            R.drawable.technique1,
+            R.drawable.technique2,
+            R.raw.technique3,
+            R.raw.technique4,
+            R.drawable.technique5
     };
 
 
+    private String uid;
+    private DatabaseReference badgeRef;
+
+    public TechniqueFragment() { }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_technique, container, false);
 
-        stepImage = view.findViewById(R.id.stepImage);
-        stepCaption = view.findViewById(R.id.stepCaption);
+        viewPager = view.findViewById(R.id.viewPagerContainer);
         buttonSkip = view.findViewById(R.id.buttonSkip);
         buttonCompleted = view.findViewById(R.id.buttonCompleted);
 
 
-        //revise here
-        showCurrentStep();
 
-        buttonSkip.setOnClickListener(v -> {
-            goToNextStep(false);
-        });
+        UIDProvider uidProvider = (UIDProvider) requireActivity();
+        uid = uidProvider.getUid();
 
-        buttonCompleted.setOnClickListener(v -> {
-            goToNextStep(true);
-        });
+        badgeRef = FirebaseDatabase
+                .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
+                .getReference("badge")
+                .child(uid)
+                .child("high-quality");
+
+        setupViewPager();
+        setupButtons();
 
         return view;
     }
 
-    private void showCurrentStep(){
-        //stepImage.setImageResource(stepImageContents[currentStep]);
-        stepCaption.setText(stepCaptionContents[currentStep]);
+    private void setupViewPager() {
+        adapter = new TechniqueAdapter(this, isVideoStep, mediaResIds);
+        viewPager.setAdapter(adapter);
 
+        viewPager.setUserInputEnabled(false);
+
+        updateCompletedButtonState();
     }
 
-    private void goToNextStep(boolean isCompleted){
-        if(isCompleted){
-            completedStep++;
+    private void setupButtons() {
+        buttonSkip.setOnClickListener(v -> goToNextStep(false));
+
+        buttonCompleted.setOnClickListener(v -> {
+            if (adapter.isVideo(currentStep) && !videoFinished[currentStep]) {
+               return;
+            }
+            goToNextStep(true);
+        });
+    }
+
+    private void goToNextStep(boolean markCompleted) {
+        if (markCompleted) {
+            completedSteps++;
         }
 
-        if(currentStep < TOTAL_STEPS - 1){
+        if (currentStep < TOTAL_STEPS - 1) {
             currentStep++;
-            showCurrentStep();
+            viewPager.setCurrentItem(currentStep, true);
+            updateCompletedButtonState();
         } else {
             onSessionFinished();
         }
-
     }
 
+    private void updateCompletedButtonState() {
+        boolean isVideo = adapter.isVideo(currentStep);
+        boolean finished = videoFinished[currentStep];
 
-    private void onSessionFinished(){
-        boolean highQuality = (completedStep == TOTAL_STEPS);
+        if (isVideo && !finished) {
+            buttonCompleted.setEnabled(false);
+            buttonCompleted.setAlpha(0.4f);
+        } else {
+            buttonCompleted.setEnabled(true);
+            buttonCompleted.setAlpha(1f);
+        }
+    }
 
-        //send to database
+    @Override
+    public void onVideoCompleted(int stepIndex) {
+        if (stepIndex >= 0 && stepIndex < videoFinished.length) {
+            videoFinished[stepIndex] = true;
+        }
+        if (stepIndex == currentStep) {
+            updateCompletedButtonState();
+        }
+    }
 
-        //reset
+    private void onSessionFinished() {
+        boolean perfect = (completedSteps == TOTAL_STEPS);
+
+        if (perfect && badgeRef != null) {
+            badgeRef.child("completed").setValue(true);
+        }
+
+        String title = perfect
+                ? "Finished High-Quality Technique Session"
+                : "Finished Technique Session";
+
+        String message = perfect
+                ? "You completed all the steps without skipping. Awesome job!"
+                : "You finished the session. You can try again another time to complete all the steps.";
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("Back to Home", (dialog, which) -> {
+
+
+                    Intent intent = new Intent(getActivity(), ChildActivity.class);
+                    startActivity(intent);
+                    requireActivity().finish();
+                })
+                .show();
+
         currentStep = 0;
-        completedStep = 0;
-
+        completedSteps = 0;
+        Arrays.fill(videoFinished, false);
     }
-
-
-
-
 }
