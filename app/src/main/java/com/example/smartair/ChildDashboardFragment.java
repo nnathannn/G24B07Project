@@ -471,7 +471,7 @@ public class ChildDashboardFragment extends Fragment {
             startActivity(intent);
         });
         buttonDailyCheckIn.setOnClickListener(v -> {
-            boolean isParent = true;       // or false, depending on your logic
+            boolean isParent = true;
 
             SymptomFragment fragment = new SymptomFragment();
 
@@ -482,7 +482,7 @@ public class ChildDashboardFragment extends Fragment {
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.parent_frame_layout, fragment)  // whichever layout ID holds your fragments
+                    .replace(R.id.parent_frame_layout, fragment)
                     .addToBackStack(null)
                     .commit();
         });
