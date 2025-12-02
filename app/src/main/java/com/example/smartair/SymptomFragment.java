@@ -72,6 +72,27 @@ public class SymptomFragment extends Fragment {
 
     private boolean[] triggerSelected;
     private LocalDateTime dateTime;
+    private boolean isParent = false;
+    private String childId;
+
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            childId = args.getString("childId");
+            isParent = args.getBoolean("isParent", false);
+        }
+
+        if (childId == null && requireActivity() instanceof UIDProvider) {
+            childId = ((UIDProvider) requireActivity()).getUid();
+            isParent = false;
+        }
+    }
+
 
     @Nullable
     @Override
