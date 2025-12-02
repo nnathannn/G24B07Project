@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -66,15 +67,18 @@ public class LineChartFragment extends Fragment {
         }
 
         LineDataSet dataSet = new LineDataSet(entries, chartTitle);
-        dataSet.setColor(Color.BLUE);
+        dataSet.setColor(ContextCompat.getColor(requireContext(), R.color.another_blue));
         dataSet.setValueTextColor(Color.BLACK);
         dataSet.setLineWidth(2f);
         dataSet.setCircleRadius(4f);
-        dataSet.setCircleColor(Color.RED);
+        dataSet.setCircleColor(ContextCompat.getColor(requireContext(), R.color.dark_blue));
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setDrawValues(false);
 
         LineData lineData = new LineData(dataSet);
         lineChart.setData(lineData);
+        lineChart.setClipValuesToContent(false);
+        lineChart.setExtraRightOffset(32f);
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setValueFormatter(new ValueFormatter() {
@@ -90,6 +94,9 @@ public class LineChartFragment extends Fragment {
         });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
+        xAxis.setLabelCount(2, true);
+        xAxis.setAxisMinimum(0f);
+        xAxis.setAxisMaximum(values.size() - 1f);
 
         lineChart.getAxisRight().setEnabled(false);
         lineChart.getDescription().setEnabled(false);
