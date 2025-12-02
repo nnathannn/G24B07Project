@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -78,9 +79,9 @@ public class LineChartFragment extends Fragment {
         LineData lineData = new LineData(dataSet);
         lineChart.setData(lineData);
         lineChart.setClipValuesToContent(false);
-        lineChart.setExtraRightOffset(32f);
 
         XAxis xAxis = lineChart.getXAxis();
+        YAxis yAxis = lineChart.getAxisLeft();
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
@@ -92,11 +93,17 @@ public class LineChartFragment extends Fragment {
                 }
             }
         });
+        float maxY = lineChart.getData().getYMax();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setLabelCount(2, true);
         xAxis.setAxisMinimum(0f);
         xAxis.setAxisMaximum(values.size() - 1f);
+        xAxis.setDrawGridLines(true);
+        yAxis.setAxisMinimum(0f);
+        yAxis.setAxisMaximum(maxY);
+        yAxis.setLabelCount(2, true);
+        yAxis.setDrawGridLines(true);
 
         lineChart.getAxisRight().setEnabled(false);
         lineChart.getDescription().setEnabled(false);
