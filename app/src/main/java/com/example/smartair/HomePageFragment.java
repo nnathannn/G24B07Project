@@ -89,7 +89,7 @@ public class HomePageFragment extends Fragment {
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadFragment(new ProfileFragment());
+                loadFragment(new ProfileChildFragment());
             }
         });
 

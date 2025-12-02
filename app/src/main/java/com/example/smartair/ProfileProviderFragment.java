@@ -18,7 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class ProfileFragment extends Fragment {
+public class ProfileProviderFragment extends Fragment {
     private FirebaseDatabase db;
     private String userID;
     private String type;
@@ -28,7 +28,7 @@ public class ProfileFragment extends Fragment {
     private String curName;
     private String curEmail;
 
-    public ProfileFragment() {
+    public ProfileProviderFragment() {
         // Required empty public constructor
     }
 
@@ -36,7 +36,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        return inflater.inflate(R.layout.fragment_profile_provider, container, false);
     }
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -52,23 +52,23 @@ public class ProfileFragment extends Fragment {
         for (String user : userType) {
             db.getReference().child(user).child(user).equalTo(userID)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        if (user.equals("child")) type = "child";
-                        if (user.equals("parent")) type = "parent";
-                        if (user.equals("provider")) type = "provider";
-                    }
-                    else {
-                        Toast.makeText(getContext(), "Error: User not found", Toast.LENGTH_SHORT).show();
-                    }
-                }
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                if (user.equals("child")) type = "child";
+                                if (user.equals("parent")) type = "parent";
+                                if (user.equals("provider")) type = "provider";
+                            }
+                            else {
+                                Toast.makeText(getContext(), "Error: User not found", Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
 
         name = view.findViewById(R.id.name);
