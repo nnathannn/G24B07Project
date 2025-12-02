@@ -142,7 +142,7 @@ public class ProfileChildFragment extends Fragment {
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainerView, new ChildSignInFragment())
+                    .replace(R.id.fragmentContainerView, new SignInFragment())
                     .commit();
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
         });
