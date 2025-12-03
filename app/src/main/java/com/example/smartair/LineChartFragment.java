@@ -94,14 +94,17 @@ public class LineChartFragment extends Fragment {
             }
         });
         float maxY = lineChart.getData().getYMax();
+        float minY = lineChart.getData().getYMin();
+        float interval = (maxY - minY) / 2;
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setLabelCount(2, true);
         xAxis.setAxisMinimum(0f);
         xAxis.setAxisMaximum(values.size() - 1f);
         xAxis.setDrawGridLines(true);
-        yAxis.setAxisMinimum(0f);
-        yAxis.setAxisMaximum(maxY);
+        xAxis.setAvoidFirstLastClipping(true);
+        yAxis.setAxisMinimum(Math.max(minY - interval, 0f));
+        yAxis.setAxisMaximum(maxY + interval);
         yAxis.setLabelCount(2, true);
         yAxis.setDrawGridLines(true);
 

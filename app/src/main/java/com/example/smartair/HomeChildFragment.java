@@ -88,7 +88,7 @@ public class HomeChildFragment extends Fragment {
         buttonDaily.setOnClickListener(v -> { loadFragment(new SymptomFragment()); });
         buttonTechnique.setOnClickListener(v -> { loadFragment(new TechniqueFragment()); });
         buttonPEF.setOnClickListener(v -> { loadFragment(new PEFFragment()); });
-        buttonProfile.setOnClickListener(v -> { loadFragment(new ProfileFragment()); });
+        buttonProfile.setOnClickListener(v -> { loadFragment(new ProfileChildFragment()); });
         streakLayout.setOnClickListener(v -> {
             if (streakTitle.getText().toString().equals("Controller Streak")) {
                 streakTitle.setText("Technique Streak");

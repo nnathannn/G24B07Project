@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.media.Image;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,15 @@ public class HomeParentFragment extends Fragment {
             FragmentManager fragmentManager = getParentFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.parent_frame_layout, new AddChildFragment());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
+
+        ImageButton account = view.findViewById(R.id.imageButton3);
+        account.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.parent_frame_layout, new ProfileParentFragment());
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         });

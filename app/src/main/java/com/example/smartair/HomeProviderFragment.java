@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 public class HomeProviderFragment extends Fragment {
-
+    private ImageButton account;
 
     public HomeProviderFragment() {}
 
@@ -47,5 +47,14 @@ public class HomeProviderFragment extends Fragment {
                     .add(R.id.providerChildListContainer, ProviderChildListFragment.class, null)
                     .commit();
         }
+
+        account = view.findViewById(R.id.profileButton);
+        account.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.providerHomeLayout, new ProfileProviderFragment());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
     }
 }
