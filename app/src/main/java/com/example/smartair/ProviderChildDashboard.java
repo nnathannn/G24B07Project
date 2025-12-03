@@ -136,6 +136,15 @@ public class ProviderChildDashboard extends Fragment {
         summaryTitle.setPadding(0, 16, 0, 0);
         layout.addView(summaryTitle, 0);
 
+        if (start == null || end == null) {
+            TextView noData = new TextView(getContext());
+            noData.setText("No schedule yet");
+            noData.setTextSize(16);
+            noData.setPadding(32, 0, 0, 0);
+            layout.addView(noData, 1);
+            return;
+        }
+
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
         int days = ((int) ChronoUnit.DAYS.between(startDate, endDate)) + 1;
