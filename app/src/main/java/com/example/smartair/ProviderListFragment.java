@@ -3,6 +3,7 @@ package com.example.smartair;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -131,11 +132,17 @@ public class ProviderListFragment extends Fragment implements ProviderAdapter.On
         bundle.putString("provider_id", clickedString.first);
         Fragment fragment = new ProviderAccessFragment();
         fragment.setArguments(bundle);
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.providerListContainer, fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
+            fragmentTransaction.commit();
+        }
+
+
     }
 
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }

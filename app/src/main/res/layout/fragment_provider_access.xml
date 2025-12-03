@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="10dp"
+        android:paddingLeft="40dp"
         android:paddingTop="40dp"
         android:paddingBottom="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,6 +31,15 @@
         <!--            android:textColor="@color/black"-->
         <!--            android:textSize="28sp"-->
         <!--            android:textStyle="bold" />-->
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Allow Access"
+            android:textColor="@color/black"
+            android:textSize="28sp"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/providerAccessName"
@@ -58,8 +67,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:paddingLeft="40dp"
+        android:paddingRight="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
