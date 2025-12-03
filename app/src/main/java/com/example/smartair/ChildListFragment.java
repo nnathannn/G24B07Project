@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +35,7 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
     private ChildAdapter adapter;
     private List<String> childList;
     private RecyclerView recyclerView;
-    private boolean redZone;
+    private List<Boolean> redZone;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,11 +49,11 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
         View view = inflater.inflate(R.layout.fragment_child_list, container, false);
         recyclerView = view.findViewById(R.id.child_recycler_view);
         childList = new ArrayList<>();
-        adapter = new ChildAdapter(childList, this);
+        redZone = new ArrayList<>();
+        adapter = new ChildAdapter(childList, this, redZone);
         recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        redZone = false;
 
         if(parentUserId == null || parentUserId.isEmpty()){
             Toast.makeText(getContext(), "Parent user ID does not exist", Toast.LENGTH_LONG).show();
@@ -76,12 +79,10 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
                         }
                     }
                 }
-                if(!ids.isEmpty()){
-                    fetchChildNames(ids);
-                    fetchChildZones(ids);
-                }
-                else{
+                if (!ids.isEmpty()) fetchChildNames(ids);
+                else {
                     childList.clear();
+                    redZone.clear();
                     adapter.notifyDataSetChanged();
                     Toast.makeText(getContext(), "No children found. Go add children.", Toast.LENGTH_LONG).show();
                 }
@@ -110,12 +111,18 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
                         }
                     }
                 }
+
+                // Initialize redZone list with false values
+                redZone.clear();
+                for (int i = 0; i < childList.size(); i++) redZone.add(false);
+
                 adapter.notifyDataSetChanged();
+                // Fetch child zones
+                fetchChildZones(childIds);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getContext(), "Failed to fetch child names: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
-
             }
         });
     }
@@ -125,61 +132,76 @@ public class ChildListFragment extends Fragment implements ChildAdapter.OnItemCl
         childZonesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (String childId : childIds) {
+                for (int i = 0; i < childIds.size(); i++) {
+                    String childId = childIds.get(i);
                     if (snapshot.hasChild(childId)) {
-                        DataSnapshot childZoneSnapshot = snapshot.child(childId);
-                        if (childZoneSnapshot.exists()) {
-                            String zoneID = childZoneSnapshot.getKey();
-                            if (zoneID != null) checkZone(zoneID, childId);
+                        DataSnapshot zonesSnapshot = snapshot.child(childId);
+
+                        String lastZoneId = null;
+                        for (DataSnapshot zoneEntry : zonesSnapshot.getChildren()) {
+                            lastZoneId = zoneEntry.getKey(); // iterates to get the last zone-id
+                        }
+
+                        if (lastZoneId != null) {
+                            checkZone(lastZoneId, i); // check only the last zone-id
                         }
                     }
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
-    private void checkZone(String zoneID, String childID) {
-        DatabaseReference zoneRef = FirebaseDatabase.getInstance().getReference("zone").child(zoneID);
+    private void checkZone(String zoneId, int position) {
+        DatabaseReference zoneRef = FirebaseDatabase.getInstance().getReference("zone").child(zoneId);
         zoneRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String zone = snapshot.child("status").getValue(String.class);
-                    if (zone != null) {
-                        LocalDate today = LocalDate.now();
-                        LocalDate date = LocalDate.parse(snapshot.child("date").getValue(String.class));
-                        if (today.isEqual(date) && zone.equals("Red")) {
-                            View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_child_alert, null);
+                if (!snapshot.exists()) return;
 
-                            TextView childAlertTitle = view.findViewById(R.id.child_alert_title);
-                            TextView childAlertMessage = view.findViewById(R.id.child_alert_message);
-                            Button okButton = view.findViewById(R.id.ok_button);
+                String status = snapshot.child("status").getValue(String.class);
+                String dateStr = snapshot.child("date").getValue(String.class);
 
-                            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                                    .setView(view)
-                                    .create();
-                            dialog.show();
+                if (status != null && dateStr != null) {
+                    try {
+                        // Parse full timestamp and get only the date
+                        LocalDate date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                .toLocalDate();
 
-                            childAlertTitle.setText("Red-Zone Day");
-                            childAlertMessage.setText("Child experiencing Red Zone today");
-                            okButton.setOnClickListener(v -> dialog.dismiss());
-
-                            redZone = true;
+                        // Update redZone if it's Red for today
+                        if (status.equals("Red") && LocalDate.now().isEqual(date)) {
+                            redZone.set(position, true);
+                            adapter.notifyItemChanged(position);
+                            showRedZoneAlert();
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace(); // prevents crash if date format is wrong
                     }
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Failed to check zone: " + error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
+    }
+
+    private void showRedZoneAlert() {
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_child_alert, null);
+        TextView title = view.findViewById(R.id.child_alert_title);
+        TextView message = view.findViewById(R.id.child_alert_message);
+        Button ok = view.findViewById(R.id.ok_button);
+
+        title.setText("Red-Zone Alert");
+        message.setText("Child experiencing Red-Zone");
+
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setView(view)
+                .create();
+
+        ok.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     @Override
