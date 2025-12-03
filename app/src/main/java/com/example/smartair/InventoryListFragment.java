@@ -4,9 +4,12 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +30,8 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
 
     private String parentUserId;
     private RecyclerView recyclerView;
-    private ItemAdapter adapter;
-    private List<Item> itemList;
+    private InventoryAdapter adapter;
+    private List<Pair<Inventory, String>> itemList;
     private DatabaseReference parentChildrenRef;
     FirebaseAuth myauth = FirebaseAuth.getInstance();
 
@@ -63,7 +66,6 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
         return view;
     }
 
-    //to be discussed: redundancy with childListFragment
     private void loadInventoryList() {
         parentChildrenRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -126,9 +128,10 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChild(inventoryId)){
+                    System.out.println("Inventory ID: " + inventoryId);
                     DataSnapshot inventoryNode = dataSnapshot.child(inventoryId);
                     if(inventoryNode.exists()) {
-                        itemList.add(inventoryNode.getValue(Inventory.class));
+                        itemList.add(new Pair<>(inventoryNode.getValue(Inventory.class), inventoryId));
                         adapter.notifyDataSetChanged();
                     }
                 }
@@ -143,8 +146,19 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
     }
 
     @Override
-    public void onItemClick(Inventory clickedInventory) {
-        Toast.makeText(getContext(), "[Code will be completed to redirect to a new activity] Clicked: " + clickedInventory.getMedName(), Toast.LENGTH_LONG).show();
+    public void onItemClick(Pair<Inventory, String> clickedInventory) {
+        Bundle bundle = new Bundle();
+        bundle.putString("child_id", clickedInventory.first.getChildId());
+        bundle.putString("inventory_id", clickedInventory.second);
+        bundle.putString("updated_by", "Parent");
+        Fragment fragment = new EditInventoryFragment();
+        fragment.setArguments(bundle);
+        assert getActivity() != null;
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
     public FirebaseUser getUser() { return myauth.getCurrentUser(); }
 }

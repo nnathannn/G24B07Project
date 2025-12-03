@@ -10,20 +10,18 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class HomeParentFragment extends Fragment {
-    String parentId;
-    FirebaseAuth myauth = FirebaseAuth.getInstance();
+    String temporaryParentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     public HomeParentFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        parentId  = getUser().getUid();
         return inflater.inflate(R.layout.fragment_home_parent, container, false);
     }
 
@@ -33,14 +31,21 @@ public class HomeParentFragment extends Fragment {
 
         if(getChildFragmentManager().findFragmentById(R.id.child_list_fragment_container) == null) {
             Bundle bundle = new Bundle();
-            bundle.putString("parent_user_id", parentId);
+            bundle.putString("parent_user_id", temporaryParentId);
 
             getChildFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
                     .add(R.id.child_list_fragment_container, ChildListFragment.class, bundle)
                     .commit();
         }
-    }
 
-    public FirebaseUser getUser() { return myauth.getCurrentUser(); }
+        ImageButton addChildButton = view.findViewById(R.id.addSymbolChildButton);
+        addChildButton.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.parent_frame_layout, new AddChildFragment());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
+    }
 }
