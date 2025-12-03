@@ -50,7 +50,7 @@ public class ProviderChildListFragment extends Fragment implements ChildAdapter.
         View view = inflater.inflate(R.layout.fragment_child_list, container, false);
         recyclerView = view.findViewById(R.id.child_recycler_view);
         childList = new ArrayList<>();
-        adapter = new ChildAdapter(childList, this);
+        adapter = new ChildAdapter(childList, this, null);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
