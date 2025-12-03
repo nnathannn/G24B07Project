@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -37,5 +38,14 @@ public class HomeParentFragment extends Fragment {
                     .add(R.id.child_list_fragment_container, ChildListFragment.class, bundle)
                     .commit();
         }
+
+        ImageButton addChildButton = view.findViewById(R.id.addSymbolChildButton);
+        addChildButton.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.parent_frame_layout, new AddChildFragment());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
     }
 }
