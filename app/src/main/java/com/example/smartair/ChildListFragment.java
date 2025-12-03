@@ -9,6 +9,7 @@
     import androidx.recyclerview.widget.LinearLayoutManager;
     import androidx.recyclerview.widget.RecyclerView;
 
+    import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
@@ -126,6 +127,9 @@
 
                     // Now fetch zones
                     fetchChildZones(childIds);
+
+                    // Now fetch triages
+                    monitorChildTriages(childIds);
                 }
 
                 @Override
@@ -194,6 +198,76 @@
         private void showRedZoneAlert() {
             View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_red_zone_day_alert, null);
 
+            Button ok = view.findViewById(R.id.ok_button);
+
+            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                    .setView(view)
+                    .create();
+
+            ok.setOnClickListener(v -> dialog.dismiss());
+            dialog.show();
+        }
+
+        private void monitorChildTriages(List<String> childIds) {
+            DatabaseReference childTriagesRef = FirebaseDatabase.getInstance()
+                    .getReference("child-triages");
+
+            childTriagesRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    // Reset all redZone flags
+                    for (int i = 0; i < redZone.size(); i++) redZone.set(i, false);
+
+                    for (int i = 0; i < childIds.size(); i++) {
+                        String childId = childIds.get(i);
+
+                        if (snapshot.hasChild(childId)) {
+                            DataSnapshot childTriageSnap = snapshot.child(childId);
+
+                            for (DataSnapshot triageEntry : childTriageSnap.getChildren()) {
+                                String triageId = triageEntry.getKey();
+                                checkTriage(triageId, i);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) { }
+            });
+        }
+
+        private void checkTriage(String triageId, int i) {
+            // Check triage details
+            DatabaseReference triageRef = FirebaseDatabase.getInstance().getReference("triage").child(triageId);
+            triageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot triageDetailSnap) {
+                    if (!triageDetailSnap.exists()) return;
+
+                    LocalDateTime start = LocalDateTime.parse(triageDetailSnap.child("date").getValue(String.class));
+                    LocalDateTime end;
+                    if (triageDetailSnap.child("endDate").getValue(String.class).isEmpty()) end = null;
+                    else end = LocalDateTime.parse(triageDetailSnap.child("endDate").getValue(String.class));
+                    LocalDateTime now = LocalDateTime.now();
+
+                    if (start != null && !now.isBefore(start) && (end == null || (end != null && !now.isAfter(end)))) {
+                        redZone.set(i, true);
+                        adapter.notifyDataSetChanged();
+                        showTriageAlert();
+                    } else {
+                        redZone.set(i, false);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) { }
+            });
+        }
+
+        private void showTriageAlert() {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_triage_alert, null);
             Button ok = view.findViewById(R.id.ok_button);
 
             AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
