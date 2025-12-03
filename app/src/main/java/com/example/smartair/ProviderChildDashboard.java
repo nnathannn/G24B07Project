@@ -80,23 +80,28 @@ public class ProviderChildDashboard extends Fragment {
         childref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int i = 0;
                 title.setText(snapshot.child("name").getValue(String.class) + "'s Data");
                 DataSnapshot accessNode = snapshot.child("provider").child(providerId);
+                Boolean summary = false;
+                Boolean controller = false;
+                Boolean trigger = false;
+                String start = "";
+                String end = "";
                 for (DataSnapshot child : accessNode.getChildren()) {
                     if (child.getKey().equals("controller") && child.getValue(Boolean.class)) {
-                        addSummary(snapshot.child("schedule").child("start-date").getValue(String.class),
-                                snapshot.child("schedule").child("end-date").getValue(String.class));
-                        i++;
+                        start = snapshot.child("schedule").child("start-date").getValue(String.class);
+                        end = snapshot.child("schedule").child("end-date").getValue(String.class);
+                        controller = true;
                     } else if (child.getKey().equals("trigger") && child.getValue(Boolean.class)) {
-                        addTrigger();
-                        i++;
+                        trigger = true;
                     } else if (child.getKey().equals("summary") && child.getValue(Boolean.class)) {
-                        addCharts();
-                        i++;
+                        summary = true;
                     }
                 }
-                if (i == 0) {
+                if (summary) { addCharts(); }
+                if (controller) { addSummary(start, end); }
+                if (trigger) { addTrigger(); }
+                if (!controller && !trigger && !summary) {
                     TextView noData = new TextView(getContext());
                     noData.setText("No data shared");
                     noData.setTextSize(24);
@@ -127,7 +132,7 @@ public class ProviderChildDashboard extends Fragment {
     private void addSummary(String start, String end) {
         TextView summaryTitle = new TextView(getContext());
         summaryTitle.setText("Controller Adherence Summary");
-        summaryTitle.setTextSize(24);
+        summaryTitle.setTextSize(22);
         summaryTitle.setPadding(0, 16, 0, 0);
         layout.addView(summaryTitle, 0);
 
@@ -177,7 +182,7 @@ public class ProviderChildDashboard extends Fragment {
 
     private void addCharts() {
         TextView pefTitle  = new TextView(getContext());
-        pefTitle.setText("Average PEF Summary Chart");
+        pefTitle.setText("Summary Charts");
         pefTitle.setTextSize(24);
         pefTitle.setPadding(0, 16, 0, 0);
         layout.addView(pefTitle, 0);
@@ -213,11 +218,8 @@ public class ProviderChildDashboard extends Fragment {
                 LineChartFragment fragment = LineChartFragment.newInstance("Average PEF Summary Charts", labels, values);
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .add(R.id.ChildLayout, fragment)
+                        .add(R.id.LineChartContainer, fragment)
                         .commit();
-                TextView test = new TextView(getContext());
-                test.setText("TEST");
-                layout.addView(test);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -225,5 +227,51 @@ public class ProviderChildDashboard extends Fragment {
             }
         });
 
+        myref.child("symptom").orderByChild("date").startAt(startDate).endAt(endDate).addListenerForSingleValueEvent(new ValueEventListener() {
+           @Override
+           public void onDataChange(@NonNull DataSnapshot snapshot) {
+               ArrayList<String> labels = new ArrayList<>();
+               ArrayList<Float> values = new ArrayList<>();
+               for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                   if (childSnapshot.child("child-id").getValue(String.class).equals(childId)) {
+                       String symptom = compressSymptom(childSnapshot.child("name").getValue(String.class));
+                       if (!labels.contains(symptom)) {
+                           labels.add(symptom);
+                           values.add(1f);
+                       } else {
+                           int index = labels.indexOf(symptom);
+                           values.set(index, values.get(index) + 1);
+                       }
+                   }
+               }
+               BarChartFragment fragment = BarChartFragment.newInstance("Total Symptom Summary Charts", labels, values);
+               getActivity().getSupportFragmentManager()
+                       .beginTransaction()
+                       .add(R.id.BarChartContainer, fragment)
+                       .commit();
+           }
+           @Override
+           public void onCancelled(@NonNull DatabaseError error) {
+
+           }
+        });
+    }
+
+    private String compressSymptom(String symptom) {
+        switch (symptom) {
+            case "Night waking":
+            case "Activity limits":
+            case "Cough":
+            case "Wheezing":
+                return symptom;
+            case "Can't speak full sentences":
+                return "Can't speak";
+            case "Chest pulling in":
+                return "Chest pulling";
+            case "Blue/gray lips/nails":
+                return "Colored parts";
+            default:
+                return symptom;
+        }
     }
 }

@@ -12,7 +12,7 @@
         android:id="@+id/ChildTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
         android:text="Child's Data"
         android:textSize="34sp"
@@ -24,16 +24,26 @@
         android:id="@+id/ChildLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/border_background"
         android:orientation="vertical"
-        android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ChildTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/ChildTitle">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/LineChartContainer"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/BarChartContainer"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
