@@ -170,12 +170,11 @@ public class ProfileParentFragment extends Fragment {
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
 
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.parent_frame_layout, new SignInFragment())
-                    .commit();
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
+
+            Intent intent = new Intent(requireActivity(), GetStartedActivity.class);
+            startActivity(intent);
         });
 
         noButton.setOnClickListener(v -> dialog.dismiss());
