@@ -128,7 +128,10 @@ public class EditInventoryFragment extends Fragment {
             String purchaseDateText = purchaseDate.getText().toString();
             String expiryDateText = expiryDate.getText().toString();
             String amountLeftText = amountLeft.getText().toString();
-
+            if(medNameText.isEmpty() || purchaseDateText.isEmpty() || expiryDateText.isEmpty() || amountLeftText.isEmpty()){
+                Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             inventoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -152,11 +155,21 @@ public class EditInventoryFragment extends Fragment {
                         inventoryRef.setValue(new Inventory(childId, purchaseDateText, purchaseDateText, amountDouble, expiryDateText, rescueStatus, medNameText, updatedBy))
                                 .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Inventory updated successfully", Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        replaceFragment(new ParentInventoryFragment());
+                        if(updatedBy.equals("Parent")){
+                            replaceParentFragment(new ParentInventoryFragment());
+                        }
+                        else{
+                            replaceChildFragment(new HomeChildFragment());
+                        }
 
                     } else {
                         Toast.makeText(getContext(), "Inventory ID not found for update.", Toast.LENGTH_SHORT).show();
-                        replaceFragment(new ParentInventoryFragment());
+                        if(updatedBy.equals("Parent")){
+                            replaceParentFragment(new ParentInventoryFragment());
+                        }
+                        else{
+                            replaceChildFragment(new HomeChildFragment());
+                        }
                     }
                 }
                 @Override
@@ -168,10 +181,18 @@ public class EditInventoryFragment extends Fragment {
 
     }
 
-    private void replaceFragment(Fragment fragment){
+    private void replaceParentFragment(Fragment fragment){
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    private void replaceChildFragment(Fragment fragment){
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentContainerView, fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
