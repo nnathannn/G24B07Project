@@ -34,22 +34,27 @@ public class GetStartedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_get_started);
+
+        if (myAuth.getCurrentUser() != null) {
+            String uid = myAuth.getCurrentUser().getUid();
+            db.getReference().get().addOnSuccessListener(dataSnapshot -> {
+                String role;
+                Intent i = null;
+                if (dataSnapshot.child("parent-users").child(uid).exists()) {
+                    i = new Intent(this, HomeParent.class);
+                } else if (dataSnapshot.child("provider-users").child(uid).exists()) {
+                    i = new Intent(this, HomeProvider.class);
+                } else {
+                    i = new Intent(this, ChildActivity.class);
+                }
+                startActivity(i);
+            });
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.GetStartedContainer, new RoleSelectionFragment());
         fragmentTransaction.commit();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = myAuth.getCurrentUser();
-        if (currentUser != null) {
-            System.out.println("Signed in");
-            startActivity(new Intent(this, SignIn.class));
-        }
     }
 
     public void signUp(String email, String password, String role, String name) {

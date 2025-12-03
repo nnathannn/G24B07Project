@@ -20,8 +20,6 @@ public class RoleSelectionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TextView view = getActivity().findViewById(R.id.GetStartedTitle);
-        view.setText("Get Started");
     }
 
     @Override
@@ -33,6 +31,9 @@ public class RoleSelectionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        TextView text = getActivity().findViewById(R.id.GetStartedTitle);
+        text.setText("Get Started");
+
         Button parentSignUpButton = view.findViewById(R.id.ParentSignUpButton);
         Button childSignUpButton = view.findViewById(R.id.ChildSignInButton);
         Button providerSignUpButton = view.findViewById(R.id.ProviderSignUpButton);

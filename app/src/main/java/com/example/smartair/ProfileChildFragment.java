@@ -95,7 +95,6 @@ public class ProfileChildFragment extends Fragment {
                 .create();
 
         yesButton.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
 
