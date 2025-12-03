@@ -88,19 +88,37 @@
         app:layout_constraintBottom_toTopOf="@id/stop_timer_button"
         tools:listitem="@layout/item_home_steps"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/stop_timer_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="15dp"
+        android:layout_marginVertical="20dp"
+        android:layout_marginHorizontal="100dp"
         android:padding="20dp"
+        android:background="@drawable/smalled_rounded_edges_background"
         android:backgroundTint="@color/white"
         android:text="Stop Timer"
         android:textSize="20sp"
         android:textColor="@color/black"
         android:textStyle="bold"
+        android:textAllCaps="false"
         app:layout_constraintTop_toBottomOf="@+id/steps_recycler"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/safety_note"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/safety_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:layout_marginHorizontal="30dp"
+        android:text="This is guidance, not a diagnosis. \n If in doubt, call emergency."
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textStyle="italic"
+        app:layout_constraintTop_toBottomOf="@id/stop_timer_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

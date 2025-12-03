@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Build;
@@ -34,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +47,7 @@ public class SymptomFragment extends Fragment {
     private Button buttonDate, buttonTime, buttonSubmit;
 
     private DatabaseReference databaseReference;
-    private String uid;
+    private String childId;
 
     private List<Symptom> symptomLogList;
     private SymptomAdapter symptomAdapter;
@@ -72,6 +74,7 @@ public class SymptomFragment extends Fragment {
 
     private boolean[] triggerSelected;
     private LocalDateTime dateTime;
+    private Activity activity;
 
     @Nullable
     @Override
@@ -93,7 +96,13 @@ public class SymptomFragment extends Fragment {
                 .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
                 .getReference("symptom");
 
-        uid = ((UIDProvider) getActivity()).getUid();
+        activity = getActivity();
+
+        if (activity instanceof HomeParent) {
+            childId = getArguments().getString("child-id");
+        } else {
+            childId = ((UIDProvider) getActivity()).getUid();
+        }
 
         dateTime = LocalDateTime.now();
 
@@ -142,7 +151,7 @@ public class SymptomFragment extends Fragment {
                         }
                         String childIdStr = String.valueOf(childIdObj);
 
-                        if (!childIdStr.equals(uid)) {
+                        if (!childIdStr.equals(childId)) {
                             continue;
                         }
 
@@ -152,7 +161,7 @@ public class SymptomFragment extends Fragment {
                         }
 
                         if (log.getTriggerList() == null) {
-                            log.setTriggerList(new ArrayList<>());
+                            log.setTriggerList(Arrays.asList("No triggers logged"));
                         }
 
                         symptomLogList.add(log);
@@ -333,10 +342,12 @@ public class SymptomFragment extends Fragment {
         }
 
         boolean parentFlag = false;   // accessed through child page
+        if (activity instanceof HomeParent) { parentFlag = true; }
+
         String triageId = "";
 
         Symptom log = new Symptom(
-                uid,
+                childId,
                 dateTime.toString(),
                 parentFlag,
                 symptomName,
