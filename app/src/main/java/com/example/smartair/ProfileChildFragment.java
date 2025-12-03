@@ -102,6 +102,7 @@ public class ProfileChildFragment extends Fragment {
             dialog.dismiss();
 
             if (childID.equals(userID)) {
+                FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(requireActivity(), GetStartedActivity.class);
                 startActivity(intent);
             }
