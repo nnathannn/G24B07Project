@@ -240,6 +240,7 @@ public class MedicineFragment extends Fragment {
                             .addOnSuccessListener(aVoid1 -> {
                                 Toast.makeText(getContext(), "Log saved successfully!", Toast.LENGTH_SHORT).show();
                                 resetForm();
+                                checkThreshold(isRescue);
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(getContext(), "Failed to save log: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -267,5 +268,58 @@ public class MedicineFragment extends Fragment {
         buttonWorse.setStrokeColorResource(R.color.red);
         buttonSame.setStrokeColorResource(R.color.pale_yellow);
         buttonBetter.setStrokeColorResource(R.color.green);
+    }
+
+    private void checkThreshold(Boolean isRescue) {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference("badge").child(uid);
+        if (isRescue) {
+            myref.child("low-rescue/threshold").get().addOnSuccessListener(dataSnapshot -> {
+                int threshold = dataSnapshot.getValue(Integer.class);
+                checkBadge(threshold, isRescue);
+            });
+        } else {
+            myref.child("perfect-controller/threshold").get().addOnSuccessListener(dataSnapshot -> {
+                int threshold = dataSnapshot.getValue(Integer.class);
+                checkBadge(threshold, isRescue);
+            });
+        }
+    }
+
+    private void checkBadge(int threshold, Boolean isRescue) {
+        String start;
+        if (isRescue) {
+            start = dateTime.minusDays(29).toString().split("T")[0];
+        } else {
+            start = dateTime.minusDays(threshold - 1).toString().split("T")[0];
+        }
+        databaseReference.orderByChild("date").startAt(start).endAt(dateTime.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int count = 0;
+                List<String> dates = new ArrayList<>();
+                String date;
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    if (childSnapshot.child("rescue").getValue(Boolean.class) == isRescue) {
+                        date = childSnapshot.child("date").getValue(String.class).split("T")[0];
+                        if (!dates.contains(date)) {
+                            dates.add(date);
+                            count++;
+                        } else if (isRescue) {
+                            count++;
+                        }
+                    }
+                }
+                if (count >= threshold && !isRescue) {
+                    FirebaseDatabase.getInstance().getReference("badge").child(uid).child("perfect-controller/completed").setValue(true);
+                } else if (count <= threshold && isRescue) {
+                    FirebaseDatabase.getInstance().getReference("badge").child(uid).child("low-rescue/completed").setValue(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
