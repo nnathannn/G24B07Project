@@ -471,13 +471,10 @@ public class ChildDashboardFragment extends Fragment {
             startActivity(intent);
         });
         buttonDailyCheckIn.setOnClickListener(v -> {
-            boolean isParent = true;
-
             SymptomFragment fragment = new SymptomFragment();
 
             Bundle args = new Bundle();
-            args.putString("uid", uid);
-            args.putBoolean("isParent", isParent);
+            args.putString("child-id", uid);
             fragment.setArguments(args);
 
             requireActivity().getSupportFragmentManager()
