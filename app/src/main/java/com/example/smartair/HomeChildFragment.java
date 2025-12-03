@@ -1,5 +1,6 @@
 package com.example.smartair;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,9 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -30,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 public class HomeChildFragment extends Fragment {
 
@@ -63,6 +68,20 @@ public class HomeChildFragment extends Fragment {
         Button buttonTechnique = view.findViewById(R.id.buttonTechnique);
         Button buttonPEF = view.findViewById(R.id.buttonPEF);
         Button buttonProfile = view.findViewById(R.id.buttonProfile);
+        Button buttonInventory = view.findViewById(R.id.childInventoryEditButton);
+
+        buttonInventory.setOnClickListener(v -> {
+            final String[] inventoryOptions = {"Rescue", "Controller"};
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Which inventory do you want to update?")
+                    .setItems(inventoryOptions, (dialog, which) -> {
+                        // 0 for rescue, 1 for controller
+                        String selectedInventory = inventoryOptions[which];
+                        getId(selectedInventory);
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
 
         buttonTriage.setOnClickListener(v -> { loadFragment(new TriageFragment()); });
         buttonMedicine.setOnClickListener(v -> { loadFragment(new MedicineFragment()); });
@@ -79,13 +98,6 @@ public class HomeChildFragment extends Fragment {
                 streakNumber.setText(controllerStreak);
             }
         });
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmentContainerView, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 
     private void fetchBadge() {
@@ -186,5 +198,54 @@ public class HomeChildFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
+    }
+
+    private void getId(String inventoryType) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("child-inventory").child(uid);
+        boolean rescue = inventoryType.equals("Rescue");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    checkType(childSnapshot.getKey(), rescue);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "Failed to load IDs: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void checkType(String id, boolean rescue) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("inventory").child(id);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Boolean isRescue = dataSnapshot.child("rescue").getValue(Boolean.class);
+                    if (isRescue != null && isRescue == rescue) {
+                        Fragment fragment = new EditInventoryFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("child_id",  uid);
+                        bundle.putString("updated_by", "Child");
+                        bundle.putString("inventory_id", id);
+                        fragment.setArguments(bundle);
+                        loadFragment(fragment);
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "Failed to load IDs: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void loadFragment(Fragment fragment) {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmentContainerView, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }
