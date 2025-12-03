@@ -45,7 +45,7 @@ public class SymptomFragment extends Fragment {
     private Button buttonDate, buttonTime, buttonSubmit;
 
     private DatabaseReference databaseReference;
-    private String uid;
+    private String childId;
 
     private List<Symptom> symptomLogList;
     private SymptomAdapter symptomAdapter;
@@ -93,7 +93,7 @@ public class SymptomFragment extends Fragment {
                 .getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
                 .getReference("symptom");
 
-        uid = ((UIDProvider) getActivity()).getUid();
+        childId = ((UIDProvider) getActivity()).getUid();
 
         dateTime = LocalDateTime.now();
 
@@ -142,7 +142,7 @@ public class SymptomFragment extends Fragment {
                         }
                         String childIdStr = String.valueOf(childIdObj);
 
-                        if (!childIdStr.equals(uid)) {
+                        if (!childIdStr.equals(childId)) {
                             continue;
                         }
 
@@ -336,7 +336,7 @@ public class SymptomFragment extends Fragment {
         String triageId = "";
 
         Symptom log = new Symptom(
-                uid,
+                childId,
                 dateTime.toString(),
                 parentFlag,
                 symptomName,
