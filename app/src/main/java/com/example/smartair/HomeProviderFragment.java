@@ -4,10 +4,13 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 public class HomeProviderFragment extends Fragment {
 
@@ -17,7 +20,21 @@ public class HomeProviderFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home_provider, container, false);
+        View view = inflater.inflate(R.layout.fragment_home_provider, container, false);
+
+        ImageButton addEditButton = view.findViewById(R.id.addEditButton);
+        addEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.replace(R.id.providerHomeLayout, new InsertChildCodeFragment());
+                fragmentTransaction.commit();
+            }
+        });
+
+        return view;
     }
 
     @Override

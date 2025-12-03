@@ -1,7 +1,11 @@
 package com.example.smartair;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,33 +15,52 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 public class HomeChildFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private ItemAdapter badgeAdapter;
-    private List<Item> itemList;
+    private LinearLayout badgeLayout;
+    private String uid, controllerStreak, techniqueStreak;
+    private TextView streakTitle, streakNumber;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home_page, container, false);
+        uid = ((UIDProvider) requireActivity()).getUid();
+        return inflater.inflate(R.layout.fragment_home_page, container, false);
+    }
 
-        //Copy the code up until fetchData() and change with respective view holders for recycler view
-        recyclerView = view.findViewById(R.id.badgeRecycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true));
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        itemList = new ArrayList<>();
-        badgeAdapter = new BadgeAdapter(itemList);
-        recyclerView.setAdapter(badgeAdapter);
+        badgeLayout = view.findViewById(R.id.badgeHolder);
+        fetchBadge();
 
-        ItemAdapter.fetchData(badgeAdapter, "badge");
+        streakTitle = view.findViewById(R.id.StreakTitle);
+        streakNumber = view.findViewById(R.id.StreakNumber);
+        ConstraintLayout streakLayout = view.findViewById(R.id.streakLayout);
+        fetchStreak();
 
         Button buttonTriage = view.findViewById(R.id.buttonTriage);
         Button buttonMedicine = view.findViewById(R.id.buttonMedicine);
@@ -45,50 +68,178 @@ public class HomeChildFragment extends Fragment {
         Button buttonTechnique = view.findViewById(R.id.buttonTechnique);
         Button buttonPEF = view.findViewById(R.id.buttonPEF);
         Button buttonProfile = view.findViewById(R.id.buttonProfile);
+        Button buttonInventory = view.findViewById(R.id.childInventoryEditButton);
 
-        buttonTriage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new TriageFragment());
-            }
+        buttonInventory.setOnClickListener(v -> {
+            final String[] inventoryOptions = {"Rescue", "Controller"};
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Which inventory do you want to update?")
+                    .setItems(inventoryOptions, (dialog, which) -> {
+                        // 0 for rescue, 1 for controller
+                        String selectedInventory = inventoryOptions[which];
+                        getId(selectedInventory);
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
         });
 
-        buttonMedicine.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new MedicineFragment());
+        buttonTriage.setOnClickListener(v -> { loadFragment(new TriageFragment()); });
+        buttonMedicine.setOnClickListener(v -> { loadFragment(new MedicineFragment()); });
+        buttonDaily.setOnClickListener(v -> { loadFragment(new SymptomFragment()); });
+        buttonTechnique.setOnClickListener(v -> { loadFragment(new TechniqueFragment()); });
+        buttonPEF.setOnClickListener(v -> { loadFragment(new PEFFragment()); });
+        buttonProfile.setOnClickListener(v -> { loadFragment(new ProfileFragment()); });
+        streakLayout.setOnClickListener(v -> {
+            if (streakTitle.getText().toString().equals("Controller Streak")) {
+                streakTitle.setText("Technique Streak");
+                streakNumber.setText(techniqueStreak);
+            } else {
+                streakTitle.setText("Controller Streak");
+                streakNumber.setText(controllerStreak);
             }
         });
+    }
 
-        buttonDaily.setOnClickListener(new View.OnClickListener() {
+    private void fetchBadge() {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference("badge").child(uid);
+        myref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                loadFragment(new SymptomFragment());
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String opacity1, opacity2, opacity3;
+                    opacity1 = dataSnapshot.child("perfect-controller/completed").getValue(Boolean.class) ? "1.0" : "0.3";
+                    opacity2 = dataSnapshot.child("high-quality/completed").getValue(Boolean.class) ? "1.0" : "0.3";;
+                    opacity3 = dataSnapshot.child("low-rescue/completed").getValue(Boolean.class) ? "1.0" : "0.3";;
+                    badgeLayout.getChildAt(0).setAlpha(Float.parseFloat(opacity1));
+                    badgeLayout.getChildAt(1).setAlpha(Float.parseFloat(opacity2));
+                    badgeLayout.getChildAt(2).setAlpha(Float.parseFloat(opacity3));
+                }
+            }
+
+            @Override
+            public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
             }
         });
+    }
 
-        buttonTechnique.setOnClickListener(new View.OnClickListener() {
+    private void fetchStreak() {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+        myref.child("medicineLogs").orderByChild("date").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                loadFragment(new TechniqueFragment());
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> dates = new ArrayList<>();
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    if (childSnapshot.child("child-id").getValue(String.class).equals(uid) && !childSnapshot.child("rescue").getValue(Boolean.class)) {
+                        String date = childSnapshot.child("date").getValue(String.class).split("T")[0];
+                        if (!dates.contains(date)) {
+                            dates.add(date);
+                        }
+                    }
+                }
+                Collections.reverse(dates);
+                LocalDate startDate = LocalDate.now();
+                int streak = 0;
+                if (!dates.isEmpty()) {
+                    if (dates.getFirst().equals(startDate.toString())) {
+                        streak++;
+                        dates.remove(0);
+                    }
+                    for (String date : dates) {
+                        if (LocalDate.parse(date).equals(startDate.minusDays(1))) {
+                            streak++;
+                            startDate = LocalDate.parse(date);
+                        } else {
+                            controllerStreak = String.valueOf(streak);
+                            streakNumber.setText(controllerStreak);
+                            return;
+                        }
+                    }
+                }
+                controllerStreak = String.valueOf(streak);
+                streakNumber.setText(controllerStreak);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-
-        buttonPEF.setOnClickListener(new View.OnClickListener() {
+        myref.child("technique").orderByChild("date").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                loadFragment(new PEFFragment());
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> dates = new ArrayList<>();
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    if (childSnapshot.child("child-id").getValue(String.class).equals(uid)) {
+                        String date = childSnapshot.child("date").getValue(String.class).split("T")[0];
+                        if (!dates.contains(date)) {
+                            dates.add(date);
+                        }
+                    }
+                }
+                Collections.reverse(dates);
+                LocalDate startDate = LocalDate.now();
+                int streak = 0;
+                if (!dates.isEmpty()) {
+                    if (dates.getFirst().equals(startDate.toString())) {
+                        streak++;
+                        dates.remove(0);
+                    }
+                    for (String date : dates) {
+                        if (LocalDate.parse(date).equals(startDate.minusDays(1))) {
+                            streak++;
+                            startDate = LocalDate.parse(date);
+                        } else {
+                            techniqueStreak = String.valueOf(streak);
+                            return;
+                        }
+                    }
+                }
+                techniqueStreak = String.valueOf(streak);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
             }
         });
+    }
 
-        buttonProfile.setOnClickListener(new View.OnClickListener() {
+    private void getId(String inventoryType) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("child-inventory").child(uid);
+        boolean rescue = inventoryType.equals("Rescue");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                loadFragment(new ProfileFragment());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    checkType(childSnapshot.getKey(), rescue);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "Failed to load IDs: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
 
-        return view;
+    private void checkType(String id, boolean rescue) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("inventory").child(id);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Boolean isRescue = dataSnapshot.child("rescue").getValue(Boolean.class);
+                    if (isRescue != null && isRescue == rescue) {
+                        Fragment fragment = new EditInventoryFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("child_id",  uid);
+                        bundle.putString("updated_by", "Child");
+                        bundle.putString("inventory_id", id);
+                        fragment.setArguments(bundle);
+                        loadFragment(fragment);
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "Failed to load IDs: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void loadFragment(Fragment fragment) {
@@ -97,5 +248,4 @@ public class HomeChildFragment extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
 }

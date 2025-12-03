@@ -39,7 +39,7 @@ import java.util.List;
 
 public class TriageHomeStepsFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String childId;
     private String triageID;
     private TextView timer;
     private AppCompatButton stopTimerButton;
@@ -73,7 +73,7 @@ public class TriageHomeStepsFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        childId = ((UIDProvider) getActivity()).getUid();
 
         timer = view.findViewById(R.id.timer_number);
         steps = new ArrayList<>();
@@ -154,7 +154,7 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void getPB(View view) {
-        DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
+        DatabaseReference ref = db.getReference("child-users").child(childId).child("PB");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -173,7 +173,7 @@ public class TriageHomeStepsFragment extends Fragment {
     }
 
     private void getPEF(View view, Double curPB) {
-        DatabaseReference ref = db.getReference("child-zones").child(childID);
+        DatabaseReference ref = db.getReference("child-zones").child(childId);
         ref.limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
