@@ -78,7 +78,7 @@ public class HomeProvider extends AppCompatActivity implements UIDProvider {
                 return true;
             }
             else if(itemId == R.id.providerHistory){
-                replaceFragment(new ProviderHistoryFragment());
+                replaceFragment(new HistoryFragment());
                 return true;
             }
             return false;

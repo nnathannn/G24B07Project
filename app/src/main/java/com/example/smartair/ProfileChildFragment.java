@@ -7,7 +7,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,11 +84,55 @@ public class ProfileChildFragment extends Fragment {
         });
     }
 
+//    private void signOutDialog() {
+//        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
+//
+//        Button yesButton = view.findViewById(R.id.yes_button);
+//        Button noButton = view.findViewById(R.id.no_button);
+//
+//        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+//                .setView(view)
+//                .setCancelable(true)
+//                .create();
+//
+//        yesButton.setOnClickListener(v -> {
+//            FirebaseAuth.getInstance().signOut();
+//            requireActivity().getSupportFragmentManager()
+//                    .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
+//
+//            Log.d("ProfileChildFragment", "userID: " + userID + ", childID: " + childID);
+//            if (childID.equals(userID)) {
+//                requireActivity().getSupportFragmentManager()
+//                        .beginTransaction()
+//                        .replace(R.id.fragmentContainerView, new SignInFragment())
+//                        .commitAllowingStateLoss();
+//            }
+//            else {
+//                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+//                transaction.replace(R.id.parent_frame_layout, new HomeParentFragment());
+//                transaction.commit();
+//            }
+//
+//            Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
+//            dialog.dismiss();
+//        });
+//
+//        noButton.setOnClickListener(v -> dialog.dismiss());
+//
+//        dialog.show();
+//    }
+
     private void signOutDialog() {
+        Log.d("ProfileChildFragment", "signOutDialog: called");
+
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
+        Log.d("ProfileChildFragment", "signOutDialog: dialog view inflated");
 
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
+
+        if (yesButton == null) Log.d("ProfileChildFragment", "signOutDialog: yesButton is null!");
+        if (noButton == null) Log.d("ProfileChildFragment", "signOutDialog: noButton is null!");
 
         AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setView(view)
@@ -94,28 +140,42 @@ public class ProfileChildFragment extends Fragment {
                 .create();
 
         yesButton.setOnClickListener(v -> {
+            Log.d("ProfileChildFragment", "signOutDialog: yesButton clicked");
+
             FirebaseAuth.getInstance().signOut();
+            Log.d("ProfileChildFragment", "signOutDialog: FirebaseAuth.signOut() called");
+
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
+            Log.d("ProfileChildFragment", "signOutDialog: back stack cleared");
+
+            Log.d("ProfileChildFragment", "userID: " + userID + ", childID: " + childID);
 
             if (childID.equals(userID)) {
+                Log.d("ProfileChildFragment", "signOutDialog: childID equals userID, replacing with SignInFragment");
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragmentContainerView, new SignInFragment())
-                        .commit();
-            }
-            else {
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.parent_frame_layout, new HomeParentFragment());
+                        .commitAllowingStateLoss();
+            } else {
+                Log.d("ProfileChildFragment", "signOutDialog: childID != userID, replacing with HomeParentFragment");
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                transaction.replace(R.id.parent_frame_layout, new HomeParentFragment());
+                transaction.commit();
             }
 
             Toast.makeText(getContext(), "Signed out", Toast.LENGTH_SHORT).show();
+            Log.d("ProfileChildFragment", "signOutDialog: dialog dismissed after sign-out");
             dialog.dismiss();
         });
 
-        noButton.setOnClickListener(v -> dialog.dismiss());
+        noButton.setOnClickListener(v -> {
+            Log.d("ProfileChildFragment", "signOutDialog: noButton clicked, dialog dismissed");
+            dialog.dismiss();
+        });
 
+        Log.d("ProfileChildFragment", "signOutDialog: showing dialog");
         dialog.show();
     }
+
 }
