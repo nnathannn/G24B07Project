@@ -12,9 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".GetStartedActivity"
-            android:exported="false" />
-        <activity
             android:name=".HomeProvider"
             android:exported="false" />
         <activity
@@ -24,10 +21,7 @@
             android:name=".ChildActivity"
             android:exported="false" />
         <activity
-            android:name=".SignIn"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".GetStartedActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
