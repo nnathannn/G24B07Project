@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -37,7 +38,7 @@ public class TriageFragment extends Fragment {
     private CheckBox flag1;
     private CheckBox flag2;
     private CheckBox flag3;
-    private Button submitFlag;
+    private AppCompatButton submitFlag;
 
     public TriageFragment() {
         // Required empty public constructor

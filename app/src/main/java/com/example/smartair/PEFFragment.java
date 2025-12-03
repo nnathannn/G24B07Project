@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,7 +37,9 @@ public class PEFFragment extends Fragment {
     private List<Zone> list;
     private FirebaseDatabase db;
     private EditText inputPEF;
-    private Button submitPEF;
+    private EditText preMed;
+    private EditText postMed;
+    private AppCompatButton submitPEF;
     private String childID;
     private int totalSnapshot;
     private int loadedSnapshot;
@@ -61,6 +64,8 @@ public class PEFFragment extends Fragment {
 
         childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         inputPEF = view.findViewById(R.id.submit_pef_box);
+        preMed = view.findViewById(R.id.pre_med);
+        postMed = view.findViewById(R.id.post_med);
         submitPEF = view.findViewById(R.id.submit_pef_button);
 
         fetchData();
@@ -75,30 +80,40 @@ public class PEFFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
+
                 if (snapshot.exists()) {
+                    totalSnapshot = (int) snapshot.getChildrenCount();
+                    loadedSnapshot = 0;
+
                     for (DataSnapshot ds : snapshot.getChildren()) {
                         String zoneID = ds.getKey();
 
                         db.getReference("zone").child(zoneID)
                                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot zoneSnapshot) {
-                                if (zoneSnapshot.exists()) {
-                                    Zone zone = zoneSnapshot.getValue(Zone.class);
-                                    if (zone != null) {
-                                        list.add(0, zone);
-                                    }
-                                    adapter.notifyDataSetChanged();
-                                }
-                            }
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot zoneSnapshot) {
+                                        loadedSnapshot++;
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(getContext(), "Failed to get zones: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                                        if (zoneSnapshot.exists()) {
+                                            Zone zone = zoneSnapshot.getValue(Zone.class);
+                                            if (zone != null) list.add(zone);
+                                            adapter.notifyDataSetChanged();
+                                        }
+
+                                        if (loadedSnapshot == totalSnapshot) {
+                                            Collections.sort(list, (a, b) -> b.getDate().compareTo(a.getDate()));
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        Toast.makeText(getContext(), "Failed to get zones: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                     }
                 }
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -110,23 +125,47 @@ public class PEFFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void addData() {
-        String input = inputPEF.getText().toString().trim();
+        String pef = inputPEF.getText().toString().trim();
+        String pre = preMed.getText().toString().trim();
+        String post = postMed.getText().toString().trim();
 
-        if (input.isEmpty()) {
-            Toast.makeText(getContext(), "No input", Toast.LENGTH_SHORT).show();
+        if (pef.isEmpty()) {
+            Toast.makeText(getContext(), "No PEF input", Toast.LENGTH_SHORT).show();
             return;
         }
 
         double count;
         try {
-            count = Double.parseDouble(input);
+            count = Double.parseDouble(pef);
             if (count <= 0) {
-                Toast.makeText(getContext(), "Invalid input", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Invalid PEF input", Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (NumberFormatException e) {
-            Toast.makeText(getContext(), "Invalid input", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Invalid PEF input", Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        int preVal;
+        if (pre.isEmpty()) preVal = 0;
+        else {
+            try {
+                preVal = Integer.parseInt(pre);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid pre-medication input", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        int postVal;
+        if (post.isEmpty()) postVal = 0;
+        else {
+            try {
+                postVal = Integer.parseInt(post);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid post-medication input", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
@@ -139,10 +178,12 @@ public class PEFFragment extends Fragment {
 
                     // Only push the Zone object, since it contains all the necessary data.
                     DatabaseReference zoneref = db.getReference("zone");
-                    Zone zone = new Zone(LocalDateTime.now().toString(), childID, count, curPB);
+                    Zone zone = new Zone(LocalDateTime.now().toString(), childID, count, curPB, preVal, postVal);
                     DatabaseReference zoneRefPush = zoneref.push();
                     zoneRefPush.setValue(zone).addOnSuccessListener(aVoid -> {
                         inputPEF.setText("");
+                        preMed.setText("");
+                        postMed.setText("");
                         // The ValueEventListener in fetchData() will automatically update the UI
                     }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 

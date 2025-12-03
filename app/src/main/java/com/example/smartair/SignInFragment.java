@@ -19,6 +19,11 @@ import org.w3c.dom.Text;
 
 public class SignInFragment extends Fragment {
 
+    SignInPresenter presenter;
+    EditText user, password;
+    Button submit;
+    TextView sign_up, recovery;
+
     public SignInFragment() {
         // Required empty public constructor
     }
@@ -28,42 +33,35 @@ public class SignInFragment extends Fragment {
         super.onCreate(savedInstanceState);
         TextView view = getActivity().findViewById(R.id.GetStartedTitle);
         view.setText("Welcome Back");
+        presenter = new SignInPresenter(this, new SignInModel());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
-        EditText user = view.findViewById(R.id.sign_in_user);
-        EditText password = view.findViewById(R.id.sign_in_password);
-        Button submit = view.findViewById(R.id.sign_in_submit);
-        TextView sign_up = view.findViewById(R.id.sign_up);
-        TextView recovery = view.findViewById(R.id.Recovery);
-
+        user = view.findViewById(R.id.sign_in_user);
+        password = view.findViewById(R.id.sign_in_password);
+        submit = view.findViewById(R.id.sign_in_submit);
+        sign_up = view.findViewById(R.id.sign_up);
+        recovery = view.findViewById(R.id.Recovery);
 
         submit.setOnClickListener(v -> {
                 String userText = user.getText().toString();
                 String passwordText = password.getText().toString();
-                GetStartedActivity activity = (GetStartedActivity) getActivity();
-                if (userText.isEmpty() || passwordText.isEmpty()) {
-                    Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
-                } else {
-                    activity.signIn(userText, passwordText);
-                }
+                presenter.attemptSignIn(userText, passwordText);
         });
 
-        sign_up.setOnClickListener(v ->{
-            replaceFragment(new RoleSelectionFragment());
-        });
+        sign_up.setOnClickListener(v -> { replaceFragment(new RoleSelectionFragment()); });
 
-        recovery.setOnClickListener(v -> {
-            replaceFragment(new AccountRecoveryFragment());
-        });
+        recovery.setOnClickListener(v -> { replaceFragment(new AccountRecoveryFragment()); });
 
         return view;
     }
 
-    private void replaceFragment(Fragment fragment){
+    public void displayErrorToast(String message) { Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show(); }
+
+    public void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(null);

@@ -2,6 +2,10 @@ package com.example.smartair;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +17,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 
-public class TechniqueFragment extends Fragment
-        implements TechniqueStepFragment.VideoCompleteListener {
+public class TechniqueFragment extends Fragment implements TechniqueStepFragment.VideoCompleteListener {
+
 
     private static final int TOTAL_STEPS = 5;
 
@@ -174,5 +183,27 @@ public class TechniqueFragment extends Fragment
         currentStep = 0;
         completedSteps = 0;
         Arrays.fill(videoFinished, false);
+    }
+
+    private void checkThreshold() {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference("badge").child(uid);
+        myref.child("high-quality/threshold").get().addOnSuccessListener(dataSnapshot -> {
+            int threshold = dataSnapshot.getValue(Integer.class);
+            checkBadge(threshold);
+        });
+    }
+
+    private void checkBadge(int threshold) {
+        FirebaseDatabase.getInstance().getReference("technique").get().addOnSuccessListener(snapshot -> {
+            int count = 0;
+            for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                if (childSnapshot.child("child-id").getValue(String.class).equals(uid)) {
+                    count++;
+                }
+            }
+            if (count >= threshold) {
+                FirebaseDatabase.getInstance().getReference("badge").child(uid).child("high-quality/completed").setValue(true);
+            }
+        });
     }
 }
