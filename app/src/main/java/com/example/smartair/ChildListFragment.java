@@ -134,6 +134,10 @@
 
                     // Now fetch triages
                     monitorChildTriages(childIds);
+
+                    checkRapidRescue(childIds);
+
+                    checkWorse(childIds);
                 }
 
                 @Override
@@ -213,37 +217,43 @@
         }
 
         private void monitorChildTriages(List<String> childIds) {
+
             DatabaseReference childTriagesRef = FirebaseDatabase.getInstance()
                     .getReference("child-triages");
 
             childTriagesRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    // Reset all redZone flags
-                    for (int i = 0; i < redZone.size(); i++) redZone.set(i, false);
 
-                    for (int i = 0; i < childIds.size(); i++) {
-                        String childId = childIds.get(i);
+                    // Always reset red flags once per full refresh
+                    for (int i = 0; i < redZone.size(); i++) {
+                        redZone.set(i, false);
+                    }
+
+                    for (String childName : childNameList) {
+
+                        String childId = childNameToId.get(childName);
+                        if (childId == null) continue;
+
+                        int index = childNameList.indexOf(childName);   // ← IMPORTANT FIX
 
                         if (snapshot.hasChild(childId)) {
-                            DataSnapshot childTriageSnap = snapshot.child(childId);
-
-                            for (DataSnapshot triageEntry : childTriageSnap.getChildren()) {
-                                String triageId = triageEntry.getKey();
-                                checkTriage(triageId, i);
+                            for (DataSnapshot triageEntry : snapshot.child(childId).getChildren()) {
+                                checkTriage(triageEntry.getKey(), index);
                             }
                         }
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) { }
+                public void onCancelled(@NonNull DatabaseError error) {}
             });
 
             triageAlertShown = false;
         }
 
-        private void checkTriage(String triageId, int i) {
+        private void checkTriage(String triageId, int position) {
+
             DatabaseReference triageRef = FirebaseDatabase.getInstance()
                     .getReference("triage")
                     .child(triageId);
@@ -254,37 +264,37 @@
 
                     if (!triageSnap.exists()) return;
 
-                    try {
-                        String startStr = triageSnap.child("date").getValue(String.class);
-                        String endStr = triageSnap.child("endDate").getValue(String.class);
+                    String startStr = triageSnap.child("date").getValue(String.class);
+                    String endStr   = triageSnap.child("endDate").getValue(String.class);
 
-                        if (startStr == null || startStr.isEmpty()) return;
+                    if (startStr == null || startStr.isEmpty()) return;
 
-                        LocalDateTime start = LocalDateTime.parse(startStr);
-                        LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime start = LocalDateTime.parse(startStr);
+                    LocalDateTime end   = (endStr == null || endStr.isEmpty()) ? null : LocalDateTime.parse(endStr);
 
-                        LocalDateTime end = null;
-                        if (endStr != null && !endStr.isEmpty()) {
-                            end = LocalDateTime.parse(endStr);
+                    boolean inTriage = false;
+
+                    if (end == null) {
+                        if (!now.isBefore(start)) inTriage = true;
+                    } else if (!now.isBefore(start) && !now.isAfter(end)) {
+                        inTriage = true;
+                    }
+
+                    if (inTriage) {
+
+                        // Only react when child transitions from no-triage → triage
+                        if (!redZone.get(position)) {
+                            redZone.set(position, true);
+                            adapter.notifyItemChanged(position);
+//                            showTriageAlertOnce();
                         }
 
-                        boolean inTriage =
-                                (((now.isEqual(start) || now.isAfter(start)) && end == null) ||
-                                ((now.isEqual(start) || now.isAfter(start)) && (now.isEqual(end) || now.isBefore(end))));
-
-                        if (inTriage) {
-                            if (!redZone.get(i)) {
-                                redZone.set(i, true);
-                                adapter.notifyItemChanged(i);
-                                showTriageAlertOnce();  // prevent alert spam
-                            }
-                        } else {
-                            redZone.set(i, false);
-                            adapter.notifyItemChanged(i);
+                    } else {
+                        if (redZone.get(position)) {
+                            redZone.set(position, false);
+                            adapter.notifyItemChanged(position);
                         }
-
-                    } catch (Exception e) {
-                        Log.e("TRIAGE", "Error parsing date/endDate: " + e.getMessage());
                     }
                 }
 
@@ -293,19 +303,156 @@
             });
         }
 
-        private void showTriageAlertOnce() {
-            if (triageAlertShown) return; // prevents repeats
-            triageAlertShown = true;
+        public void checkRapidRescue(List<String> childIds) {
+            for (String childId : childIds) {
+                checkRapidRescueRepeat(childId, adapter, childIds.indexOf(childId));
+            }
+        }
+        public void checkRapidRescueRepeat(String childId, ChildAdapter adapter, int position) {
+            DatabaseReference childMedicineRef = FirebaseDatabase.getInstance()
+                    .getReference("child-medicineLogs")
+                    .child(childId);
 
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_triage_alert, null);
-            Button ok = view.findViewById(R.id.ok_button);
+            childMedicineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.exists()) {
+                        Log.d("RapidRescue", "No medicine logs found for child: " + childId);
+                        Toast.makeText(getContext(), "No medicine logs found for this child", Toast.LENGTH_LONG).show();
+                        return;
+                    }
 
-            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                    .setView(view)
-                    .create();
+                    final int[] rapidRescueCount = {0};
+                    LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
-            ok.setOnClickListener(v -> dialog.dismiss());
-            dialog.show();
+                    Log.d("RapidRescue", "Found " + dataSnapshot.getChildrenCount() + " medicine logs for child: " + childId);
+
+                    for (DataSnapshot medicineSnapshot : dataSnapshot.getChildren()) {
+                        String medicineLogId = medicineSnapshot.getKey();
+                        if (medicineLogId == null) continue;
+
+                        Log.d("RapidRescue", "Checking medicine log: " + medicineLogId);
+
+                        DatabaseReference medicineRef = FirebaseDatabase.getInstance()
+                                .getReference("medicineLogs")
+                                .child(medicineLogId);
+
+                        medicineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.O)
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot logSnapshot) {
+                                Boolean rescue = logSnapshot.child("rescue").getValue(Boolean.class);
+                                String dateStr = logSnapshot.child("date").getValue(String.class);
+
+                                Log.d("RapidRescue", "Medicine log " + medicineLogId + " -> rescue: " + rescue + ", date: " + dateStr);
+
+                                if (rescue != null && rescue && dateStr != null) {
+                                    try {
+                                        LocalDateTime date = LocalDateTime.parse(dateStr, formatter);
+                                        Duration duration = Duration.between(date, now);
+
+                                        Log.d("RapidRescue", "Time difference (hours) between now and log: " + duration.toHours());
+
+                                        if (duration.toHours() <= 3) {
+                                            rapidRescueCount[0]++;
+                                            Log.d("RapidRescue", "Rapid rescue count so far: " + rapidRescueCount[0]);
+
+                                            if (rapidRescueCount[0] >= 3) {
+                                                Log.d("RapidRescue", "Rapid rescue alert triggered for child: " + childId);
+                                                // fill this in with set red
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e("RapidRescue", "Error parsing date for log " + medicineLogId, e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Log.e("RapidRescue", "Failed to read medicine log " + medicineLogId, databaseError.toException());
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("RapidRescue", "Failed to read child medicine logs for child: " + childId, databaseError.toException());
+                }
+            });
+        }
+
+        public void checkWorse(List<String> childIds) {
+            for (String childId : childIds) {
+                checkWorseAfterDose(childId);
+            }
+        }
+        public void checkWorseAfterDose(String childId) {
+            DatabaseReference childMedicineRef = FirebaseDatabase.getInstance()
+                    .getReference("child-medicineLogs")
+                    .child(childId);
+
+            childMedicineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.exists()) {
+                        Log.d("WorseStatus", "No medicine logs found for child: " + childId);
+                        return;
+                    }
+
+                    LocalDate today = LocalDate.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+
+                    for (DataSnapshot medicineSnapshot : dataSnapshot.getChildren()) {
+                        String medicineLogId = medicineSnapshot.getKey();
+                        if (medicineLogId == null) continue;
+
+                        Log.d("WorseStatus", "Checking medicine log: " + medicineLogId);
+
+                        DatabaseReference medicineRef = FirebaseDatabase.getInstance()
+                                .getReference("medicineLogs")
+                                .child(medicineLogId);
+
+                        medicineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.O)
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot logSnapshot) {
+                                String status = logSnapshot.child("prePostStatus").getValue(String.class);
+                                String dateStr = logSnapshot.child("date").getValue(String.class);
+
+                                Log.d("WorseStatus", "Log " + medicineLogId + " -> status: " + status + ", date: " + dateStr);
+
+                                if (status != null && status.equals("Worse") && dateStr != null) {
+                                    try {
+                                        LocalDate logDate = LocalDateTime.parse(dateStr, formatter).toLocalDate();
+                                        Log.d("WorseStatus", "Parsed log date: " + logDate + ", today: " + today);
+
+                                        if (logDate.equals(today)) {
+                                            Log.d("WorseStatus", "Worse status today detected for child: " + childId);
+                                            // TODO: fill this
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e("WorseStatus", "Error parsing date for log: " + medicineLogId, e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.e("WorseStatus", "Failed to read medicine log " + medicineLogId, error.toException());
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("WorseStatus", "Failed to read child medicine logs for child: " + childId, error.toException());
+                }
+            });
         }
 
         @Override
