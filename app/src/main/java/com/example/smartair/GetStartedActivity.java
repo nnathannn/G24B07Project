@@ -34,22 +34,16 @@ public class GetStartedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_get_started);
+
+        if (myAuth.getCurrentUser() != null) {
+            String uid = myAuth.getCurrentUser().getUid();
+            startUserPage(uid);
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.GetStartedContainer, new RoleSelectionFragment());
         fragmentTransaction.commit();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = myAuth.getCurrentUser();
-        if (currentUser != null) {
-            System.out.println("Signed in");
-            startActivity(new Intent(this, SignIn.class));
-        }
     }
 
     public void signUp(String email, String password, String role, String name) {
@@ -59,7 +53,14 @@ public class GetStartedActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             logUser(role, name);
-                            Intent i = new Intent(GetStartedActivity.this, SignIn.class);
+                            Intent i = null;
+                            if (role.equals("parent")) {
+                                i = new Intent(GetStartedActivity.this, HomeParent.class);
+                            } else if (role.equals("provider")) {
+                                i = new Intent(GetStartedActivity.this, HomeProvider.class);
+                            } else {
+                                new Intent(GetStartedActivity.this, ChildActivity.class);
+                            }
                             startActivity(i);
                         }
                     }
@@ -73,8 +74,7 @@ public class GetStartedActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Intent i = new Intent(GetStartedActivity.this, SignIn.class);
-                            startActivity(i);
+                            startUserPage(task.getResult().getUser().getUid());
                         } else {
                             Toast.makeText(GetStartedActivity.this, "Email/Username and Password does not match our records.", Toast.LENGTH_LONG).show();
                         }
@@ -123,5 +123,20 @@ public class GetStartedActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void startUserPage(String uid) {
+        db.getReference().get().addOnSuccessListener(dataSnapshot -> {
+            String role;
+            Intent i = null;
+            if (dataSnapshot.child("parent-users").child(uid).exists()) {
+                i = new Intent(this, HomeParent.class);
+            } else if (dataSnapshot.child("provider-users").child(uid).exists()) {
+                i = new Intent(this, HomeProvider.class);
+            } else {
+                i = new Intent(this, ChildActivity.class);
+            }
+            startActivity(i);
+        });
     }
 }

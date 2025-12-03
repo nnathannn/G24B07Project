@@ -45,7 +45,7 @@ public class HistoryFragment extends Fragment {
     private RecyclerView recycler;
     private List<Item> itemList;
     private ItemAdapter itemAdapter;
-    private DatabaseReference myref = MainActivity.db.getReference();
+    private DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
     private Map<String, String> idToName, nameToId;
     private List<String> filters, nameSelection, listSymptom, listTrigger;
     private LocalDate date;

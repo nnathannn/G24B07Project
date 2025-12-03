@@ -62,7 +62,7 @@ public class PEFFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        childID = ((UIDProvider) getActivity()).getUid();
         inputPEF = view.findViewById(R.id.submit_pef_box);
         preMed = view.findViewById(R.id.pre_med);
         postMed = view.findViewById(R.id.post_med);

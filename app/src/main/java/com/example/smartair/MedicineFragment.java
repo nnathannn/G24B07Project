@@ -64,7 +64,7 @@ public class MedicineFragment extends Fragment {
 
         initializeViews(view);
         databaseReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("medicineLogs");
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        uid = ((UIDProvider) getActivity()).getUid();
         dateTime = LocalDateTime.now();
         setupClickListeners();
         setupRecyclerView();

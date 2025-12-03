@@ -21,9 +21,11 @@ public class Inventory extends Item{
     private boolean rescue;
     @PropertyName("med-name")
     private String medName;
+    @PropertyName("updated-by")
+    private String updatedBy;
     public Inventory() {}
 
-    public Inventory(String childId, String date, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName) throws IllegalArgumentException {
+    public Inventory(String childId, String date, String purchaseDate, double amountLeft, String expiryDate, boolean rescue, String medName, String updatedBy) throws IllegalArgumentException {
         super(date, childId);
         if (amountLeft < 0 || amountLeft > 1) {
             throw new IllegalArgumentException("Amount Left must be between 0.0 and 1.0");
@@ -34,7 +36,7 @@ public class Inventory extends Item{
         this.expiryDate = expiryDate;
         this.rescue = rescue;
         this.medName = medName;
-
+        this.updatedBy = updatedBy;
     }
 
 
@@ -48,6 +50,8 @@ public class Inventory extends Item{
     public boolean getRescue() {return rescue;}
     @PropertyName("med-name")
     public String getMedName() {return medName;}
+    @PropertyName("updated-by")
+    public String getUpdatedBy() {return updatedBy;}
 
     @PropertyName("amount-left")
     public void setAmountLeft(double amountLeft) {
@@ -69,6 +73,10 @@ public class Inventory extends Item{
         this.medName = medName;
     }
 
+    @PropertyName("updated-by")
+    public void setUpdatedBy(String updatedBy){
+        this.updatedBy = updatedBy;
+    }
 
     public void applyDose(double dose){
         if (dose < 0){
