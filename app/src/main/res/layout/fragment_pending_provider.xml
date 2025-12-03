@@ -2,48 +2,54 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayoutInventory"
+    android:id="@+id/frameLayout7"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ParentInventoryFragment"
-    android:background="@color/white">
-
+    tools:context=".PendingProviderFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/inventoryTitle"
+        android:id="@+id/pending_invite_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.15"
+        app:layout_constraintBottom_toTopOf="@+id/pendingProviderContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/inventoryListContainer"
-        android:paddingVertical="30dp">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/inventoryText"
+            android:id="@+id/pending_invite_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Inventory"
+            android:gravity="center"
+            android:text="Pending Provider Invitation"
             android:textColor="@color/black"
-            android:textSize="28sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/inventoryListContainer"
+        android:id="@+id/pendingProviderContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/inventoryTitle">
+        app:layout_constraintTop_toBottomOf="@+id/pending_invite_header">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/invite_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="25dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/provider_invite_card" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

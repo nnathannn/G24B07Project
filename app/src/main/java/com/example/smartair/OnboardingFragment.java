@@ -23,17 +23,32 @@ public class OnboardingFragment extends Fragment {
     private String role;
     int length;
     private final List<Integer> onboardingParent = Arrays.asList(
-            R.drawable.onboarding_dummy_1,
-            R.drawable.onboarding_dummy_2,
-            R.drawable.onboarding_dummy_2);
+            R.drawable.parent_1,
+            R.drawable.parent_2,
+            R.drawable.parent_3,
+            R.drawable.parent_4,
+            R.drawable.parent_5,
+            R.drawable.parent_6,
+            R.drawable.parent_7,
+            R.drawable.parent_8,
+            R.drawable.parent_9,
+            R.drawable.parent_10);
     private final List<Integer> onboardingProvider = Arrays.asList(
-            R.drawable.onboarding_dummy_2,
-            R.drawable.onboarding_dummy_2,
-            R.drawable.onboarding_dummy_1);
+            R.drawable.provider_1,
+            R.drawable.provider_2,
+            R.drawable.provider_3,
+            R.drawable.provider_4,
+            R.drawable.provider_5);
 
     private final List<Integer> onboardingChild = Arrays.asList(
-            R.drawable.onboarding_dummy_1,
-            R.drawable.onboarding_dummy_2);
+            R.drawable.child_1,
+            R.drawable.child_2,
+            R.drawable.child_3,
+            R.drawable.child_4,
+            R.drawable.child_5,
+            R.drawable.child_6,
+            R.drawable.child_7,
+            R.drawable.child_8);
 
     @Override
     public void onCreate(Bundle savedInstanceState){

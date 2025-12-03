@@ -215,4 +215,19 @@
         app:layout_constraintStart_toEndOf="@+id/buttonTechnique"
         app:layout_constraintTop_toBottomOf="@+id/buttonDaily" />
 
+    <Button
+        android:id="@+id/childInventoryEditButton"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="30dp"
+        android:text="Inventory"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonPEF"
+        app:layout_constraintVertical_bias="0.15"
+        app:cornerRadius="20dp"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
