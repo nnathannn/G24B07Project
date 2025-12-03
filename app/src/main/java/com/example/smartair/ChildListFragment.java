@@ -1,9 +1,11 @@
     package com.example.smartair;
 
     import android.app.AlertDialog;
+    import android.os.Build;
     import android.os.Bundle;
 
     import androidx.annotation.NonNull;
+    import androidx.annotation.RequiresApi;
     import androidx.fragment.app.Fragment;
     import androidx.navigation.fragment.NavHostFragment;
     import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +24,7 @@
     import com.google.firebase.database.FirebaseDatabase;
     import com.google.firebase.database.ValueEventListener;
 
+    import java.time.Duration;
     import java.time.LocalDate;
     import java.time.LocalDateTime;
     import java.time.format.DateTimeFormatter;
@@ -39,6 +42,7 @@
         private Map<String, String> childNameToId;
         private RecyclerView recyclerView;
         private List<Boolean> redZone;
+        private boolean triageAlertShown = false;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -235,38 +239,64 @@
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) { }
             });
+
+            triageAlertShown = false;
         }
 
         private void checkTriage(String triageId, int i) {
-            // Check triage details
-            DatabaseReference triageRef = FirebaseDatabase.getInstance().getReference("triage").child(triageId);
+            DatabaseReference triageRef = FirebaseDatabase.getInstance()
+                    .getReference("triage")
+                    .child(triageId);
+
             triageRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot triageDetailSnap) {
-                    if (!triageDetailSnap.exists()) return;
+                public void onDataChange(@NonNull DataSnapshot triageSnap) {
 
-                    LocalDateTime start = LocalDateTime.parse(triageDetailSnap.child("date").getValue(String.class));
-                    LocalDateTime end;
-                    if (triageDetailSnap.child("endDate").getValue(String.class).isEmpty()) end = null;
-                    else end = LocalDateTime.parse(triageDetailSnap.child("endDate").getValue(String.class));
-                    LocalDateTime now = LocalDateTime.now();
+                    if (!triageSnap.exists()) return;
 
-                    if (start != null && !now.isBefore(start) && (end == null || (end != null && !now.isAfter(end)))) {
-                        redZone.set(i, true);
-                        adapter.notifyDataSetChanged();
-                        showTriageAlert();
-                    } else {
-                        redZone.set(i, false);
-                        adapter.notifyDataSetChanged();
+                    try {
+                        String startStr = triageSnap.child("date").getValue(String.class);
+                        String endStr = triageSnap.child("endDate").getValue(String.class);
+
+                        if (startStr == null || startStr.isEmpty()) return;
+
+                        LocalDateTime start = LocalDateTime.parse(startStr);
+                        LocalDateTime now = LocalDateTime.now();
+
+                        LocalDateTime end = null;
+                        if (endStr != null && !endStr.isEmpty()) {
+                            end = LocalDateTime.parse(endStr);
+                        }
+
+                        boolean inTriage =
+                                (((now.isEqual(start) || now.isAfter(start)) && end == null) ||
+                                ((now.isEqual(start) || now.isAfter(start)) && (now.isEqual(end) || now.isBefore(end))));
+
+                        if (inTriage) {
+                            if (!redZone.get(i)) {
+                                redZone.set(i, true);
+                                adapter.notifyItemChanged(i);
+                                showTriageAlertOnce();  // prevent alert spam
+                            }
+                        } else {
+                            redZone.set(i, false);
+                            adapter.notifyItemChanged(i);
+                        }
+
+                    } catch (Exception e) {
+                        Log.e("TRIAGE", "Error parsing date/endDate: " + e.getMessage());
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) { }
+                public void onCancelled(@NonNull DatabaseError error) {}
             });
         }
 
-        private void showTriageAlert() {
+        private void showTriageAlertOnce() {
+            if (triageAlertShown) return; // prevents repeats
+            triageAlertShown = true;
+
             View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_triage_alert, null);
             Button ok = view.findViewById(R.id.ok_button);
 
