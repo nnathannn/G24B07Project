@@ -4,6 +4,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -25,11 +26,13 @@ import java.util.List;
 
 public class TriageInputPEFRescueFragment extends Fragment {
     private FirebaseDatabase db;
-    private String childID;
+    private String childId;
     private String triageID;
     private EditText inputPEF;
+    private EditText inputPreMed;
+    private EditText inputPostMed;
     private EditText inputRescue;
-    private Button submit;
+    private AppCompatButton submit;
 
     public TriageInputPEFRescueFragment() {
         // Required empty public constructor
@@ -57,10 +60,12 @@ public class TriageInputPEFRescueFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        childID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        childId = ((UIDProvider) getActivity()).getUid();
 
         inputRescue = view.findViewById(R.id.input_rescue_box);
         inputPEF = view.findViewById(R.id.input_pef_box);
+        inputPreMed = view.findViewById(R.id.pre_med);
+        inputPostMed = view.findViewById(R.id.post_med);
         submit = view.findViewById(R.id.submit_rescue_pef);
 
         submit.setOnClickListener(new View.OnClickListener() {
@@ -70,6 +75,9 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 // update rescue and pef in triage
                 String rescue = inputRescue.getText().toString();
                 String pef = inputPEF.getText().toString();
+                String preMed = inputPreMed.getText().toString();
+                String postMed = inputPostMed.getText().toString();
+
                 if (rescue.isEmpty()) {
                     Toast.makeText(getContext(), "Please input number of rescue trial.", Toast.LENGTH_SHORT).show();
                     return;
@@ -84,23 +92,33 @@ public class TriageInputPEFRescueFragment extends Fragment {
                     Toast.makeText(getContext(), "PEF should be a positive number.", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                if (!preMed.isEmpty() && Integer.parseInt(preMed) < 0) {
+                    Toast.makeText(getContext(), "Pre-medicine should be a positive number.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!postMed.isEmpty() && Integer.parseInt(postMed) < 0) {
+                    Toast.makeText(getContext(), "Post-medicine should be a positive number.", Toast.LENGTH_SHORT).show();
+                    return;
+                    }
 
                 triageRef.child("rescue").setValue(Integer.parseInt(rescue));
                 if (!pef.isEmpty()) {
                     triageRef.child("pef").setValue(Double.parseDouble(pef));
                     // retrieve current PB of the child and input current zone
-                    DatabaseReference pb = db.getReference("child-users").child(childID).child("PB");
+                    DatabaseReference pb = db.getReference("child-users").child(childId).child("PB");
                     pb.get().addOnSuccessListener(dataSnapshot -> {
                         if (dataSnapshot.exists()) {
                             double curPB = dataSnapshot.getValue(Double.class);
-                            Zone zone = new Zone(LocalDateTime.now().toString(), childID, Double.parseDouble(pef), curPB);
+                            Zone zone = new Zone(LocalDateTime.now().toString(), childId, Double.parseDouble(pef), curPB
+                                    , preMed.isEmpty() ? 0 : Integer.parseInt(preMed)
+                                    , postMed.isEmpty() ? 0 : Integer.parseInt(postMed));
                             DatabaseReference zoneRef = db.getReference("zone").push();
                             zoneRef.setValue(zone).addOnFailureListener(e -> {
                                 Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
 
                             // input child-zones
-                            DatabaseReference childZonesRef = db.getReference("child-zones").child(childID);
+                            DatabaseReference childZonesRef = db.getReference("child-zones").child(childId);
                             childZonesRef.child(zoneRef.getKey()).setValue(true).addOnFailureListener(e -> {
                                 Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });

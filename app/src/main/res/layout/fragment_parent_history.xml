@@ -7,28 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".ParentHistoryFragment">
 
-    <View
-        android:id="@+id/divider4"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintBottom_toTopOf="@+id/HistoryList"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/HistoryHeader" />
-
     <ImageButton
         android:id="@+id/button8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:background="@color/transparent"
+        android:elevation="2dp"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:padding="5dp"
         android:src="@drawable/export_button"
-        android:background="@color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -36,11 +26,49 @@
         android:id="@+id/HistoryHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@drawable/child_home_page_top_nav_background"
         android:paddingVertical="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <Spinner
+            android:id="@+id/layoutHelper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/history_dropdown"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/filterLayout"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/filterLayout"
+            app:layout_constraintTop_toBottomOf="@+id/HistoryFilterSubmit" />
+
+        <LinearLayout
+            android:id="@+id/filterLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:divider="@drawable/empty_layout_divider"
+            android:orientation="vertical"
+            android:showDividers="middle"
+            app:layout_constraintEnd_toEndOf="@+id/HistoryEndDate"
+            app:layout_constraintStart_toStartOf="@+id/HistoryStartDate"
+            app:layout_constraintTop_toBottomOf="@+id/HistoryStartDate">
+
+            <Spinner
+                android:id="@+id/HistoryChildSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/history_dropdown" />
+
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/history_dropdown" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/RangeHistory"
@@ -48,6 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Date Range"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/HistoryTitle"
@@ -57,9 +86,10 @@
             android:id="@+id/HistoryTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
             android:text="History"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="28sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -100,16 +130,6 @@
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toTopOf="@+id/imageView" />
 
-        <Spinner
-            android:id="@+id/spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/history_dropdown"
-            app:layout_constraintEnd_toEndOf="@+id/HistoryEndDate"
-            app:layout_constraintStart_toStartOf="@+id/HistoryChildSelect"
-            app:layout_constraintTop_toBottomOf="@+id/HistoryChildSelect" />
-
         <Button
             android:id="@+id/HistoryFilterSubmit"
             android:layout_width="wrap_content"
@@ -124,14 +144,13 @@
             android:text="Apply Filters"
             android:textColor="@color/black"
             android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/spinner"
-            app:layout_constraintTop_toBottomOf="@+id/spinner" />
+            app:layout_constraintStart_toStartOf="@+id/filterLayout"
+            app:layout_constraintTop_toBottomOf="@+id/filterLayout" />
 
         <Button
             android:id="@+id/HistoryFilterReset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:backgroundTint="@color/light_grey"
             android:insetTop="0dp"
             android:insetBottom="0dp"
@@ -141,18 +160,9 @@
             android:text="Reset Filters"
             android:textColor="@color/black"
             android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@+id/HistoryFilterSubmit"
+            app:layout_constraintBottom_toBottomOf="@+id/HistoryFilterSubmit"
+            app:layout_constraintEnd_toEndOf="@+id/filterLayout"
             app:layout_constraintTop_toTopOf="@+id/HistoryFilterSubmit" />
-
-        <Spinner
-            android:id="@+id/HistoryChildSelect"
-            android:layout_width="0dp"
-            android:layout_height="25dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/history_dropdown"
-            app:layout_constraintEnd_toEndOf="@+id/HistoryEndDate"
-            app:layout_constraintStart_toStartOf="@+id/HistoryStartDate"
-            app:layout_constraintTop_toBottomOf="@+id/HistoryStartDate" />
 
         <ImageView
             android:id="@+id/imageView"

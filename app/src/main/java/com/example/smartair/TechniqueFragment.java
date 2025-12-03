@@ -2,11 +2,21 @@ package com.example.smartair;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +33,7 @@ public class TechniqueFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String uid;
 
     public TechniqueFragment() {
         // Required empty public constructor
@@ -49,6 +60,7 @@ public class TechniqueFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uid = ((UIDProvider) requireActivity()).getUid();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -60,5 +72,27 @@ public class TechniqueFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_technique, container, false);
+    }
+
+    private void checkThreshold() {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference("badge").child(uid);
+        myref.child("high-quality/threshold").get().addOnSuccessListener(dataSnapshot -> {
+            int threshold = dataSnapshot.getValue(Integer.class);
+            checkBadge(threshold);
+        });
+    }
+
+    private void checkBadge(int threshold) {
+        FirebaseDatabase.getInstance().getReference("technique").get().addOnSuccessListener(snapshot -> {
+            int count = 0;
+            for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                if (childSnapshot.child("child-id").getValue(String.class).equals(uid)) {
+                    count++;
+                }
+            }
+            if (count >= threshold) {
+                FirebaseDatabase.getInstance().getReference("badge").child(uid).child("high-quality/completed").setValue(true);
+            }
+        });
     }
 }
