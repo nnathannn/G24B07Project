@@ -78,6 +78,11 @@ public class InventoryAdapter extends ItemAdapter {
         }
         else {
             inventoryHolder.cardView.setCardBackgroundColor(Color.parseColor("#F1F1F1"));
+            inventoryHolder.medName.setTextColor(Color.parseColor("#000000"));
+            inventoryHolder.medChildName.setTextColor(Color.parseColor("#000000"));
+            inventoryHolder.purchaseDate.setTextColor(Color.parseColor("#000000"));
+            inventoryHolder.expiryDate.setTextColor(Color.parseColor("#000000"));
+            inventoryHolder.amountLeft.setTextColor(Color.parseColor("#000000"));
         }
 
         String childId = inventory.getChildId();
