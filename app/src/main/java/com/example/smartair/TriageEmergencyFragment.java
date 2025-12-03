@@ -12,7 +12,6 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 
 public class TriageEmergencyFragment extends Fragment {
     private FirebaseDatabase db;
-    private String triageID, childId;
+    private String triageID;
     private AppCompatButton homeButton;
 
     public TriageEmergencyFragment() {
@@ -43,8 +42,6 @@ public class TriageEmergencyFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        checkUser();
-
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
         DatabaseReference triageRef = db.getReference("triage").child(triageID);
@@ -56,24 +53,10 @@ public class TriageEmergencyFragment extends Fragment {
         // back to home page
         homeButton = view.findViewById(R.id.home_button);
         homeButton.setOnClickListener(v -> {
-            HomeChildFragment fragment = new HomeChildFragment();
-
-            Bundle bundle = new Bundle();
-            bundle.putString("childId", childId);
-            fragment.setArguments(bundle);
-
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragmentContainerView, fragment);
+            transaction.replace(R.id.fragmentContainerView, new HomeChildFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 }

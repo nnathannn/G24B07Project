@@ -11,10 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 public class TriageDecisionCardFragment extends Fragment {
-    private String triageID, childId;
+    private String triageID;
     private AppCompatButton emergencyCallButton;
     private AppCompatButton homeStepsButton;
 
@@ -30,8 +28,6 @@ public class TriageDecisionCardFragment extends Fragment {
             triageID = getArguments().getString("triageID");
         }
 
-        checkUser();
-
         // navigate to each page when choosing the button
         emergencyCallButton = view.findViewById(R.id.emergency_call_button);
         emergencyCallButton.setOnClickListener(new View.OnClickListener() {
@@ -40,7 +36,6 @@ public class TriageDecisionCardFragment extends Fragment {
                 TriageEmergencyFragment fragment = new TriageEmergencyFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
-                args.putString("childId", childId);
                 fragment.setArguments(args);
                 loadFragment(fragment);
             }
@@ -53,7 +48,6 @@ public class TriageDecisionCardFragment extends Fragment {
                 TriageHomeStepsFragment fragment = new TriageHomeStepsFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
-                args.putString("childId", childId);
                 fragment.setArguments(args);
                 loadFragment(fragment);
             }
@@ -66,13 +60,5 @@ public class TriageDecisionCardFragment extends Fragment {
         transaction.replace(R.id.fragmentContainerView, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 }

@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -38,7 +37,7 @@ public class TriageFragment extends Fragment {
     private CheckBox flag1;
     private CheckBox flag2;
     private CheckBox flag3;
-    private AppCompatButton submitFlag;
+    private Button submitFlag;
 
     public TriageFragment() {
         // Required empty public constructor
@@ -52,7 +51,7 @@ public class TriageFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        checkUser();
+        childId = ((UIDProvider) getActivity()).getUid();
 
         // set up child data
         childName = view.findViewById(R.id.child_name);
@@ -166,7 +165,6 @@ public class TriageFragment extends Fragment {
                     TriageEmergencyFragment fragment = new TriageEmergencyFragment();
                     Bundle args = new Bundle();
                     args.putString("triageID", triageRefPush.getKey());
-                    args.putString("childId", childId);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }
@@ -174,7 +172,6 @@ public class TriageFragment extends Fragment {
                     TriageInputPEFRescueFragment fragment = new TriageInputPEFRescueFragment();
                     Bundle args = new Bundle();
                     args.putString("triageID", triageRefPush.getKey());
-                    args.putString("childId", childId);
                     fragment.setArguments(args);
                     loadFragment(fragment);
                 }
@@ -187,13 +184,5 @@ public class TriageFragment extends Fragment {
         transaction.replace(R.id.fragmentContainerView, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 }

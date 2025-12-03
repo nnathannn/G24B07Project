@@ -40,7 +40,7 @@ public class PEFFragment extends Fragment {
     private EditText preMed;
     private EditText postMed;
     private AppCompatButton submitPEF;
-    private String childId;
+    private String childID;
     private int totalSnapshot;
     private int loadedSnapshot;
 
@@ -62,8 +62,7 @@ public class PEFFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        checkUser();
-
+        childID = ((UIDProvider) getActivity()).getUid();
         inputPEF = view.findViewById(R.id.submit_pef_box);
         preMed = view.findViewById(R.id.pre_med);
         postMed = view.findViewById(R.id.post_med);
@@ -76,7 +75,7 @@ public class PEFFragment extends Fragment {
     }
 
     private void fetchData() {
-        DatabaseReference ref = db.getReference("child-zones").child(childId);
+        DatabaseReference ref = db.getReference("child-zones").child(childID);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -169,7 +168,7 @@ public class PEFFragment extends Fragment {
             }
         }
 
-        DatabaseReference ref = db.getReference("child-users").child(childId).child("PB");
+        DatabaseReference ref = db.getReference("child-users").child(childID).child("PB");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -179,7 +178,7 @@ public class PEFFragment extends Fragment {
 
                     // Only push the Zone object, since it contains all the necessary data.
                     DatabaseReference zoneref = db.getReference("zone");
-                    Zone zone = new Zone(LocalDateTime.now().toString(), childId, count, curPB, preVal, postVal);
+                    Zone zone = new Zone(LocalDateTime.now().toString(), childID, count, curPB, preVal, postVal);
                     DatabaseReference zoneRefPush = zoneref.push();
                     zoneRefPush.setValue(zone).addOnSuccessListener(aVoid -> {
                         inputPEF.setText("");
@@ -189,7 +188,7 @@ public class PEFFragment extends Fragment {
                     }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
                     // input zone id to child-zones
-                    DatabaseReference childZoneRef = db.getReference("child-zones").child(childId).child(zoneRefPush.getKey());
+                    DatabaseReference childZoneRef = db.getReference("child-zones").child(childID).child(zoneRefPush.getKey());
                     childZoneRef.setValue("true").addOnFailureListener
                             (e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                 } else {
@@ -202,13 +201,5 @@ public class PEFFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to get PB: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 }

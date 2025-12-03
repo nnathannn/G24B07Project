@@ -42,7 +42,7 @@ public class MedicineFragment extends Fragment {
     private Button buttonSubmit, buttonDate, buttonTime;
     private MaterialButton buttonRescue, buttonController, buttonWorse, buttonSame, buttonBetter;
     private EditText editDoseCount, editPreCheck, editPostCheck;
-    private String medicineType, childId, prePostStatus;
+    private String medicineType, uid, prePostStatus;
     private LocalDateTime dateTime;
 
     // RecyclerView components
@@ -64,7 +64,7 @@ public class MedicineFragment extends Fragment {
 
         initializeViews(view);
         databaseReference = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/").getReference("medicineLogs");
-        checkUser();
+        uid = ((UIDProvider) getActivity()).getUid();
         dateTime = LocalDateTime.now();
         setupClickListeners();
         setupRecyclerView();
@@ -99,7 +99,7 @@ public class MedicineFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 medicineLogList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if (childId.equals(snapshot.child("child-id").getValue(String.class))) {
+                    if (uid.equals(snapshot.child("child-id").getValue(String.class))) {
                         MedicineLog log = snapshot.getValue(MedicineLog.class);
                         if (log != null) {
                             medicineLogList.add(log);
@@ -229,13 +229,13 @@ public class MedicineFragment extends Fragment {
         boolean isRescue = "Rescue".equals(medicineType);
 
 
-        MedicineLog log = new MedicineLog(dateTime.toString(), childId, prePostStatus, preCheck, postCheck, isRescue, dose, "");
+        MedicineLog log = new MedicineLog(dateTime.toString(), uid, prePostStatus, preCheck, postCheck, isRescue, dose, "");
 
         DatabaseReference mainRef = databaseReference.push();
         mainRef.setValue(log)
                 .addOnSuccessListener(aVoid -> {
                     DatabaseReference childRef = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/")
-                            .getReference("child-medicineLogs").child(childId).child(mainRef.getKey());
+                            .getReference("child-medicineLogs").child(uid).child(mainRef.getKey());
                     childRef.setValue(true)
                             .addOnSuccessListener(aVoid1 -> {
                                 Toast.makeText(getContext(), "Log saved successfully!", Toast.LENGTH_SHORT).show();
@@ -248,14 +248,6 @@ public class MedicineFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to save log: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

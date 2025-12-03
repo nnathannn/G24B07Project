@@ -60,7 +60,7 @@ public class TriageInputPEFRescueFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        checkUser();
+        childId = ((UIDProvider) getActivity()).getUid();
 
         inputRescue = view.findViewById(R.id.input_rescue_box);
         inputPEF = view.findViewById(R.id.input_pef_box);
@@ -134,7 +134,6 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 TriageDecisionCardFragment fragment = new TriageDecisionCardFragment();
                 Bundle args = new Bundle();
                 args.putString("triageID", triageID);
-                args.putString("childId", childId);
                 fragment.setArguments(args);
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragmentContainerView, fragment);
@@ -142,13 +141,5 @@ public class TriageInputPEFRescueFragment extends Fragment {
                 transaction.commit();
             }
         });
-    }
-
-    private void checkUser() {
-        if (getArguments() == null) {
-            childId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            childId = getArguments().getString("childId");
-        }
     }
 }
