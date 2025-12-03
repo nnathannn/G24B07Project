@@ -157,7 +157,6 @@ public class ProfileParentFragment extends Fragment {
     private void signOutDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
 
-        TextView signOutText = view.findViewById(R.id.sign_out_text);
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
 

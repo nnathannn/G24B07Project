@@ -27,10 +27,9 @@ import com.google.firebase.database.ValueEventListener;
 public class ProfileChildFragment extends Fragment {
     private FirebaseDatabase db;
     private String userID;
-    private String userType;
+    private String childID;
     private TextView name;
     private TextView dob;
-    private EditText password;
     private Button signOut;
 
     public ProfileChildFragment() {
@@ -45,26 +44,14 @@ public class ProfileChildFragment extends Fragment {
 
         db = FirebaseDatabase.getInstance("https://smartair-abd1d-default-rtdb.firebaseio.com/");
 
-        // check which user
-        if (getArguments() != null) {
-            userID = getArguments().getString("childID");
-            userType = "parent";
-        }
-        else {
-            userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            userType = "child";
-        }
-
+        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        childID = ((UIDProvider) getActivity()).getUid();
         name = view.findViewById(R.id.name);
         dob = view.findViewById(R.id.dob);
-        password = view.findViewById(R.id.password);
         signOut = view.findViewById(R.id.sign_out);
 
         // show data
         showData();
-
-        // update password
-        password.setOnClickListener(v -> changePassword());
 
         // sign out
         signOut.setOnClickListener(v -> signOutDialog());
@@ -73,7 +60,7 @@ public class ProfileChildFragment extends Fragment {
     }
 
     private void showData() {
-        DatabaseReference childRef = db.getReference().child("child-users").child(userID);
+        DatabaseReference childRef = db.getReference().child("child-users").child(childID);
         childRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -95,78 +82,9 @@ public class ProfileChildFragment extends Fragment {
         });
     }
 
-    private void changePassword() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_change_password, null);
-
-        EditText newPassInput = view.findViewById(R.id.new_pass_input);
-        EditText confirmPassInput = view.findViewById(R.id.confirm_pass_input);
-        Button saveButton = view.findViewById(R.id.save_button);
-        Button cancelButton = view.findViewById(R.id.cancel_button);
-
-        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                .setView(view)
-                .setCancelable(true)
-                .create();
-
-        saveButton.setOnClickListener(v -> {
-            String newPass = newPassInput.getText().toString();
-            String confirmPass = confirmPassInput.getText().toString();
-
-            if (newPass.isEmpty() || confirmPass.isEmpty()){
-                Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_LONG).show();
-            }
-            else if (!newPass.equals(confirmPass)) {
-                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
-            }
-            else if (!passwordCheck(newPass)) {
-                Toast.makeText(getContext(), "Please input new password as requirement below", Toast.LENGTH_LONG).show();
-            }
-            else {
-                updatePassword(newPass);
-                dialog.dismiss();
-            }
-        });
-
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-
-        dialog.show();
-    }
-
-    private boolean passwordCheck(String newPass) {
-        boolean checkUpper = false;
-        boolean checkLower = false;
-        boolean checkNumber = false;
-        boolean checkSpecial = false;
-        for (int i = 0; i < newPass.length(); i++) {
-            if (Character.isUpperCase(newPass.charAt(i))) checkUpper = true;
-            else if (Character.isLowerCase(newPass.charAt(i))) checkLower = true;
-            else if (Character.isDigit(newPass.charAt(i))) checkNumber = true;
-            else if (String.valueOf(newPass.charAt(i)).matches("[!@#$%^&*()_+=<>?/{}~]")) checkSpecial = true;
-        }
-        return newPass.length() >= 8 && checkUpper && checkLower && checkNumber && checkSpecial;
-    }
-
-    private void updatePassword(String newPass) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user == null) {
-            Toast.makeText(getContext(), "Error: User not found", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        user.updatePassword(newPass).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(getContext(), "Password updated", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void signOutDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
 
-        TextView signOutText = view.findViewById(R.id.sign_out_text);
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
 
@@ -180,7 +98,7 @@ public class ProfileChildFragment extends Fragment {
             requireActivity().getSupportFragmentManager()
                     .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE); // clear stack
 
-            if (userType.equals("child")) {
+            if (childID.equals(userID)) {
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragmentContainerView, new SignInFragment())
@@ -200,5 +118,4 @@ public class ProfileChildFragment extends Fragment {
 
         dialog.show();
     }
-
 }

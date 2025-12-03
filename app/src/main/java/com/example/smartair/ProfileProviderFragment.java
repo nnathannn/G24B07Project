@@ -1,5 +1,7 @@
 package com.example.smartair;
 
+import static androidx.fragment.app.FragmentManager.TAG;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,7 +160,6 @@ public class ProfileProviderFragment extends Fragment {
     private void signOutDialog() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sign_out, null);
 
-        TextView signOutText = view.findViewById(R.id.sign_out_text);
         Button yesButton = view.findViewById(R.id.yes_button);
         Button noButton = view.findViewById(R.id.no_button);
 
@@ -183,5 +185,4 @@ public class ProfileProviderFragment extends Fragment {
 
         dialog.show();
     }
-
 }
