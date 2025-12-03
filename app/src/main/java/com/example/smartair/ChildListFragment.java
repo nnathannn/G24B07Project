@@ -1,5 +1,6 @@
     package com.example.smartair;
 
+    import android.app.AlertDialog;
     import android.os.Bundle;
 
     import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
+    import android.widget.Button;
     import android.widget.Toast;
 
     import com.google.firebase.database.DataSnapshot;
@@ -19,6 +21,9 @@
     import com.google.firebase.database.FirebaseDatabase;
     import com.google.firebase.database.ValueEventListener;
 
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
+    import java.time.format.DateTimeFormatter;
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
@@ -32,6 +37,7 @@
         private List<String> childNameList, childIdList;
         private Map<String, String> childNameToId;
         private RecyclerView recyclerView;
+        private List<Boolean> redZone;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,8 @@
             recyclerView = view.findViewById(R.id.child_recycler_view);
             childNameList = new ArrayList<>();
             childNameToId = new HashMap<>();
-            adapter = new ChildAdapter(childNameList, this);
+            redZone = new ArrayList<>();
+            adapter = new ChildAdapter(childNameList, this, redZone);
             recyclerView.setAdapter(adapter);
             recyclerView.setHasFixedSize(true);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -110,14 +117,91 @@
                             }
                         }
                     }
-                    adapter.notifyDataSetChanged();
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Toast.makeText(getContext(), "Failed to fetch child names: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
 
+                    // Initialize redZone list with false
+                    redZone.clear();
+                    for (int i = 0; i < childNameList.size(); i++) redZone.add(false);
+
+                    adapter.notifyDataSetChanged();
+
+                    // Now fetch zones
+                    fetchChildZones(childIds);
                 }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) { }
             });
+        }
+
+        private void fetchChildZones(List<String> childIds) {
+            DatabaseReference childZonesRef = FirebaseDatabase.getInstance().getReference("child-zones");
+            childZonesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (int i = 0; i < childIds.size(); i++) {
+                        String childId = childIds.get(i);
+                        if (snapshot.hasChild(childId)) {
+                            DataSnapshot zonesSnapshot = snapshot.child(childId);
+
+                            String lastZoneId = null;
+                            for (DataSnapshot zoneEntry : zonesSnapshot.getChildren()) {
+                                lastZoneId = zoneEntry.getKey(); // iterates to get the last zone-id
+                            }
+
+                            if (lastZoneId != null) {
+                                checkZone(lastZoneId, i); // check only the last zone-id
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) { }
+            });
+        }
+
+        private void checkZone(String zoneId, int position) {
+            DatabaseReference zoneRef = FirebaseDatabase.getInstance().getReference("zone").child(zoneId);
+            zoneRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (!snapshot.exists()) return;
+
+                    String status = snapshot.child("status").getValue(String.class);
+                    String dateStr = snapshot.child("date").getValue(String.class);
+
+                    if (status != null && dateStr != null) {
+                        try {
+                            LocalDate date = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                    .toLocalDate();
+
+                            if (status.equals("Red") && LocalDate.now().isEqual(date)) {
+                                redZone.set(position, true);
+                                adapter.notifyItemChanged(position); // <-- update color
+                                showRedZoneAlert(); // optional: show alert only once per day
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace(); // prevents crash
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) { }
+            });
+        }
+
+        private void showRedZoneAlert() {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_red_zone_day_alert, null);
+
+            Button ok = view.findViewById(R.id.ok_button);
+
+            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                    .setView(view)
+                    .create();
+
+            ok.setOnClickListener(v -> dialog.dismiss());
+            dialog.show();
         }
 
         @Override
