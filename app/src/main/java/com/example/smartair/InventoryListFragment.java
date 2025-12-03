@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,9 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class InventoryListFragment extends Fragment implements InventoryAdapter.OnItemClickListener {
     private FirebaseDatabase db;
@@ -147,12 +147,22 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
                         itemList.add(item);
 
                         if (item.isLowCanister()) {
-                            AlertDialog dialog = new AlertDialog.Builder(getContext())
-                                    .setTitle("Low Canister Alert")
-                                    .setMessage("Low Canister Alert: " + item.getMedName() + " is low in quantity")
-                                    .setPositiveButton("Done", null)
+                            View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_alert_inventory, null);
+
+                            TextView lowCanisterTitle = view.findViewById(R.id.alert_title);
+                            TextView lowCanisterMess = view.findViewById(R.id.alert_message);
+                            Button okButton = view.findViewById(R.id.ok_button);
+
+                            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                                    .setView(view)
+                                    .setCancelable(true)
                                     .create();
                             dialog.show();
+
+                            lowCanisterTitle.setText("Low Canister Alert");
+                            lowCanisterMess.setText((item.getRescue() ? "Rescue | " : "Control | ") + item.getMedName() + " is low in quantity");
+
+                            okButton.setOnClickListener(v -> { dialog.dismiss(); });
 
                             lowCanister.add(item);
                         }
@@ -161,12 +171,22 @@ public class InventoryListFragment extends Fragment implements InventoryAdapter.
                             LocalDate today = LocalDate.now();
                             LocalDate expiryDate = LocalDate.parse(item.getExpiryDate());
                             if (!today.isBefore(expiryDate)) {
-                                AlertDialog dialog = new AlertDialog.Builder(getContext())
-                                        .setTitle("Expired Alert")
-                                        .setMessage("Expired Alert: " + item.getMedName() + " has expired")
-                                        .setPositiveButton("Done", null)
+                                View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_alert_inventory, null);
+
+                                TextView expiredTitle = view.findViewById(R.id.alert_title);
+                                TextView expiredMess = view.findViewById(R.id.alert_message);
+                                Button okButton = view.findViewById(R.id.ok_button);
+
+                                AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                                        .setView(view)
+                                        .setCancelable(true)
                                         .create();
                                 dialog.show();
+
+                                expiredTitle.setText("Expired Medicine Alert");
+                                expiredMess.setText((item.getRescue() ? "Rescue | " : "Control | ") + item.getMedName() + " has expired");
+
+                                okButton.setOnClickListener(v -> { dialog.dismiss(); });
 
                                 expired.add(item);
                             }
