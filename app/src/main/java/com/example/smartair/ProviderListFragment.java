@@ -131,10 +131,15 @@ public class ProviderListFragment extends Fragment implements ProviderAdapter.On
         bundle.putString("provider_id", clickedString.first);
         Fragment fragment = new ProviderAccessFragment();
         fragment.setArguments(bundle);
+//        FragmentManager fragmentManager = getParentFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.replace(R.id.providerListContainer, fragment);
+//        fragmentTransaction.addToBackStack(null);
+//        fragmentTransaction.commit();
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.providerListContainer, fragment);
         fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.parent_frame_layout, fragment);
         fragmentTransaction.commit();
     }
 
