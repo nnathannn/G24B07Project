@@ -183,6 +183,7 @@ public class TechniqueFragment extends Fragment implements TechniqueStepFragment
         currentStep = 0;
         completedSteps = 0;
         Arrays.fill(videoFinished, false);
+        checkThreshold();
     }
 
     private void checkThreshold() {
