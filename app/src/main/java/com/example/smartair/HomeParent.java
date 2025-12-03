@@ -83,7 +83,7 @@ public class HomeParent extends AppCompatActivity implements UIDProvider {
                 return true;
             }
             else if(itemId == R.id.history){
-                replaceFragment(new ParentHistoryFragment());
+                replaceFragment(new HistoryFragment());
                 return true;
             }
             return false;

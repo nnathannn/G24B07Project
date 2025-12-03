@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -16,7 +17,7 @@ import java.util.List;
 public class PDFExportButton {
 
 
-    public static void exportParentHistory(
+    public static void exportHistory(
             Context context,
             String childName,
             String filterType,
@@ -130,7 +131,7 @@ public class PDFExportButton {
                     currentY = margin;
 
 
-                    canvas.drawText("History Export (cont.)", margin, currentY, titlePaint);
+                    canvas.drawText("History Export", margin, currentY, titlePaint);
                     currentY += 24;
 
 
@@ -175,21 +176,28 @@ public class PDFExportButton {
 
             fileName = fileName.replaceAll("[^A-Za-z0-9._-]", "_");
 
-            File baseDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            if (baseDir == null) {
-                baseDir = context.getFilesDir();
-            }
-
-            File dir = new File(baseDir, "exports");
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS
+            );
+            File dir = new File(downloadsDir, "exports");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
             File pdfFile = new File(dir, fileName);
+
+            Log.d("PDF_EXPORT", "Saving to: " + pdfFile.getAbsolutePath());
+            Toast.makeText(context,
+                    "Exported to:\n" + pdfFile.getAbsolutePath(),
+                    Toast.LENGTH_LONG
+            ).show();
+
+
             FileOutputStream out = new FileOutputStream(pdfFile);
             pdfDocument.writeTo(out);
             out.close();
             pdfDocument.close();
+
 
             Toast.makeText(context,
                     "Exported to: " + pdfFile.getAbsolutePath(),
@@ -201,7 +209,6 @@ public class PDFExportButton {
                     Toast.LENGTH_LONG).show();
         }
     }
-
     public static void exportProviderReport(Context context, ProviderReportData data) {
         if (context == null || data == null) return;
 
@@ -229,7 +236,8 @@ public class PDFExportButton {
         Canvas canvas = page.getCanvas();
         int y = margin;
 
-        //Header
+
+
         canvas.drawText("Provider Report", margin, y, titlePaint);
         y += 20;
         canvas.drawText("Child: " + safe(data.childName), margin, y, textPaint);
@@ -240,208 +248,51 @@ public class PDFExportButton {
                 margin, y, textPaint);
         y += 24;
 
-        // 1) Rescue frequency + controller adherence
-        if (data.canSeeRescue || data.canSeeController) {
-            y = drawSectionTitle(canvas,
-                    "Rescue frequency & controller adherence",
-                    margin, y, subtitlePaint);
-
-            if (data.canSeeRescue) {
-                canvas.drawText("Rescue events during this period: " +
-                                data.rescueEventCount,
-                        margin, y, textPaint);
-                y += 14;
-            }
-
-            if (data.canSeeController) {
-                canvas.drawText("Controller schedule: " +
-                                safe(data.controllerScheduleStart) + " to " +
-                                safe(data.controllerScheduleEnd),
-                        margin, y, textPaint);
-                y += 14;
-
-                canvas.drawText(String.format(
-                                "Adherence: %.1f%% of planned days",
-                                data.controllerAdherencePercent),
-                        margin, y, textPaint);
-                y += 18;
-            }
-        }
-
-        // 2) Symptom burden (problem days + table + bar chart)
-        if (data.canSeeSymptoms) {
-            y = drawSectionTitle(canvas, "Symptom burden", margin, y, subtitlePaint);
-
-            canvas.drawText("Problem symptom days: " + data.problemSymptomDays,
-                    margin, y, textPaint);
-            y += 16;
-
-            //Table: Symptom Count
-            if (data.symptomCounts != null && !data.symptomCounts.isEmpty()) {
-                int col1 = margin;
-                int col2 = margin + 180;
-
-                textPaint.setFakeBoldText(true);
-                canvas.drawText("Symptom", col1, y, textPaint);
-                canvas.drawText("Days", col2, y, textPaint);
-                textPaint.setFakeBoldText(false);
-                y += 14;
-
-                for (ProviderReportData.CategoryCount c : data.symptomCounts) {
-                    canvas.drawText(safe(c.label), col1, y, textPaint);
-                    canvas.drawText(String.valueOf(c.count), col2, y, textPaint);
-                    y += 14;
-                    if (y > pageHeight - margin) {
-                        pdf.finishPage(page);
-                        pageNumber++;
-                        pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
-                        page = pdf.startPage(pageInfo);
-                        canvas = page.getCanvas();
-                        y = margin;
-                    }
-                }
-
-                //Categorical bar chart (symptom counts)
-                int chartHeight = 120;
-                int chartWidth = pageWidth - 2 * margin;
-                if (y + chartHeight > pageHeight - margin) {
-                    pdf.finishPage(page);
-                    pageNumber++;
-                    pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
-                    page = pdf.startPage(pageInfo);
-                    canvas = page.getCanvas();
-                    y = margin;
-                }
-                y = drawSymptomBarChart(canvas,
-                        margin, y + 10,
-                        chartWidth, chartHeight,
-                        data.symptomCounts);
-                y += 16;
-            }
-        }
-
-        // 3) Zone distribution over time (table + time-series chart)
-        if (data.canSeeZones) {
-            y = drawSectionTitle(canvas, "Zone distribution over time", margin, y, subtitlePaint);
-
-            if (data.zoneTable != null && !data.zoneTable.isEmpty()) {
-                int col0 = margin;
-                int col1 = margin + 120;
-                int col2 = margin + 220;
-                int col3 = margin + 320;
-
-                textPaint.setFakeBoldText(true);
-                canvas.drawText("Period", col0, y, textPaint);
-                canvas.drawText("Green", col1, y, textPaint);
-                canvas.drawText("Yellow", col2, y, textPaint);
-                canvas.drawText("Red", col3, y, textPaint);
-                textPaint.setFakeBoldText(false);
-                y += 14;
-
-                for (ProviderReportData.ZoneDistributionRow row : data.zoneTable) {
-                    canvas.drawText(safe(row.label), col0, y, textPaint);
-                    canvas.drawText(String.valueOf(row.greenCount), col1, y, textPaint);
-                    canvas.drawText(String.valueOf(row.yellowCount), col2, y, textPaint);
-                    canvas.drawText(String.valueOf(row.redCount), col3, y, textPaint);
-                    y += 14;
-
-                    if (y > pageHeight - margin) {
-                        pdf.finishPage(page);
-                        pageNumber++;
-                        pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
-                        page = pdf.startPage(pageInfo);
-                        canvas = page.getCanvas();
-                        y = margin;
-                    }
-                }
-
-
-
-                int chartHeight = 140;
-                int chartWidth = pageWidth - 2 * margin;
-                if (y + chartHeight > pageHeight - margin) {
-                    pdf.finishPage(page);
-                    pageNumber++;
-                    pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
-                    page = pdf.startPage(pageInfo);
-                    canvas = page.getCanvas();
-                    y = margin;
-                }
-                y = drawZoneTimeSeriesChart(canvas,
-                        margin, y + 10,
-                        chartWidth, chartHeight,
-                        data.zoneTimeSeries);
-                y += 16;
-            }
-        }
-
-        // 4) Notable triage incidents
-        if (data.canSeeTriages &&
-                data.triageIncidents != null &&
-                !data.triageIncidents.isEmpty()) {
-
-            y = drawSectionTitle(canvas, "Notable triage incidents", margin, y, subtitlePaint);
-
-            for (ProviderReportData.TriageIncident t : data.triageIncidents) {
-                String line = "• " + safe(t.date) + " – " + safe(t.summary);
-                canvas.drawText(line, margin, y, textPaint);
-                y += 14;
-
-                if (y > pageHeight - margin) {
-                    pdf.finishPage(page);
-                    pageNumber++;
-                    pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
-                    page = pdf.startPage(pageInfo);
-                    canvas = page.getCanvas();
-                    y = margin;
-                }
-            }
-        }
-
         pdf.finishPage(page);
 
-        //saving PDF
         try {
             String safeChild = (data.childName == null || data.childName.isEmpty())
                     ? "child"
                     : data.childName.replaceAll("\\s+", "_");
 
+            String timeStamp = String.valueOf(System.currentTimeMillis());
+
             String fileName = "provider_report_"
                     + safeChild + "_"
-                    + safe(data.startDate) + "_to_" + safe(data.endDate)
+                    + safe(data.startDate) + "_to_" + safe(data.endDate) + "_"
+                    + timeStamp
                     + ".pdf";
 
             fileName = fileName.replaceAll("[^A-Za-z0-9._-]", "_");
 
-            File baseDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            if (baseDir == null) {
-                baseDir = context.getFilesDir();
-            }
-
-            File dir = new File(baseDir, "exports");
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS
+            );
+            File dir = new File(downloadsDir, "exports");
             if (!dir.exists()) {
-                dir.mkdirs();
+                boolean ok = dir.mkdirs();
+                Log.d("PDF_EXPORT_PROVIDER", "mkdirs: " + ok + " at " + dir.getAbsolutePath());
             }
 
             File pdfFile = new File(dir, fileName);
+            Log.d("PDF_EXPORT_PROVIDER", "Writing file: " + pdfFile.getAbsolutePath());
+
             FileOutputStream out = new FileOutputStream(pdfFile);
             pdf.writeTo(out);
             out.close();
             pdf.close();
 
             Toast.makeText(context,
-                    "Exported to: " + pdfFile.getAbsolutePath(),
+                    "Exported to:\n" + pdfFile.getAbsolutePath(),
                     Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Log.e("PDF_EXPORT_PROVIDER", "Error writing PDF", e);
             try { pdf.close(); } catch (Exception ignored) {}
             Toast.makeText(context,
                     "Failed to export PDF: " + e.getMessage(),
                     Toast.LENGTH_LONG).show();
         }
     }
-
-
-
 
 
 
@@ -478,7 +329,6 @@ public class PDFExportButton {
         Paint labelPaint = new Paint();
         labelPaint.setTextSize(9f);
 
-
         int bottomY = startY + height;
         int leftX = startX;
         int rightX = startX + width;
@@ -486,7 +336,6 @@ public class PDFExportButton {
         canvas.drawLine(leftX, bottomY, rightX, bottomY, axisPaint); // X-axis
         canvas.drawLine(leftX, bottomY, leftX, startY, axisPaint);   // Y-axis
 
-        // Determine max value
         int max = 0;
         for (ProviderReportData.CategoryCount c : data) {
             if (c.count > max) max = c.count;
@@ -504,19 +353,12 @@ public class PDFExportButton {
             float barTop = bottomY - (c.count / (float) max) * (height - 20);
             float halfBar = barWidth / 2f;
 
-            canvas.drawRect(
-                    centerX - halfBar,
-                    barTop,
-                    centerX + halfBar,
-                    bottomY,
-                    barPaint
-            );
+            canvas.drawRect(centerX - halfBar, barTop,
+                    centerX + halfBar, bottomY, barPaint);
 
-            // X-labels
             String label = c.label;
-            if (label.length() > 6) {
-                label = label.substring(0, 6);
-            }
+            if (label.length() > 6) label = label.substring(0, 6);
+
             canvas.drawText(label,
                     centerX - (labelPaint.measureText(label) / 2f),
                     bottomY + 10,
@@ -525,9 +367,6 @@ public class PDFExportButton {
 
         return bottomY + 24;
     }
-
-
-
 
     private static int drawZoneTimeSeriesChart(Canvas canvas,
                                                int startX,
@@ -555,14 +394,11 @@ public class PDFExportButton {
         int leftX = startX;
         int rightX = startX + width;
 
-        // Axes
         canvas.drawLine(leftX, bottomY, rightX, bottomY, axisPaint); // X-axis
         canvas.drawLine(leftX, bottomY, leftX, startY, axisPaint);   // Y-axis
 
         int n = data.size();
-        if (n == 1) {
-            n = 2;
-        }
+        if (n == 1) n = 2;
 
         float xStep = width / (float) (n - 1);
         float maxYValue = 100f;
@@ -584,22 +420,17 @@ public class PDFExportButton {
             prevY = y;
         }
 
-
         ProviderReportData.DailyZonePoint first = data.get(0);
         ProviderReportData.DailyZonePoint last = data.get(data.size() - 1);
         String firstLabel = safe(first.date);
         String lastLabel = safe(last.date);
 
-        canvas.drawText(firstLabel,
-                leftX,
-                bottomY + 10,
-                labelPaint);
+        canvas.drawText(firstLabel, leftX, bottomY + 10, labelPaint);
         float lastLabelWidth = labelPaint.measureText(lastLabel);
         canvas.drawText(lastLabel,
                 rightX - lastLabelWidth,
                 bottomY + 10,
                 labelPaint);
-
 
         canvas.drawText("0%", leftX - 25, bottomY, labelPaint);
         canvas.drawText("100%", leftX - 30, startY + 5, labelPaint);

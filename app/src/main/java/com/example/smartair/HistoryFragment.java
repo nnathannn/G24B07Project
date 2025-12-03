@@ -135,7 +135,7 @@ public class HistoryFragment extends Fragment {
 
         exportButton.setOnClickListener(v -> {
 
-            Toast.makeText(v.getContext(), "Export clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Exporting file...", Toast.LENGTH_SHORT).show();
 
             if (itemList == null || itemList.isEmpty()) {
                 Toast.makeText(requireContext(), "No data to export", Toast.LENGTH_SHORT).show();
@@ -160,7 +160,7 @@ public class HistoryFragment extends Fragment {
                 end = date.toString();
             }
 
-            PDFExportButton.exportParentHistory(
+            PDFExportButton.exportHistory(
                     requireContext(),
                     child,
                     filter,

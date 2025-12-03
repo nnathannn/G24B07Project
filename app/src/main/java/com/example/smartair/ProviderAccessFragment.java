@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,9 @@ public class ProviderAccessFragment extends Fragment {
     private static final String ARG_PARAM1 = "provider_id", ARG_PARAM2 = "child_id";
     private String providerId, childId;
     private DatabaseReference childRef, providerRef;
+    private String providerNameStr = "Provider";
+    private String childNameStr = "Child";
+
     private final HashMap<String, Switch> switchMap = new HashMap<>();
 
 
@@ -114,10 +118,114 @@ public class ProviderAccessFragment extends Fragment {
             }
         });
         ImageButton download = view.findViewById(R.id.downloadButton);
-        download.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Download button clicked", Toast.LENGTH_LONG).show();
-        });
+        download.setOnClickListener(v -> buildAndExportProviderReport());
+
     }
+
+
+    private void buildAndExportProviderReport() {
+        if (getContext() == null) return;
+
+        if (childId == null || providerId == null) {
+            Toast.makeText(getContext(),
+                    "Missing child/provider id for report",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        LocalDate end   = LocalDate.now();
+        LocalDate start = end.minusDays(89);
+        String startStr = start.toString();
+        String endStr   = end.toString();
+
+        ProviderReportData data = new ProviderReportData();
+        data.childName   = childNameStr;
+        data.providerName = providerNameStr;
+        data.startDate   = startStr;
+        data.endDate     = endStr;
+
+
+        data.canSeeRescue         = getSwitchValue("rescue");
+        data.canSeeController     = getSwitchValue("controller");
+        data.canSeeSymptoms       = getSwitchValue("symptom");
+        data.canSeeZones          = getSwitchValue("pef");
+        data.canSeeTriages        = getSwitchValue("triage");
+        data.canSeeSummaryCharts  = getSwitchValue("summary");
+
+
+        fetchAndFillReportDataThenExport(data, startStr, endStr);
+    }
+
+    private boolean getSwitchValue(String key) {
+        Switch s = switchMap.get(key);
+        return s != null && s.isChecked();
+    }
+
+
+    private void fetchAndFillReportDataThenExport(ProviderReportData data,
+                                                  String start, String end) {
+
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+
+
+        if (!data.canSeeRescue && !data.canSeeController
+                && !data.canSeeSymptoms && !data.canSeeZones
+                && !data.canSeeTriages) {
+            PDFExportButton.exportProviderReport(requireContext(), data);
+            return;
+        }
+
+        if (data.canSeeRescue || data.canSeeController) {
+            String endWithTime = end + "T23:59:59.999999";
+
+            rootRef.child("medicineLogs")
+                    .orderByChild("date")
+                    .startAt(start)
+                    .endAt(endWithTime)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            int rescueCount = 0;
+
+                            for (DataSnapshot ds : snapshot.getChildren()) {
+
+                                String logChildId = ds.child("child-id").getValue(String.class);
+                                if (logChildId == null || !logChildId.equals(childId)) continue;
+
+                                Boolean isRescue = ds.child("rescue").getValue(Boolean.class);
+                                if (Boolean.TRUE.equals(isRescue)) {
+                                    rescueCount++;
+                                }
+                            }
+
+                            data.rescueEventCount = rescueCount;
+
+                            PDFExportButton.exportProviderReport(requireContext(), data);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(getContext(),
+                                    "Failed to load report data: " + error.getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+        } else {
+            PDFExportButton.exportProviderReport(requireContext(), data);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void showRevokeConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
