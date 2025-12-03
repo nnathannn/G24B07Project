@@ -351,18 +351,18 @@ public class HistoryFragment extends Fragment {
                     Collections.reverse(itemList);
                     switch (type) {
                         case "Zones":
-                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "PEF", "PB", "Status"));
+                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "PEF", "PB", "Status", null));
                             break;
                         case "Triages":
-                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Symptoms", "Emergency", "Rescue"));
+                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Symptoms", "Emergency", "Rescue", "PEF"));
                             break;
                         case "Rescue":
                         case "Controller":
-                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Dose", "Pre-Status", "Post-Status"));
+                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Dose", "Pre-Status", "Post-Status", null));
                             break;
                         case "Symptoms":
                         case "Triggers":
-                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Symptom", "Author", "Triggers"));
+                            itemList.add(0, new AdapterHistory.HistoryItem("Date", "Symptom", "Author", "Triggers", null));
                             break;
                         default:
                             break;
@@ -386,14 +386,16 @@ public class HistoryFragment extends Fragment {
                 date = zone.getDate().split("T")[0];
                 String count = String.valueOf(zone.getCount());
                 String currPB = String.valueOf(zone.getCurPB());
-                return new AdapterHistory.HistoryItem(date, count, currPB, zone.getStatus());
+                return new AdapterHistory.HistoryItem(date, count, currPB, zone.getStatus(), null);
             case "Triages":
                 Triage triage = snapshot.getValue(Triage.class);
                 date = triage.getDate().split("T")[0];
                 List<String> symptoms = triage.getSymptomList();
                 String emergency = triage.getEmergency();
                 String rescue = String.valueOf(triage.getRescue());
-                return new AdapterHistory.HistoryItem(date, String.join("\n", symptoms), emergency, rescue);
+                String pef = String.valueOf(triage.getPef());
+                if (pef.equals("0")) { pef = "None"; }
+                return new AdapterHistory.HistoryItem(date, String.join("\n", symptoms), emergency, rescue, pef);
             case "Controller":
             case "Rescue":
                 MedicineLog medicine = snapshot.getValue(MedicineLog.class);
@@ -401,7 +403,7 @@ public class HistoryFragment extends Fragment {
                 String dose = String.valueOf(medicine.getDose());
                 String pre = String.valueOf(medicine.getPreStatus());
                 String post = String.valueOf(medicine.getPostStatus());
-                return new AdapterHistory.HistoryItem(date, dose, pre, post);
+                return new AdapterHistory.HistoryItem(date, dose, pre, post, null);
             case "Symptoms":
             case "Triggers":
                 Symptom symptom = snapshot.getValue(Symptom.class);
@@ -411,7 +413,7 @@ public class HistoryFragment extends Fragment {
                 List<String> triggers = symptom.getTriggerList();
                 if ( triggers == null ) { triggers = Arrays.asList("During Emergency"); }
                 if ( user == "provider" && !triggerAccess) { triggers = Arrays.asList("Data not shared"); }
-                return new AdapterHistory.HistoryItem(date, name, author, String.join("\n", triggers));
+                return new AdapterHistory.HistoryItem(date, name, author, String.join("\n", triggers), null);
             default:
                 return null;
         }
